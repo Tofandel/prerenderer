@@ -37,7 +37,6 @@
     "async": "^2.5.0",
     "chrome-remote-interface": "^0.24.2",
     "express": "^4.15.3",
-    "mkdirp-promise": "^5.0.1",
     "portfinder": "^1.0.13",
     "wait-port": "^0.1.4"
   },
