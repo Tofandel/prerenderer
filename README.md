@@ -1,5 +1,5 @@
-<h1 style="text-align: center;">Prerenderer</h1>
-<p style="text-align: center;">
+<h1 align="center">Prerenderer</h1>
+<p align="center">
   <em>Fast, flexible, framework-agnostic prerendering for sites and SPAs.</em>
 </p>
 
@@ -7,7 +7,8 @@
 
 ---
 
-<div style="text-align: center;">
+<div align="center">
+
 [![npm version](https://img.shields.io/npm/v/prerenderer.svg)]()
 
 [![npm downloads](https://img.shields.io/npm/dt/prerenderer.svg)]()
@@ -17,11 +18,12 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
 
 [![license](https://img.shields.io/github/license/tribex/prerenderer.svg)]()
+
 </div>
 
 ---
 
-<div style="text-align: center;">
+<div align="center">
 [![NPM](https://nodei.co/npm/prerenderer.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/prerenderer/)
 </div>
 
@@ -235,7 +237,7 @@ SOFTWARE.
 <table>
   <tbody>
     <tr>
-      <td style="text-align: center;">
+      <td align="center">
         <a href="https://github.com/tribex">
           <img width="150" height="150" src="https://github.com/tribex.png?v=3&s=150">
           </br>
