@@ -39,7 +39,7 @@ var getPageContents = function getPageContents(dom, window, options) {
     } else if (options.renderAfterElementExists) {
       // TODO: Try and get something MutationObserver-based working.
       setInterval(function () {
-        if (window.documentdocument.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
+        if (window.document.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
       }, 100);
 
       // CAPTURE AFTER A NUMBER OF MILLISECONDS
