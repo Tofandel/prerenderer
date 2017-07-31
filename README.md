@@ -75,6 +75,7 @@ const fs = require('fs')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const Prerenderer = require('prerenderer')
+const JSDOMRenderer = Prerenderer.JSDOMRenderer
 const ChromeRenderer = Prerenderer.ChromeRenderer
 
 const prerenderer = new Prerenderer({
@@ -82,11 +83,7 @@ const prerenderer = new Prerenderer({
   staticDir: path.join(__dirname, 'app'),
 
   // Optional - This is the default.
-  renderer: new ChromeRenderer({
-    // If this is omitted, ChromeRenderer will *attempt* to find a valid installed version based on your platform. No promises.
-    command: 'start chrome' // Windows
-    // More optional renderer arguments.
-  })
+  renderer: new JSDOMRenderer() // or new ChromeRenderer({ command: 'chrome-start-command' })
 })
 
 // Initialize is separate from the constructor for flexibility of integration with build systems.
@@ -126,7 +123,8 @@ prerenderer.initialize()
 ```
 
 ## Available Renderers
-- Chromium / Google Chrome Headless over RDP (builtin) - `prerenderer.ChromeRenderer`
+- `prerenderer.JSDOMRenderer` (builtin, default) - Uses [jsdom](https://npmjs.com/package/jsdom) Extremely fast, but unreliable and cannot handle advanced usages. May not work with all front-end frameworks and apps.
+- `prerenderer.ChromeRenderer` (builtin) - Uses Google Chrome in headless mode over RDP. Not blazing fast, but produces excellent results. *Requires **Chrome 54+** on macOS and Linux, and **Chrome 60+** on Windows*
 
 ## Documentation
 
@@ -136,7 +134,7 @@ prerenderer.initialize()
 |-----------|-----------------------------|-----------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | staticDir | String                      | Yes       | None                   | The root path to serve your app from.                                                                                                            |
 | server    | Object                      | No        | None                   | App server configuration options (See below)                                                                                                     |
-| renderer  | Renderer Instance or Object | No        | `new ChromeRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will attempt to start ChromeRenderer. |
+| renderer  | Renderer Instance or Configuration Object | No        | `new JSDOMRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to JSDOMRenderer. |
 
 ### Server Options
 
@@ -150,6 +148,37 @@ prerenderer.initialize()
 - `initialize(): Promise<>` - Starts the static file server and renderer instance (where appropriate).
 - `destroy()` - Destroys the static file server and renderer, freeing the resources.
 - `renderRoutes(routes: Array<String>): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise resolving to an array of rendered routes in the form of:
+
+```js
+[
+  {
+    path: '/route/path', // The route path.
+    html: '<!DOCTYPE html><html>...</html>' // The prerendered HTML for the route
+  },
+  ...
+]
+```
+
+---
+
+### JSDOMRenderer Options
+
+| Option                   | Type                   | Required?        | Default                    | Description                                                                                                                                                                                         |
+|--------------------------|------------------------|------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| inject                   | Object                 | No               | None                       | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
+| injectProperty           | String                 | No               | `'__PRERENDER_INJECTED'`   | The property to mount `inject` to during rendering.                                                                                                                                                 |
+| renderAfterDocumentEvent | String                 | No               | None                       | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
+| renderAfterElementExists | String (Selector)      | No               | None                       | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
+| renderAfterTime          | Integer (Milliseconds) | No               | None                       | Wait to render until a certain amount of time has passed.                                                                                                                                           |
+
+### JSDOMRenderer Methods
+
+These are handled by `prerenderer`. The only thing you need to worry about is the constructor unless you're planning on writing your own renderer.
+
+- `constructor(options: Object)` - Loads and validates options.
+- `initialize(): Promise<Process Handle>` - Does nothing
+- `destroy()` - Does nothing
+- `renderRoutes(routes: Array<String>, serverPort: Integer (fileserver port), rootOptions: Object (Prerenderer global options))): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise resolving to an array of rendered routes in the form of:
 
 ```js
 [

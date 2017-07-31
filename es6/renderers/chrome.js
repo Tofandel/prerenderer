@@ -116,16 +116,18 @@ async function prepareTab (connectionOptions, url, options) {
 
     await Page.enable()
 
+    if (options.inject) {
     // Chrome 61+
-    try {
-      await Page.addScriptToEvaluateOnNewDocument({
-        source: `(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`
-      })
+      try {
+        await Page.addScriptToEvaluateOnNewDocument({
+          source: `(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`
+        })
     // Chrome 56 - 60?
-    } catch (e) {
-      await Page.addScriptToEvaluateOnLoad({
-        scriptSource: `(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`
-      })
+      } catch (e) {
+        await Page.addScriptToEvaluateOnLoad({
+          scriptSource: `(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`
+        })
+      }
     }
 
     Page.domContentEventFired(() => {

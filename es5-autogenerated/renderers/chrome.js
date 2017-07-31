@@ -156,39 +156,44 @@ var prepareTab = function () {
                         return Page.enable();
 
                       case 9:
-                        _context3.prev = 9;
-                        _context3.next = 12;
+                        if (!options.inject) {
+                          _context3.next = 19;
+                          break;
+                        }
+
+                        _context3.prev = 10;
+                        _context3.next = 13;
                         return Page.addScriptToEvaluateOnNewDocument({
                           source: `(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`
                         });
 
-                      case 12:
-                        _context3.next = 18;
+                      case 13:
+                        _context3.next = 19;
                         break;
 
-                      case 14:
-                        _context3.prev = 14;
-                        _context3.t0 = _context3['catch'](9);
-                        _context3.next = 18;
+                      case 15:
+                        _context3.prev = 15;
+                        _context3.t0 = _context3['catch'](10);
+                        _context3.next = 19;
                         return Page.addScriptToEvaluateOnLoad({
                           scriptSource: `(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`
                         });
 
-                      case 18:
+                      case 19:
 
                         Page.domContentEventFired(function () {
                           resolve({ client, tab });
                         });
 
-                        _context3.next = 21;
+                        _context3.next = 22;
                         return Page.navigate({ url });
 
-                      case 21:
+                      case 22:
                       case 'end':
                         return _context3.stop();
                     }
                   }
-                }, _callee3, _this, [[9, 14]]);
+                }, _callee3, _this, [[10, 15]]);
               }));
 
               return function (_x8, _x9) {
@@ -284,12 +289,11 @@ var ChromeRenderer = function () {
 
     this._browserProcess = null;
     this._command = null;
+    this._rendererOptions = rendererOptions || {};
 
-    if (rendererOptions.inject && !rendererOptions.injectProperty) {
-      rendererOptions.injectProperty = '__PRERENDER_INJECTED';
+    if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
+      this._rendererOptions.injectProperty = '__PRERENDER_INJECTED';
     }
-
-    this._rendererOptions = rendererOptions;
   }
 
   _createClass(ChromeRenderer, [{

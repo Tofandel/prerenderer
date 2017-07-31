@@ -1,5 +1,7 @@
 const Server = require('./server')
 const ChromeRenderer = require('./renderers/chrome')
+const JSDOMRenderer = require('./renderers/jsdom')
+
 const PortFinder = require('portfinder')
 
 const PackageName = '[Prerenderer]'
@@ -27,9 +29,9 @@ class Prerenderer {
   constructor (options) {
     this._options = options || {}
     this._server = new Server(this._options)
-    this._renderer = (options.renderer && !!options.renderer.constructor && typeof options.renderer !== 'object')
+    this._renderer = (options.renderer && typeof options.renderer.initialize === 'function')
       ? options.renderer
-      : new ChromeRenderer(options.renderer || {})
+      : new JSDOMRenderer(options.renderer || {})
 
     validateOptions(this._options)
   }
@@ -54,5 +56,6 @@ class Prerenderer {
 }
 
 Prerenderer.ChromeRenderer = ChromeRenderer
+Prerenderer.JSDOMRenderer = JSDOMRenderer
 
 module.exports = Prerenderer

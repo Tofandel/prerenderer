@@ -14,6 +14,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Server = require('./server');
 var ChromeRenderer = require('./renderers/chrome');
+var JSDOMRenderer = require('./renderers/jsdom');
+
 var PortFinder = require('portfinder');
 
 var PackageName = '[Prerenderer]';
@@ -39,7 +41,7 @@ var Prerenderer = function () {
 
     this._options = options || {};
     this._server = new Server(this._options);
-    this._renderer = options.renderer && !!options.renderer.constructor && typeof options.renderer !== 'object' ? options.renderer : new ChromeRenderer(options.renderer || {});
+    this._renderer = options.renderer && typeof options.renderer.initialize === 'function' ? options.renderer : new JSDOMRenderer(options.renderer || {});
 
     validateOptions(this._options);
   }
@@ -118,5 +120,6 @@ var Prerenderer = function () {
 }();
 
 Prerenderer.ChromeRenderer = ChromeRenderer;
+Prerenderer.JSDOMRenderer = JSDOMRenderer;
 
 module.exports = Prerenderer;
