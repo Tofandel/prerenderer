@@ -1,6 +1,6 @@
 {
   "name": "prerenderer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Fast, flexible, framework-agnostic prerendering for sites and SPAs.",
   "license": "MIT",
   "main": "index.js",
