@@ -178,12 +178,11 @@ class ChromeRenderer {
   constructor (rendererOptions) {
     this._browserProcess = null
     this._command = null
+    this._rendererOptions = rendererOptions || {}
 
-    if (rendererOptions.inject && !rendererOptions.injectProperty) {
-      rendererOptions.injectProperty = '__PRERENDER_INJECTED'
+    if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
+      this._rendererOptions.injectProperty = '__PRERENDER_INJECTED'
     }
-
-    this._rendererOptions = rendererOptions
   }
 
   async initialize () {
