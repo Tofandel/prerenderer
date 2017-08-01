@@ -12,18 +12,38 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _require = require('jsdom'),
-    JSDOM = _require.JSDOM;
+var JSDOM = require('jsdom/lib/old-api.js').jsdom;
+var serializeDocument = require('jsdom/lib/old-api.js').serializeDocument;
 
-var getPageContents = function getPageContents(dom, window, options) {
+var shim = function shim(window) {
+  window.SVGElement = window.HTMLElement;
+  window.localStorage = window.sessionStorage = {
+
+    getItem: function getItem(key) {
+      return this[key];
+    },
+
+    setItem: function setItem(key, value) {
+      this[key] = value;
+    }
+  };
+};
+
+var getPageContents = function getPageContents(window, options, originalRoute) {
   options = options || {};
 
   return new Promise(function (resolve, reject) {
+    var int = void 0;
+
     function captureDocument() {
       var result = {
-        route: window.location.pathname,
-        html: dom.serialize()
+        route: originalRoute,
+        html: serializeDocument(window.document)
       };
+
+      if (int != null) {
+        clearInterval(int);
+      }
 
       window.close();
       return result;
@@ -37,9 +57,10 @@ var getPageContents = function getPageContents(dom, window, options) {
 
       // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
+      var doc = window.document;
       // TODO: Try and get something MutationObserver-based working.
-      setInterval(function () {
-        if (window.document.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
+      int = setInterval(function () {
+        if (doc.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
       }, 100);
 
       // CAPTURE AFTER A NUMBER OF MILLISECONDS
@@ -94,28 +115,44 @@ var JSDOMRenderer = function () {
   }, {
     key: 'renderRoutes',
     value: function () {
-      var _ref2 = _asyncToGenerator(_regenerator2.default.mark(function _callee2(routes, serverPort, rootOptions) {
+      var _ref2 = _asyncToGenerator(_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
         var _this = this;
 
-        var results;
+        var rootOptions, results;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                rootOptions = Prerenderer.getOptions();
                 results = Promise.all(routes.map(function (route) {
-                  return JSDOM.fromURL(`http://127.0.0.1:${serverPort}${route}`, {
-                    runScripts: 'dangerously',
-                    resources: 'usable'
-                  }).then(function (dom) {
+                  return new Promise(function (resolve, reject) {
+                    JSDOM.env({
+                      url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
+                      features: {
+                        FetchExternalResources: ['script'],
+                        ProcessExternalResources: ['script'],
+                        SkipExternalResources: false
+                      },
+                      created: function created(err, window) {
+                        return err ? reject(err) : resolve(window);
+                      }
+                    });
+                  }).then(function (window) {
+                    window.addEventListener('error', function (event) {
+                      console.error(event.error);
+                    });
+
+                    shim(window);
+
                     if (_this._rendererOptions.inject) {
-                      dom.window.eval(`
+                      window.eval(`
             (function () { window['${_this._rendererOptions.injectProperty}'] = ${JSON.stringify(_this._rendererOptions.inject)}; })();
           `);
                     }
 
                     return new Promise(function (resolve, reject) {
-                      dom.window.document.addEventListener('DOMContentLoaded', function () {
-                        resolve(getPageContents(dom, dom.window, _this._rendererOptions));
+                      window.document.addEventListener('DOMContentLoaded', function () {
+                        resolve(getPageContents(window, _this._rendererOptions, route));
                       });
                     });
                   });
@@ -124,7 +161,7 @@ var JSDOMRenderer = function () {
                 });
                 return _context2.abrupt('return', results);
 
-              case 2:
+              case 3:
               case 'end':
                 return _context2.stop();
             }
@@ -132,7 +169,7 @@ var JSDOMRenderer = function () {
         }, _callee2, this);
       }));
 
-      function renderRoutes(_x, _x2, _x3) {
+      function renderRoutes(_x, _x2) {
         return _ref2.apply(this, arguments);
       }
 

@@ -138,7 +138,7 @@ async function prepareTab (connectionOptions, url, options) {
   })
 }
 
-const getPageContents = function (options) {
+const getPageContents = function (options, originalRoute) {
   options = options || {}
 
   return new Promise((resolve, reject) => {
@@ -147,7 +147,7 @@ const getPageContents = function (options) {
       const outerHTML = document.documentElement.outerHTML
 
       const result = {
-        route: window.location.pathname,
+        route: originalRoute,
         html: doctype + outerHTML
       }
 
@@ -216,26 +216,26 @@ class ChromeRenderer {
     })
   }
 
-  async renderRoutes (routes, serverPort, rootOptions) {
-    const rendererOptions = this._rendererOptions
+  async renderRoutes (routes, Prerenderer) {
+    const rootOptions = Prerenderer.getOptions()
 
     const connectionOptions = {
       host: '127.0.0.1',
-      port: rendererOptions.port
+      port: this._rendererOptions.port
     }
 
     const handlers = await Promise.all(routes.map(route => {
-      return prepareTab(connectionOptions, `http://localhost:${serverPort}${route}`, rendererOptions)
+      return prepareTab(connectionOptions, `http://localhost:${rootOptions.server.port}${route}`, this._rendererOptions)
     }))
 
-    const handlerPromises = Promise.all(handlers.map(async (handler) => {
+    const handlerPromises = Promise.all(handlers.map(async (handler, index) => {
       const {client, tab} = handler
       const {Runtime} = client
 
       await CRI.Activate(Object.assign({}, connectionOptions, {id: tab.id}))
 
       const {result} = await Runtime.evaluate({
-        expression: `(${getPageContents})(${JSON.stringify(rendererOptions)})`,
+        expression: `(${getPageContents})(${JSON.stringify(this._rendererOptions)}, ${routes[index]})`,
         awaitPromise: true
       })
 

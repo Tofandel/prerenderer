@@ -8,11 +8,12 @@ var express = require('express');
 var path = require('path');
 
 var Server = function () {
-  function Server(options) {
+  function Server(Prerenderer) {
     _classCallCheck(this, Server);
 
-    this._options = options;
-    this._serverInstance = null;
+    this._prerenderer = Prerenderer;
+    this._options = Prerenderer.getOptions();
+    this._expressServer = express();
     this._nativeServer = null;
   }
 
@@ -21,16 +22,23 @@ var Server = function () {
     value: function initialize() {
       var _this = this;
 
-      var server = express();
-      this._serverInstance = server;
+      var server = this._expressServer;
 
-      server.use(express.static(this._options.staticDir, {
+      this._prerenderer.modifyServer(this, 'pre-static');
+
+      server.get('*.*', express.static(this._options.staticDir, {
         dotfiles: 'allow'
       }));
 
-      server.use('*', function (req, res) {
+      this._prerenderer.modifyServer(this, 'post-static');
+
+      this._prerenderer.modifyServer(this, 'pre-fallback');
+
+      server.get('*', function (req, res) {
         res.sendFile(_this._options.indexPath ? _this._options.indexPath : path.join(_this._options.staticDir, 'index.html'));
       });
+
+      this._prerenderer.modifyServer(this, 'post-fallback');
 
       return new Promise(function (resolve, reject) {
         _this._nativeServer = server.listen(_this._options.server.port, function () {

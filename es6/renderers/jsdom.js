@@ -1,13 +1,34 @@
-const { JSDOM } = require('jsdom')
+const JSDOM = require('jsdom/lib/old-api.js').jsdom
+const serializeDocument = require('jsdom/lib/old-api.js').serializeDocument
 
-const getPageContents = function (dom, window, options) {
+const shim = function (window) {
+  window.SVGElement = window.HTMLElement
+  window.localStorage = window.sessionStorage = {
+
+    getItem: function (key) {
+      return this[key]
+    },
+
+    setItem: function (key, value) {
+      this[key] = value
+    }
+  }
+}
+
+const getPageContents = function (window, options, originalRoute) {
   options = options || {}
 
   return new Promise((resolve, reject) => {
+    let int
+
     function captureDocument () {
       const result = {
-        route: window.location.pathname,
-        html: dom.serialize()
+        route: originalRoute,
+        html: serializeDocument(window.document)
+      }
+
+      if (int != null) {
+        clearInterval(int)
       }
 
       window.close()
@@ -20,9 +41,10 @@ const getPageContents = function (dom, window, options) {
 
     // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
+      let doc = window.document
       // TODO: Try and get something MutationObserver-based working.
-      setInterval(() => {
-        if (window.document.querySelector(options.renderAfterElementExists)) resolve(captureDocument())
+      int = setInterval(() => {
+        if (doc.querySelector(options.renderAfterElementExists)) resolve(captureDocument())
       }, 100)
 
     // CAPTURE AFTER A NUMBER OF MILLISECONDS
@@ -51,22 +73,37 @@ class JSDOMRenderer {
     return Promise.resolve()
   }
 
-  async renderRoutes (routes, serverPort, rootOptions) {
+  async renderRoutes (routes, Prerenderer) {
+    const rootOptions = Prerenderer.getOptions()
+
     const results = Promise.all(routes.map(route => {
-      return JSDOM.fromURL(`http://127.0.0.1:${serverPort}${route}`, {
-        runScripts: 'dangerously',
-        resources: 'usable'
+      return new Promise((resolve, reject) => {
+        JSDOM.env({
+          url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
+          features: {
+            FetchExternalResources: ['script'],
+            ProcessExternalResources: ['script'],
+            SkipExternalResources: false
+          },
+          created: (err, window) => err ? reject(err) : resolve(window)
+        })
       })
-      .then(dom => {
+      .then(window => {
+        window.addEventListener('error', function (event) {
+          console.error(event.error)
+        })
+
+        shim(window)
+
         if (this._rendererOptions.inject) {
-          dom.window.eval(`
+          window.eval(`
             (function () { window['${this._rendererOptions.injectProperty}'] = ${JSON.stringify(this._rendererOptions.inject)}; })();
           `)
         }
 
         return new Promise((resolve, reject) => {
-          dom.window.document.addEventListener('DOMContentLoaded', () => {
-            resolve(getPageContents(dom, dom.window, this._rendererOptions))
+          window.document.addEventListener('DOMContentLoaded', () => {
+            resolve(getPageContents(window, this._rendererOptions, route))
           })
         })
       })

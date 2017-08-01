@@ -2,23 +2,31 @@ const express = require('express')
 const path = require('path')
 
 class Server {
-  constructor (options) {
-    this._options = options
-    this._serverInstance = null
+  constructor (Prerenderer) {
+    this._prerenderer = Prerenderer
+    this._options = Prerenderer.getOptions()
+    this._expressServer = express()
     this._nativeServer = null
   }
 
   initialize () {
-    const server = express()
-    this._serverInstance = server
+    const server = this._expressServer
 
-    server.use(express.static(this._options.staticDir, {
+    this._prerenderer.modifyServer(this, 'pre-static')
+
+    server.get('*.*', express.static(this._options.staticDir, {
       dotfiles: 'allow'
     }))
 
-    server.use('*', (req, res) => {
+    this._prerenderer.modifyServer(this, 'post-static')
+
+    this._prerenderer.modifyServer(this, 'pre-fallback')
+
+    server.get('*', (req, res) => {
       res.sendFile(this._options.indexPath ? this._options.indexPath : path.join(this._options.staticDir, 'index.html'))
     })
+
+    this._prerenderer.modifyServer(this, 'post-fallback')
 
     return new Promise((resolve, reject) => {
       this._nativeServer = server.listen(this._options.server.port, () => {

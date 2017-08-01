@@ -15,6 +15,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Server = require('./server');
 var ChromeRenderer = require('./renderers/chrome');
 var JSDOMRenderer = require('./renderers/jsdom');
+var BrowserRenderer = require('./renderers/browser');
 
 var PortFinder = require('portfinder');
 
@@ -40,8 +41,11 @@ var Prerenderer = function () {
     _classCallCheck(this, Prerenderer);
 
     this._options = options || {};
-    this._server = new Server(this._options);
-    this._renderer = options.renderer && typeof options.renderer.initialize === 'function' ? options.renderer : new JSDOMRenderer(options.renderer || {});
+
+    this._server = new Server(this);
+    this._renderer = options.renderer && typeof options.renderer.initialize === 'function' ? options.renderer : new BrowserRenderer(options.renderer || {});
+
+    if (this._renderer.preServer) this._renderer.preServer(this);
 
     validateOptions(this._options);
   }
@@ -110,9 +114,40 @@ var Prerenderer = function () {
       this._server.destroy();
     }
   }, {
+    key: 'getServer',
+    value: function getServer() {
+      return this._server;
+    }
+  }, {
+    key: 'getRenderer',
+    value: function getRenderer() {
+      return this._renderer;
+    }
+  }, {
+    key: 'getOptions',
+    value: function getOptions() {
+      return this._options;
+    }
+  }, {
+    key: 'modifyServer',
+    value: function modifyServer(server, stage) {
+      if (this._renderer.modifyServer) this._renderer.modifyServer(this, server, stage);
+    }
+  }, {
     key: 'renderRoutes',
     value: function renderRoutes(routes) {
-      return this._renderer.renderRoutes(routes, this._options.server.port, this._options);
+      var _this = this;
+
+      return this._renderer.renderRoutes(routes, this).then(function (renderedRoutes) {
+        // May break things, regex is really basic. Recommended you leave this disabled.
+        if (_this._options.removeWhitespace) {
+          renderedRoutes.forEach(function (renderedRoute) {
+            renderedRoute.html = renderedRoute.html.split(/>[\s]+</gmi).join('><');
+          });
+        }
+
+        return renderedRoutes;
+      });
     }
   }]);
 
@@ -121,5 +156,6 @@ var Prerenderer = function () {
 
 Prerenderer.ChromeRenderer = ChromeRenderer;
 Prerenderer.JSDOMRenderer = JSDOMRenderer;
+Prerenderer.BrowserRenderer = BrowserRenderer;
 
 module.exports = Prerenderer;

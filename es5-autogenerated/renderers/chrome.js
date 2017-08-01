@@ -241,7 +241,7 @@ var platformCommands = {
    */
 };
 
-var getPageContents = function getPageContents(options) {
+var getPageContents = function getPageContents(options, originalRoute) {
   options = options || {};
 
   return new Promise(function (resolve, reject) {
@@ -250,7 +250,7 @@ var getPageContents = function getPageContents(options) {
       var outerHTML = document.documentElement.outerHTML;
 
       var result = {
-        route: window.location.pathname,
+        route: originalRoute,
         html: doctype + outerHTML
       };
 
@@ -387,28 +387,28 @@ var ChromeRenderer = function () {
   }, {
     key: 'renderRoutes',
     value: function () {
-      var _ref6 = _asyncToGenerator(_regenerator2.default.mark(function _callee7(routes, serverPort, rootOptions) {
+      var _ref6 = _asyncToGenerator(_regenerator2.default.mark(function _callee7(routes, Prerenderer) {
         var _this3 = this;
 
-        var rendererOptions, connectionOptions, handlers, handlerPromises;
+        var rootOptions, connectionOptions, handlers, handlerPromises;
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                rendererOptions = this._rendererOptions;
+                rootOptions = Prerenderer.getOptions();
                 connectionOptions = {
                   host: '127.0.0.1',
-                  port: rendererOptions.port
+                  port: this._rendererOptions.port
                 };
                 _context7.next = 4;
                 return Promise.all(routes.map(function (route) {
-                  return prepareTab(connectionOptions, `http://localhost:${serverPort}${route}`, rendererOptions);
+                  return prepareTab(connectionOptions, `http://localhost:${rootOptions.server.port}${route}`, _this3._rendererOptions);
                 }));
 
               case 4:
                 handlers = _context7.sent;
                 handlerPromises = Promise.all(handlers.map(function () {
-                  var _ref7 = _asyncToGenerator(_regenerator2.default.mark(function _callee6(handler) {
+                  var _ref7 = _asyncToGenerator(_regenerator2.default.mark(function _callee6(handler, index) {
                     var client, tab, Runtime, _ref8, result, parsedResult;
 
                     return _regenerator2.default.wrap(function _callee6$(_context6) {
@@ -423,7 +423,7 @@ var ChromeRenderer = function () {
                           case 4:
                             _context6.next = 6;
                             return Runtime.evaluate({
-                              expression: `(${getPageContents})(${JSON.stringify(rendererOptions)})`,
+                              expression: `(${getPageContents})(${JSON.stringify(_this3._rendererOptions)}, ${routes[index]})`,
                               awaitPromise: true
                             });
 
@@ -445,7 +445,7 @@ var ChromeRenderer = function () {
                     }, _callee6, _this3);
                   }));
 
-                  return function (_x13) {
+                  return function (_x12, _x13) {
                     return _ref7.apply(this, arguments);
                   };
                 }())).catch(function (e) {
@@ -464,7 +464,7 @@ var ChromeRenderer = function () {
         }, _callee7, this);
       }));
 
-      function renderRoutes(_x10, _x11, _x12) {
+      function renderRoutes(_x10, _x11) {
         return _ref6.apply(this, arguments);
       }
 

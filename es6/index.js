@@ -1,6 +1,7 @@
 const Server = require('./server')
 const ChromeRenderer = require('./renderers/chrome')
 const JSDOMRenderer = require('./renderers/jsdom')
+const BrowserRenderer = require('./renderers/browser')
 
 const PortFinder = require('portfinder')
 
@@ -28,10 +29,13 @@ function validateOptions (options) {
 class Prerenderer {
   constructor (options) {
     this._options = options || {}
-    this._server = new Server(this._options)
+
+    this._server = new Server(this)
     this._renderer = (options.renderer && typeof options.renderer.initialize === 'function')
       ? options.renderer
-      : new JSDOMRenderer(options.renderer || {})
+      : new BrowserRenderer(options.renderer || {})
+
+    if (this._renderer.preServer) this._renderer.preServer(this)
 
     validateOptions(this._options)
   }
@@ -50,12 +54,39 @@ class Prerenderer {
     this._server.destroy()
   }
 
+  getServer () {
+    return this._server
+  }
+
+  getRenderer () {
+    return this._renderer
+  }
+
+  getOptions () {
+    return this._options
+  }
+
+  modifyServer (server, stage) {
+    if (this._renderer.modifyServer) this._renderer.modifyServer(this, server, stage)
+  }
+
   renderRoutes (routes) {
-    return this._renderer.renderRoutes(routes, this._options.server.port, this._options)
+    return this._renderer.renderRoutes(routes, this)
+    .then(renderedRoutes => {
+      // May break things, regex is really basic. Recommended you leave this disabled.
+      if (this._options.removeWhitespace) {
+        renderedRoutes.forEach(renderedRoute => {
+          renderedRoute.html = renderedRoute.html.split(/>[\s]+</gmi).join('><')
+        })
+      }
+
+      return renderedRoutes
+    })
   }
 }
 
 Prerenderer.ChromeRenderer = ChromeRenderer
 Prerenderer.JSDOMRenderer = JSDOMRenderer
+Prerenderer.BrowserRenderer = BrowserRenderer
 
 module.exports = Prerenderer
