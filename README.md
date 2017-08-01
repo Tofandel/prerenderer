@@ -27,7 +27,7 @@
 
 ## About prerenderer
 
-<p align="center">***Note: This package is unstable and still under active development. Use at your own risk.***</p>
+***Note: This package is unstable and still under active development. Use at your own risk.***
 
 The goal of this package is to provide a simple, framework-agnostic prerendering solution that is easily extensible and usable for any site or single-page-app.
 
