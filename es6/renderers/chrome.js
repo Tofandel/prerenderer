@@ -1,6 +1,7 @@
 const childProcess = require('child_process')
 const waitPort = require('wait-port')
 const CRI = require('chrome-remote-interface')
+const promiseLimit = require('promise-limit')
 const PortFinder = require('portfinder')
 
 const platformCommands = {
@@ -109,9 +110,11 @@ async function createRenderProcess (processArgs, renderPort, maxRetries) {
 }
 
 async function prepareTab (connectionOptions, url, options) {
+  const localConnectionOptions = Object.assign({}, connectionOptions)
+
   return new Promise(async (resolve, reject) => {
-    const tab = await CRI.New(connectionOptions)
-    const client = await CRI(Object.assign({}, connectionOptions, {tab}))
+    const tab = await CRI.New(localConnectionOptions)
+    const client = await CRI(Object.assign({}, localConnectionOptions, {tab}))
     const {Page} = client
 
     await Page.enable()
@@ -182,6 +185,8 @@ class ChromeRenderer {
     this._command = null
     this._rendererOptions = rendererOptions || {}
 
+    if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0
+
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED'
     }
@@ -219,31 +224,41 @@ class ChromeRenderer {
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
 
+    const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
+
     const connectionOptions = {
       host: '127.0.0.1',
       port: this._rendererOptions.port
     }
 
-    const handlers = await Promise.all(routes.map(route => {
-      return prepareTab(connectionOptions, `http://localhost:${rootOptions.server.port}${route}`, this._rendererOptions)
-    }))
+    let handlers = []
 
-    const handlerPromises = Promise.all(handlers.map(async (handler, index) => {
-      const {client, tab} = handler
-      const {Runtime} = client
+    // Yes, this is really hard to read, sorry.
+    const handlerPromises = Promise.all(
+      routes.map(
+        (route, index) => limiter(
+          async () => {
+            const handler = await prepareTab(connectionOptions, `http://localhost:${rootOptions.server.port}${route}`, this._rendererOptions)
+            handlers.push(handler)
 
-      await CRI.Activate(Object.assign({}, connectionOptions, {id: tab.id}))
+            const {client, tab} = handler
+            const {Runtime} = client
 
-      const {result} = await Runtime.evaluate({
-        expression: `(${getPageContents})(${JSON.stringify(this._rendererOptions)}, ${routes[index]})`,
-        awaitPromise: true
-      })
+            await CRI.Activate(Object.assign({}, connectionOptions, {id: tab.id}))
 
-      const parsedResult = JSON.parse(result.value)
+            const {result} = await Runtime.evaluate({
+              expression: `(${getPageContents})(${JSON.stringify(this._rendererOptions)}, '${route}')`,
+              awaitPromise: true
+            })
 
-      await client.close()
-      return Promise.resolve(parsedResult)
-    }))
+            const parsedResult = JSON.parse(result.value)
+
+            await client.close()
+            return Promise.resolve(parsedResult)
+          }
+        )
+      )
+    )
     .catch(e => {
       handlers.forEach(handler => { handler.client.close() })
       throw e

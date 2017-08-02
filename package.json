@@ -42,6 +42,7 @@
     "jsdom": "^11.1.0",
     "opn": "^5.1.0",
     "portfinder": "^1.0.13",
+    "promise-limit": "^2.5.0",
     "wait-port": "^0.1.4"
   },
   "devDependencies": {

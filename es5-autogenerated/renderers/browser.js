@@ -17,6 +17,7 @@ var fs = require('fs');
 var bodyParser = require('body-parser');
 var cheerio = require('cheerio');
 var opn = require('opn');
+var promiseLimit = require('promise-limit');
 var EventEmitter = require('events');
 
 var getPageContents = function getPageContents(rendererOptions, rootOptions, originalRoute) {
@@ -81,6 +82,8 @@ var BrowserRenderer = function () {
 
     this._rendererOptions = rendererOptions || {};
     this._routeEmitter = new EventEmitter();
+
+    if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0;
 
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED';
@@ -208,23 +211,26 @@ var BrowserRenderer = function () {
       var _ref2 = _asyncToGenerator(_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
         var _this2 = this;
 
-        var rootOptions;
+        var limiter, rootOptions;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 rootOptions = Prerenderer.getOptions();
                 return _context2.abrupt('return', Promise.all(routes.map(function (route) {
-                  opn(`http://localhost:${rootOptions.server.port}${route}`, _this2._rendererOptions.opn);
+                  return limiter(function () {
+                    opn(`http://localhost:${rootOptions.server.port}${route}`, _this2._rendererOptions.opn);
 
-                  return new Promise(function (resolve, reject) {
-                    _this2._routeEmitter.on(route, function (result) {
-                      resolve(result);
+                    return new Promise(function (resolve, reject) {
+                      _this2._routeEmitter.on(route, function (result) {
+                        resolve(result);
+                      });
                     });
                   });
                 })));
 
-              case 2:
+              case 3:
               case 'end':
                 return _context2.stop();
             }

@@ -14,6 +14,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var JSDOM = require('jsdom/lib/old-api.js').jsdom;
 var serializeDocument = require('jsdom/lib/old-api.js').serializeDocument;
+var promiseLimit = require('promise-limit');
 
 var shim = function shim(window) {
   window.SVGElement = window.HTMLElement;
@@ -83,6 +84,8 @@ var JSDOMRenderer = function () {
     this._jsdom = null;
     this._rendererOptions = rendererOptions || {};
 
+    if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0;
+
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED';
     }
@@ -118,41 +121,44 @@ var JSDOMRenderer = function () {
       var _ref2 = _asyncToGenerator(_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
         var _this = this;
 
-        var rootOptions, results;
+        var rootOptions, limiter, results;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 rootOptions = Prerenderer.getOptions();
+                limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 results = Promise.all(routes.map(function (route) {
-                  return new Promise(function (resolve, reject) {
-                    JSDOM.env({
-                      url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
-                      features: {
-                        FetchExternalResources: ['script'],
-                        ProcessExternalResources: ['script'],
-                        SkipExternalResources: false
-                      },
-                      created: function created(err, window) {
-                        return err ? reject(err) : resolve(window);
-                      }
-                    });
-                  }).then(function (window) {
-                    window.addEventListener('error', function (event) {
-                      console.error(event.error);
-                    });
+                  return limiter(function () {
+                    return new Promise(function (resolve, reject) {
+                      JSDOM.env({
+                        url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
+                        features: {
+                          FetchExternalResources: ['script'],
+                          ProcessExternalResources: ['script'],
+                          SkipExternalResources: false
+                        },
+                        created: function created(err, window) {
+                          return err ? reject(err) : resolve(window);
+                        }
+                      });
+                    }).then(function (window) {
+                      window.addEventListener('error', function (event) {
+                        console.error(event.error);
+                      });
 
-                    shim(window);
+                      shim(window);
 
-                    if (_this._rendererOptions.inject) {
-                      window.eval(`
+                      if (_this._rendererOptions.inject) {
+                        window.eval(`
             (function () { window['${_this._rendererOptions.injectProperty}'] = ${JSON.stringify(_this._rendererOptions.inject)}; })();
           `);
-                    }
+                      }
 
-                    return new Promise(function (resolve, reject) {
-                      window.document.addEventListener('DOMContentLoaded', function () {
-                        resolve(getPageContents(window, _this._rendererOptions, route));
+                      return new Promise(function (resolve, reject) {
+                        window.document.addEventListener('DOMContentLoaded', function () {
+                          resolve(getPageContents(window, _this._rendererOptions, route));
+                        });
                       });
                     });
                   });
@@ -161,7 +167,7 @@ var JSDOMRenderer = function () {
                 });
                 return _context2.abrupt('return', results);
 
-              case 3:
+              case 4:
               case 'end':
                 return _context2.stop();
             }

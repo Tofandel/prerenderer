@@ -130,10 +130,12 @@ var prepareTab = function () {
   var _ref3 = _asyncToGenerator(_regenerator2.default.mark(function _callee4(connectionOptions, url, options) {
     var _this = this;
 
+    var localConnectionOptions;
     return _regenerator2.default.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
+            localConnectionOptions = Object.assign({}, connectionOptions);
             return _context4.abrupt('return', new Promise(function () {
               var _ref4 = _asyncToGenerator(_regenerator2.default.mark(function _callee3(resolve, reject) {
                 var tab, client, Page;
@@ -142,12 +144,12 @@ var prepareTab = function () {
                     switch (_context3.prev = _context3.next) {
                       case 0:
                         _context3.next = 2;
-                        return CRI.New(connectionOptions);
+                        return CRI.New(localConnectionOptions);
 
                       case 2:
                         tab = _context3.sent;
                         _context3.next = 5;
-                        return CRI(Object.assign({}, connectionOptions, { tab }));
+                        return CRI(Object.assign({}, localConnectionOptions, { tab }));
 
                       case 5:
                         client = _context3.sent;
@@ -201,7 +203,7 @@ var prepareTab = function () {
               };
             }()));
 
-          case 1:
+          case 2:
           case 'end':
             return _context4.stop();
         }
@@ -225,6 +227,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var childProcess = require('child_process');
 var waitPort = require('wait-port');
 var CRI = require('chrome-remote-interface');
+var promiseLimit = require('promise-limit');
 var PortFinder = require('portfinder');
 
 var platformCommands = {
@@ -290,6 +293,8 @@ var ChromeRenderer = function () {
     this._browserProcess = null;
     this._command = null;
     this._rendererOptions = rendererOptions || {};
+
+    if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0;
 
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED';
@@ -390,65 +395,67 @@ var ChromeRenderer = function () {
       var _ref6 = _asyncToGenerator(_regenerator2.default.mark(function _callee7(routes, Prerenderer) {
         var _this3 = this;
 
-        var rootOptions, connectionOptions, handlers, handlerPromises;
+        var rootOptions, limiter, connectionOptions, handlers, handlerPromises;
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
                 rootOptions = Prerenderer.getOptions();
+                limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 connectionOptions = {
                   host: '127.0.0.1',
                   port: this._rendererOptions.port
                 };
-                _context7.next = 4;
-                return Promise.all(routes.map(function (route) {
-                  return prepareTab(connectionOptions, `http://localhost:${rootOptions.server.port}${route}`, _this3._rendererOptions);
-                }));
+                handlers = [];
 
-              case 4:
-                handlers = _context7.sent;
-                handlerPromises = Promise.all(handlers.map(function () {
-                  var _ref7 = _asyncToGenerator(_regenerator2.default.mark(function _callee6(handler, index) {
-                    var client, tab, Runtime, _ref8, result, parsedResult;
+                // Yes, this is really hard to read, sorry.
+
+                handlerPromises = Promise.all(routes.map(function (route, index) {
+                  return limiter(_asyncToGenerator(_regenerator2.default.mark(function _callee6() {
+                    var handler, client, tab, Runtime, _ref8, result, parsedResult;
 
                     return _regenerator2.default.wrap(function _callee6$(_context6) {
                       while (1) {
                         switch (_context6.prev = _context6.next) {
                           case 0:
+                            _context6.next = 2;
+                            return prepareTab(connectionOptions, `http://localhost:${rootOptions.server.port}${route}`, _this3._rendererOptions);
+
+                          case 2:
+                            handler = _context6.sent;
+
+                            handlers.push(handler);
+
                             client = handler.client, tab = handler.tab;
                             Runtime = client.Runtime;
-                            _context6.next = 4;
+                            _context6.next = 8;
                             return CRI.Activate(Object.assign({}, connectionOptions, { id: tab.id }));
 
-                          case 4:
-                            _context6.next = 6;
+                          case 8:
+                            _context6.next = 10;
                             return Runtime.evaluate({
-                              expression: `(${getPageContents})(${JSON.stringify(_this3._rendererOptions)}, ${routes[index]})`,
+                              expression: `(${getPageContents})(${JSON.stringify(_this3._rendererOptions)}, '${route}')`,
                               awaitPromise: true
                             });
 
-                          case 6:
+                          case 10:
                             _ref8 = _context6.sent;
                             result = _ref8.result;
                             parsedResult = JSON.parse(result.value);
-                            _context6.next = 11;
+                            _context6.next = 15;
                             return client.close();
 
-                          case 11:
+                          case 15:
                             return _context6.abrupt('return', Promise.resolve(parsedResult));
 
-                          case 12:
+                          case 16:
                           case 'end':
                             return _context6.stop();
                         }
                       }
                     }, _callee6, _this3);
-                  }));
-
-                  return function (_x12, _x13) {
-                    return _ref7.apply(this, arguments);
-                  };
-                }())).catch(function (e) {
+                  })));
+                })).catch(function (e) {
                   handlers.forEach(function (handler) {
                     handler.client.close();
                   });
@@ -456,7 +463,7 @@ var ChromeRenderer = function () {
                 });
                 return _context7.abrupt('return', handlerPromises);
 
-              case 7:
+              case 6:
               case 'end':
                 return _context7.stop();
             }

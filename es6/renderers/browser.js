@@ -3,6 +3,7 @@ const fs = require('fs')
 const bodyParser = require('body-parser')
 const cheerio = require('cheerio')
 const opn = require('opn')
+const promiseLimit = require('promise-limit')
 const EventEmitter = require('events')
 
 const getPageContents = function (rendererOptions, rootOptions, originalRoute) {
@@ -61,6 +62,8 @@ class BrowserRenderer {
   constructor (rendererOptions) {
     this._rendererOptions = rendererOptions || {}
     this._routeEmitter = new EventEmitter()
+
+    if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0
 
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED'
@@ -158,9 +161,10 @@ class BrowserRenderer {
   }
 
   async renderRoutes (routes, Prerenderer) {
+    const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
     const rootOptions = Prerenderer.getOptions()
 
-    return Promise.all(routes.map(route => {
+    return Promise.all(routes.map(route => limiter(() => {
       opn(`http://localhost:${rootOptions.server.port}${route}`, this._rendererOptions.opn)
 
       return new Promise((resolve, reject) => {
@@ -168,7 +172,7 @@ class BrowserRenderer {
           resolve(result)
         })
       })
-    }))
+    })))
   }
 
   destroy () {

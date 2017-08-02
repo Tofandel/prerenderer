@@ -1,5 +1,6 @@
 const JSDOM = require('jsdom/lib/old-api.js').jsdom
 const serializeDocument = require('jsdom/lib/old-api.js').serializeDocument
+const promiseLimit = require('promise-limit')
 
 const shim = function (window) {
   window.SVGElement = window.HTMLElement
@@ -63,6 +64,8 @@ class JSDOMRenderer {
     this._jsdom = null
     this._rendererOptions = rendererOptions || {}
 
+    if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0
+
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED'
     }
@@ -76,7 +79,9 @@ class JSDOMRenderer {
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
 
-    const results = Promise.all(routes.map(route => {
+    const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
+
+    const results = Promise.all(routes.map(route => limiter(() => {
       return new Promise((resolve, reject) => {
         JSDOM.env({
           url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
@@ -107,7 +112,7 @@ class JSDOMRenderer {
           })
         })
       })
-    }))
+    })))
     .catch(e => {
       console.error(e)
     })
