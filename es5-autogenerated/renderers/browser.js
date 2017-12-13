@@ -4,6 +4,8 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -220,11 +222,12 @@ var BrowserRenderer = function () {
                 rootOptions = Prerenderer.getOptions();
                 return _context2.abrupt('return', Promise.all(routes.map(function (route) {
                   return limiter(function () {
-                    opn(`http://localhost:${rootOptions.server.port}${route}`, _this2._rendererOptions.opn);
-
-                    return new Promise(function (resolve, reject) {
-                      _this2._routeEmitter.on(route, function (result) {
-                        resolve(result);
+                    return opn(`http://localhost:${rootOptions.server.port}${route}`, _extends({ wait: false }, _this2._rendererOptions.opn)).then(function (cp) {
+                      return new Promise(function (resolve, reject) {
+                        _this2._routeEmitter.on(route, function (result) {
+                          cp.kill();
+                          resolve(result);
+                        });
                       });
                     });
                   });

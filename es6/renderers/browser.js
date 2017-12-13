@@ -165,13 +165,15 @@ class BrowserRenderer {
     const rootOptions = Prerenderer.getOptions()
 
     return Promise.all(routes.map(route => limiter(() => {
-      opn(`http://localhost:${rootOptions.server.port}${route}`, this._rendererOptions.opn)
-
-      return new Promise((resolve, reject) => {
-        this._routeEmitter.on(route, result => {
-          resolve(result)
-        })
-      })
+      return opn(`http://localhost:${rootOptions.server.port}${route}`, {wait: false, ...this._rendererOptions.opn})
+          .then(cp => {
+              return new Promise((resolve, reject) => {
+                  this._routeEmitter.on(route, result => {
+                      cp.kill()
+                      resolve(result)
+                  })
+              })
+          })
     })))
   }
 
