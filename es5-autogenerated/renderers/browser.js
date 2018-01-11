@@ -186,7 +186,7 @@ var BrowserRenderer = function () {
   }, {
     key: 'initialize',
     value: function () {
-      var _ref = _asyncToGenerator(_regenerator2.default.mark(function _callee() {
+      var _ref = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -210,7 +210,7 @@ var BrowserRenderer = function () {
   }, {
     key: 'renderRoutes',
     value: function () {
-      var _ref2 = _asyncToGenerator(_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
         var _this2 = this;
 
         var limiter, rootOptions;

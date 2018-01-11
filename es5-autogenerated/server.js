@@ -6,6 +6,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var express = require('express');
 var path = require('path');
+var bodyParser = require('body-parser');
 
 var Server = function () {
   function Server(Prerenderer) {
@@ -15,6 +16,16 @@ var Server = function () {
     this._options = Prerenderer.getOptions();
     this._expressServer = express();
     this._nativeServer = null;
+
+    this._expressServer.use(bodyParser.json({
+      limit: '100mb'
+    }));
+
+    this._expressServer.use(bodyParser.urlencoded({
+      limit: '100mb',
+      extended: true,
+      parameterLimit: 50000
+    }));
   }
 
   _createClass(Server, [{

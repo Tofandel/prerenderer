@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path')
+const bodyParser = require('body-parser')
 
 class Server {
   constructor (Prerenderer) {
@@ -7,6 +8,16 @@ class Server {
     this._options = Prerenderer.getOptions()
     this._expressServer = express()
     this._nativeServer = null
+
+    this._expressServer.use(bodyParser.json({
+      limit: '100mb'
+    }))
+
+    this._expressServer.use(bodyParser.urlencoded({
+      limit: '100mb',
+      extended: true,
+      parameterLimit: 50000,
+    }))
   }
 
   initialize () {

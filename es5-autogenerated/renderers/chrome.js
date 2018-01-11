@@ -7,7 +7,7 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var getChromeStartCommand = function () {
-  var _ref = _asyncToGenerator(_regenerator2.default.mark(function _callee(platform) {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee(platform) {
     var foundValid, promises;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
@@ -69,7 +69,7 @@ var getChromeStartCommand = function () {
 
 
 var createRenderProcess = function () {
-  var _ref2 = _asyncToGenerator(_regenerator2.default.mark(function _callee2(processArgs, renderPort, maxRetries) {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(processArgs, renderPort, maxRetries) {
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -127,7 +127,7 @@ var createRenderProcess = function () {
 }();
 
 var prepareTab = function () {
-  var _ref3 = _asyncToGenerator(_regenerator2.default.mark(function _callee4(connectionOptions, url, options) {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee4(connectionOptions, url, options) {
     var _this = this;
 
     var localConnectionOptions;
@@ -137,7 +137,7 @@ var prepareTab = function () {
           case 0:
             localConnectionOptions = Object.assign({}, connectionOptions);
             return _context4.abrupt('return', new Promise(function () {
-              var _ref4 = _asyncToGenerator(_regenerator2.default.mark(function _callee3(resolve, reject) {
+              var _ref4 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3(resolve, reject) {
                 var tab, client, Page;
                 return _regenerator2.default.wrap(function _callee3$(_context3) {
                   while (1) {
@@ -304,7 +304,7 @@ var ChromeRenderer = function () {
   _createClass(ChromeRenderer, [{
     key: 'initialize',
     value: function () {
-      var _ref5 = _asyncToGenerator(_regenerator2.default.mark(function _callee5() {
+      var _ref5 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee5() {
         var _this2 = this;
 
         var splitCommand, rendererPort, maxLaunchRetries, processArguments;
@@ -392,7 +392,7 @@ var ChromeRenderer = function () {
   }, {
     key: 'renderRoutes',
     value: function () {
-      var _ref6 = _asyncToGenerator(_regenerator2.default.mark(function _callee7(routes, Prerenderer) {
+      var _ref6 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee7(routes, Prerenderer) {
         var _this3 = this;
 
         var rootOptions, limiter, connectionOptions, handlers, handlerPromises;
@@ -411,7 +411,7 @@ var ChromeRenderer = function () {
                 // Yes, this is really hard to read, sorry.
 
                 handlerPromises = Promise.all(routes.map(function (route, index) {
-                  return limiter(_asyncToGenerator(_regenerator2.default.mark(function _callee6() {
+                  return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee6() {
                     var handler, client, tab, Runtime, _ref8, result, parsedResult;
 
                     return _regenerator2.default.wrap(function _callee6$(_context6) {
