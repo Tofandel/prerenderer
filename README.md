@@ -9,8 +9,8 @@
 
 <div align="center">
 
-[![npm version](https://img.shields.io/npm/v/prerenderer.svg)]()
-[![npm downloads](https://img.shields.io/npm/dt/prerenderer.svg)]()
+[![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)]()
+[![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)]()
 [![Dependency Status](https://img.shields.io/david/tribex/prerenderer.svg)](https://david-dm.org/tribex/prerenderer)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
 [![license](https://img.shields.io/github/license/tribex/prerenderer.svg)]()
@@ -21,17 +21,17 @@
 
 <div align="center">
 
-[![NPM](https://nodei.co/npm/prerenderer.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/prerenderer/)
+[![NPM](https://nodei.co/npm/@prerenderer/prerenderer.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/@prerenderer/prerenderer/)
 
 </div>
 
 ## About prerenderer
 
-***Note: This package is unstable and still under active development. Use at your own risk.***
+**Note: This package is unstable and still under active development. Use at your own risk.**
 
 The goal of this package is to provide a simple, framework-agnostic prerendering solution that is easily extensible and usable for any site or single-page-app.
 
-If you're looking for the webpack plugin that wraps this package, check out [prerenderer-webpack-plugin](https://github.com/tribex/prerenderer-webpack-plugin).
+[prerenderer-webpack-plugin](https://github.com/tribex/prerenderer-webpack-plugin) is now deprecated, but still functional. It will be replaced by [prerender-spa-plugin](https://github.com/chrisvfritz/prerender-spa-plugin) v3 in the near future.
 
 Now, if you're not familiar with the concept of *prerendering*, you might predictably ask...
 
@@ -143,13 +143,14 @@ prerenderer.initialize()
 
 ### Prerenderer Options
 
-| Option           | Type                                      | Required? | Default                 | Description                                                                                                                                 |
-|------------------|-------------------------------------------|-----------|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| staticDir        | String                                    | Yes       | None                    | The root path to serve your app from.                                                                                                       |
-| indexPath        | String                                    | No        | `staticDir/index.html`  | The index file to fall back on for SPAs.                                                                                                    |
-| removeWhitespace | Boolean                                   | No        |                         | Strip whitespace in-between tags in the resulting HTML. May cause issues in your app, use with caution.                                     |
-| server           | Object                                    | No        | None                    | App server configuration options (See below)                                                                                                |
-| renderer         | Renderer Instance or Configuration Object | No        | `new BrowserRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to BrowserRenderer. |
+| Option      | Type                                      | Required? | Default                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|-------------|-------------------------------------------|-----------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| staticDir   | String                                    | Yes       | None                      | The root path to serve your app from.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ouputDir    | String                                    | No        | None                      | Where the prerendered pages should be output. If not set, defaults to staticDir.                                                                                                                                                                                                                                                                                                                                                                     |
+| indexPath   | String                                    | No        | `staticDir/index.html`    | The index file to fall back on for SPAs.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| postProcess | Function(Object context): Object          | No        | None                      | Passes in an object in the format ```javascript {   route: String, // The prerendered route, after following redirects.   originalRoute: String, // The original route passed, before redirects.   html: String // The resulting HTML for the route. } ```  You can modify `html` to change what gets written to the prerendered files, or modify `route` to change the output location. (Make sure to return the object once you're done with it.)  |
+| server      | Object                                    | No        | None                      | App server configuration options (See below)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| renderer    | Renderer Instance or Configuration Object | No        | `new PuppeteerRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to `@prerenderer/renderer-puppeteer`.                                                                                                                                                                                                                                                                                        |
 
 #### Server Options
 
@@ -188,21 +189,22 @@ prerenderer.initialize()
 |--------------------------|------------------------|-----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | maxConcurrentRoutes      | Number                 | No        | 0 (No limit)             | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
 | inject                   | Object                 | No        | None                     | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
-| injectProperty           | String                 | No        | `'__PRERENDER_INJECTED'` | The property to mount `inject` to during rendering.                                                                                                                                                 |
+| injectProperty           | String                 | No        | `__PRERENDER_INJECTED` | The property to mount `inject` to during rendering.                                                                                                                                                 |
 | renderAfterDocumentEvent | String                 | No        | None                     | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
 | renderAfterElementExists | String (Selector)      | No        | None                     | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
 | renderAfterTime          | Integer (Milliseconds) | No        | None                     | Wait to render until a certain amount of time has passed.                                                                                                                                           |
 
 ### `@prerenderer/renderer-puppeteer` Options
 
-| Option                   | Type                   | Required? | Default                  | Description                                                                                                                                                                                         |
-|--------------------------|------------------------|-----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| maxConcurrentRoutes      | Number                 | No        | 0 (No limit)             | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
-| inject                   | Object                 | No        | None                     | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
-| injectProperty           | String                 | No        | `'__PRERENDER_INJECTED'` | The property to mount `inject` to during rendering.                                                                                                                                                 |
-| renderAfterDocumentEvent | String                 | No        | None                     | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
-| renderAfterElementExists | String (Selector)      | No        | None                     | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
-| renderAfterTime          | Integer (Milliseconds) | No        | None                     | Wait to render until a certain amount of time has passed.                                                                                                                                           |
+| Option                                                                                                                | Type                   | Required? | Default                | Description                                                                                                                                                                                         |
+|-----------------------------------------------------------------------------------------------------------------------|------------------------|-----------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| maxConcurrentRoutes                                                                                                   | Number                 | No        | 0 (No limit)           | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
+| inject                                                                                                                | Object                 | No        | None                   | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
+| injectProperty                                                                                                        | String                 | No        | `__PRERENDER_INJECTED` | The property to mount `inject` to during rendering.                                                                                                                                                 |
+| renderAfterDocumentEvent                                                                                              | String                 | No        | None                   | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
+| renderAfterElementExists                                                                                              | String (Selector)      | No        | None                   | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
+| renderAfterTime                                                                                                       | Integer (Milliseconds) | No        | None                   | Wait to render until a certain amount of time has passed.                                                                                                                                           |
+| [[Puppeteer Launch Options]](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#puppeteerlaunchoptions) | ?                      | No        | None                   | Any additional options will be passed to `puppeteer.launch()`, such as `headless: false`.                                                                                                                                        |
 
 ---
 
@@ -236,9 +238,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-## Credits
-- Originally forked and rewritten from [prerender-spa-plugin](https://github.com/chrisvfritz/prerender-spa-plugin) by [Chris Fritz](https://github.com/chrisvfritz). Thanks Chris!
 
 ## Maintainers
 
