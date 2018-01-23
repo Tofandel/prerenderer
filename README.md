@@ -77,19 +77,15 @@ app/
 const fs = require('fs')
 const path = require('path')
 const mkdirp = require('mkdirp')
-const Prerenderer = require('prerenderer')
-const BrowserRenderer = Prerenderer.BrowserRenderer
-const ChromeRenderer = Prerenderer.ChromeRenderer
-const JSDOMRenderer = Prerenderer.JSDOMRenderer
+const Prerenderer = require('@prerenderer/prerenderer')
+// Make sure you install a renderer as well!
+const JSDOMRenderer = require('@prerenderer/renderer-jsdom')
 
 const prerenderer = new Prerenderer({
   // Required - The path to the app to prerender. Should have an index.html and any other needed assets.
   staticDir: path.join(__dirname, 'app'),
-
-  // Optional - This is the default.
-  // or new ChromeRenderer({ command: 'chrome-start-command' })
-  // or new JSDOMRenderer()
-  renderer: new BrowserRenderer()
+  // The plugin that actually renders the page.
+  renderer: new JSDOMRenderer()
 })
 
 // Initialize is separate from the constructor for flexibility of integration with build systems.
@@ -129,20 +125,19 @@ prerenderer.initialize()
 ```
 
 ## Available Renderers
-- `prerenderer.BrowserRenderer` (builtin, default) - Opens the system default browser to render the page. Adds and removes a script from the page in the process which could potentially cause problems, though highly unlikely. Works best with Chrome and Chrome variants. This should be your first choice.
-- `prerenderer.JSDOMRenderer` (builtin) - Uses [jsdom](https://npmjs.com/package/jsdom) Extremely fast, but unreliable and cannot handle advanced usages. May not work with all front-end frameworks and apps.
-- `prerenderer.ChromeRenderer` (builtin) - Uses Google Chrome in headless mode over RDP. Not blazing fast, but produces excellent results and avoids page mangling. *Requires **Chrome 54+** on macOS and Linux, and **Chrome 60+** on Windows*
+- `@prerenderer/renderer-jsdom` - Uses [jsdom](https://npmjs.com/package/jsdom). Extremely fast, but unreliable and cannot handle advanced usages. May not work with all front-end frameworks and apps.
+- `@prerenderer/renderer-puppeteer` - Uses [puppeteer](https://github.com/GoogleChrome/puppeteer) to render pages in headless Chrome. Simpler and more reliable than the previous `ChromeRenderer`.
+
+## Removed in `prerenderer 0.6.0`:
+- `prerenderer.BrowserRenderer` - Opens the system default browser to render the page. (Use `@prerenderer/renderer-jsdom` or `@prerenderer/renderer-puppeteer` instead.)
+- `prerenderer.ChromeRenderer` - Uses Google Chrome in headless mode over RDP.  (Use `@prerenderer/renderer-puppeteer` instead.)
 
 
 ### Which renderer should I use?
 
-**Use `BrowserRenderer` if:** You're pre-rendering maybe ten or twenty routes tops, and don't mind a bunch of tabs opening in your browser and closing again in a split second. (This can be avoided if you use Chrome with the `--headless` flag in the opn options.)
+**Use `@prerenderer/renderer-puppeteer` if:** You're prerendering up to a couple hundred pages (bye-bye RAM!).
 
-Also, `BrowserRenderer` cannot close any opened Firefox tabs (without you first setting `dom.allow_scripts_to_close_windows` to `true` in `about:config`.) So yeah, sorry about that.
-
-**Use `ChromeRenderer` if:** You're prerendering up to a couple hundred pages (bye-bye RAM!), or if `BrowserRenderer`'s script injection is interfering with your app.
-
-**Use `JSDOMRenderer` if:** You need to prerender thousands upon thousands of pages, but quality isn't all that important, and you're willing to work around issues for more advanced cases. (Programmatic SVG support, etc.)
+**Use `@prerenderer/renderer-jsdom` if:** You need to prerender thousands upon thousands of pages, but quality isn't all that important, and you're willing to work around issues for more advanced cases. (Programmatic SVG support, etc.)
 
 ## Documentation
 
@@ -185,72 +180,9 @@ Also, `BrowserRenderer` cannot close any opened Firefox tabs (without you first 
 
 ---
 
-### BrowserRenderer Options
-
-| Option                   | Type                   | Required? | Default                                                                 | Description                                                                                                                                                                                         |
-|--------------------------|------------------------|-----------|-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| maxConcurrentRoutes      | Number                 | No        | 0 (No limit)                                                            | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
-| inject                   | Object                 | No        | None                                                                    | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
-| injectProperty           | String                 | No        | `'__PRERENDER_INJECTED'`                                                | The property to mount `inject` to during rendering.                                                                                                                                                 |
-| renderAfterDocumentEvent | String                 | No        | None                                                                    | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
-| renderAfterElementExists | String (Selector)      | No        | None                                                                    | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
-| renderAfterTime          | Integer (Milliseconds) | No        | None                                                                    | Wait to render until a certain amount of time has passed.                                                                                                                                           |
-| injectedScriptId         | String                 | No        | `'__prerenderer-browser-injected-326eaade-583d-407b-bfcc-6f56c5507a55'` | The element ID to use for the internal script injected by BrowserRenderer into your app.                                                                                                            |
-| opn                      | Object                 | no        | {}                                                                      | Configuration for [opn](https://github.com/sindresorhus/opn) (The package that opens the browser.) See more about that below.                                                                       |
-
-#### Opn configurations:
-
-You can configure [opn](https://github.com/sindresorhus/opn) with the `opn` option to make `BrowserRenderer` less intrusive. Unfortunately, we can't do it for you because of cross-platform differences.
-Here are some example setups:
-
-**Chrome Headless Mode (Chrome 60+)**
-Opens chrome in the background without creating a window and renders your pages. Similar to `ChromeRenderer`.
-
-```javascript
-new BrowserRenderer({
-  opn: {
-    // Mac: google-chrome, Windows: chrome, Linux: varies, probably google-chrome or google-chrome stable. chromium works too.
-    app: ['google-chrome', '--headless']
-  }
-})
-```
-
-**Firefox Private Browsing Mode**
-Opens Firefox with a separate private browsing window.
-
-*Note: `BrowserRenderer` cannot close any opened Firefox tabs (without you first setting `dom.allow_scripts_to_close_windows` to `true` in `about:config`.)*
-
-```javascript
-new BrowserRenderer({
-  opn: {
-    app: ['firefox', '-private']
-  }
-})
-```
-
-### BrowserRenderer Methods
-
-These are handled by `prerenderer`. The only thing you need to worry about is the constructor unless you're planning on writing your own renderer.
-
-- `constructor(options: Object)` - Loads and validates options.
-- `initialize(): Promise<Process Handle>` - Does nothing
-- `modifyServer(Prerenderer: Prerenderer, ServerWrapper: Internal Server, stage: String): void` - Patches the static file server to inject scripts into HTML pages and get render results back. **INTERNAL**
-- `destroy()` - Does nothing
-- `renderRoutes(routes: Array<String>, serverPort: Integer (fileserver port), rootOptions: Object (Prerenderer global options))): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise resolving to an array of rendered routes in the form of:
-
-```js
-[
-  {
-    route: '/route/path', // The route path.
-    html: '<!DOCTYPE html><html>...</html>' // The prerendered HTML for the route
-  },
-  ...
-]
-```
-
 ---
 
-### JSDOMRenderer Options
+### `@prerenderer/renderer-jsdom` Options
 
 | Option                   | Type                   | Required? | Default                  | Description                                                                                                                                                                                         |
 |--------------------------|------------------------|-----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -261,60 +193,18 @@ These are handled by `prerenderer`. The only thing you need to worry about is th
 | renderAfterElementExists | String (Selector)      | No        | None                     | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
 | renderAfterTime          | Integer (Milliseconds) | No        | None                     | Wait to render until a certain amount of time has passed.                                                                                                                                           |
 
-### JSDOMRenderer Methods
+### `@prerenderer/renderer-puppeteer` Options
 
-These are handled by `prerenderer`. The only thing you need to worry about is the constructor unless you're planning on writing your own renderer.
-
-- `constructor(options: Object)` - Loads and validates options.
-- `initialize(): Promise<Process Handle>` - Does nothing
-- `destroy()` - Does nothing
-- `renderRoutes(routes: Array<String>, serverPort: Integer (fileserver port), rootOptions: Object (Prerenderer global options))): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise resolving to an array of rendered routes in the form of:
-
-```js
-[
-  {
-    route: '/route/path', // The route path.
-    html: '<!DOCTYPE html><html>...</html>' // The prerendered HTML for the route
-  },
-  ...
-]
-```
+| Option                   | Type                   | Required? | Default                  | Description                                                                                                                                                                                         |
+|--------------------------|------------------------|-----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| maxConcurrentRoutes      | Number                 | No        | 0 (No limit)             | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
+| inject                   | Object                 | No        | None                     | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
+| injectProperty           | String                 | No        | `'__PRERENDER_INJECTED'` | The property to mount `inject` to during rendering.                                                                                                                                                 |
+| renderAfterDocumentEvent | String                 | No        | None                     | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
+| renderAfterElementExists | String (Selector)      | No        | None                     | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
+| renderAfterTime          | Integer (Milliseconds) | No        | None                     | Wait to render until a certain amount of time has passed.                                                                                                                                           |
 
 ---
-
-### ChromeRenderer Options
-
-| Option                   | Type                   | Required?        | Default                    | Description                                                                                                                                                                                         |
-|--------------------------|------------------------|------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| maxConcurrentRoutes      | Number                 | No               | 0 (No limit)               | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
-| inject                   | Object                 | No               | None                       | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
-| injectProperty           | String                 | No               | `'__PRERENDER_INJECTED'`   | The property to mount `inject` to during rendering.                                                                                                                                                 |
-| renderAfterDocumentEvent | String                 | No               | None                       | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
-| renderAfterElementExists | String (Selector)      | No               | None                       | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
-| renderAfterTime          | Integer (Milliseconds) | No               | None                       | Wait to render until a certain amount of time has passed.                                                                                                                                           |
-| maxLaunchRetries         | Integer                | No               | 5                          | Max amount of times to try and start the render program before erroring out.                                                                                                                        |
-| port                     | Integer                | No               | Auto-detect available port | The port to run Chrome's RDP on.                                                                                                                                                                    |
-| command                  | String                 | No (Recommended) | Auto-detect                | The command to use to start Chrome or Chromium. Auto-detection is unreliable, so I'd recommend setting it.                                                                                          |
-| arguments                | Array:String           | No               | None                       | Additional arguments to pass to Chrome.                                                                                                                                                             |
-
-### ChromeRenderer Methods
-
-These are handled by `prerenderer`. The only thing you need to worry about is the constructor unless you're planning on writing your own renderer.
-
-- `constructor(options: Object)` - Loads and validates options.
-- `initialize(): Promise<Process Handle>` - Starts Chrome in headless mode with an RDP session.
-- `destroy()` - Kills the Chrome process.
-- `renderRoutes(routes: Array<String>, serverPort: Integer (fileserver port), rootOptions: Object (Prerenderer global options))): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise resolving to an array of rendered routes in the form of:
-
-```js
-[
-  {
-    route: '/route/path', // The route path.
-    html: '<!DOCTYPE html><html>...</html>' // The prerendered HTML for the route
-  },
-  ...
-]
-```
 
 ## Caveats
 

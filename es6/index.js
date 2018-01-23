@@ -1,8 +1,4 @@
 const Server = require('./server')
-const ChromeRenderer = require('./renderers/chrome')
-const JSDOMRenderer = require('./renderers/jsdom')
-const BrowserRenderer = require('./renderers/browser')
-
 const PortFinder = require('portfinder')
 
 const PackageName = '[Prerenderer]'
@@ -10,14 +6,17 @@ const PackageName = '[Prerenderer]'
 function validateOptions (options) {
   const stringTypes = [
     'staticDir',
-    'indexPath',
-    'injectName'
+    'indexPath'
   ]
 
   if (!options) throw new Error(`${PackageName} Options must be defined!`)
 
+  if (!options.renderer) {
+    throw new Error(`${PackageName} No renderer was passed to prerenderer.
+If you are not sure wihch renderer to use, see the documentation at https://github.com/tribex/prerenderer.`)
+  }
+
   if (!options.staticDir) throw new Error(`${PackageName} Unable to prerender. No "staticDir" was defined.`)
-  if (typeof options.staticDir !== 'string') throw new TypeError(`${PackageName} Unable to prerender. "staticDir" must be a string.`)
 
   stringTypes.forEach(type => {
     if (options[type] && typeof options[type] !== 'string') throw new TypeError(`${PackageName} Unable to prerender. "${type}" must be a string.`)
@@ -31,11 +30,9 @@ class Prerenderer {
     this._options = options || {}
 
     this._server = new Server(this)
-    this._renderer = (options.renderer && typeof options.renderer.initialize === 'function')
-      ? options.renderer
-      : new BrowserRenderer(options.renderer || {})
+    this._renderer = options.renderer
 
-    if (this._renderer.preServer) this._renderer.preServer(this)
+    if (this._renderer && this._renderer.preServer) this._renderer.preServer(this)
 
     validateOptions(this._options)
   }
@@ -72,21 +69,7 @@ class Prerenderer {
 
   renderRoutes (routes) {
     return this._renderer.renderRoutes(routes, this)
-    .then(renderedRoutes => {
-      // May break things, regex is really basic. Recommended you leave this disabled.
-      if (this._options.removeWhitespace) {
-        renderedRoutes.forEach(renderedRoute => {
-          renderedRoute.html = renderedRoute.html.split(/>[\s]+</gmi).join('><')
-        })
-      }
-
-      return renderedRoutes
-    })
   }
 }
-
-Prerenderer.ChromeRenderer = ChromeRenderer
-Prerenderer.JSDOMRenderer = JSDOMRenderer
-Prerenderer.BrowserRenderer = BrowserRenderer
 
 module.exports = Prerenderer

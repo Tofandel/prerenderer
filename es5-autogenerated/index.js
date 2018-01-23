@@ -13,21 +13,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Server = require('./server');
-var ChromeRenderer = require('./renderers/chrome');
-var JSDOMRenderer = require('./renderers/jsdom');
-var BrowserRenderer = require('./renderers/browser');
-
 var PortFinder = require('portfinder');
 
 var PackageName = '[Prerenderer]';
 
 function validateOptions(options) {
-  var stringTypes = ['staticDir', 'indexPath', 'injectName'];
+  var stringTypes = ['staticDir', 'indexPath'];
 
   if (!options) throw new Error(`${PackageName} Options must be defined!`);
 
+  if (!options.renderer) {
+    throw new Error(`${PackageName} No renderer was passed to prerenderer.
+If you are not sure wihch renderer to use, see the documentation at https://github.com/tribex/prerenderer.`);
+  }
+
   if (!options.staticDir) throw new Error(`${PackageName} Unable to prerender. No "staticDir" was defined.`);
-  if (typeof options.staticDir !== 'string') throw new TypeError(`${PackageName} Unable to prerender. "staticDir" must be a string.`);
 
   stringTypes.forEach(function (type) {
     if (options[type] && typeof options[type] !== 'string') throw new TypeError(`${PackageName} Unable to prerender. "${type}" must be a string.`);
@@ -43,9 +43,9 @@ var Prerenderer = function () {
     this._options = options || {};
 
     this._server = new Server(this);
-    this._renderer = options.renderer && typeof options.renderer.initialize === 'function' ? options.renderer : new BrowserRenderer(options.renderer || {});
+    this._renderer = options.renderer;
 
-    if (this._renderer.preServer) this._renderer.preServer(this);
+    if (this._renderer && this._renderer.preServer) this._renderer.preServer(this);
 
     validateOptions(this._options);
   }
@@ -53,7 +53,7 @@ var Prerenderer = function () {
   _createClass(Prerenderer, [{
     key: 'initialize',
     value: function () {
-      var _ref = _asyncToGenerator(_regenerator2.default.mark(function _callee() {
+      var _ref = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -136,26 +136,11 @@ var Prerenderer = function () {
   }, {
     key: 'renderRoutes',
     value: function renderRoutes(routes) {
-      var _this = this;
-
-      return this._renderer.renderRoutes(routes, this).then(function (renderedRoutes) {
-        // May break things, regex is really basic. Recommended you leave this disabled.
-        if (_this._options.removeWhitespace) {
-          renderedRoutes.forEach(function (renderedRoute) {
-            renderedRoute.html = renderedRoute.html.split(/>[\s]+</gmi).join('><');
-          });
-        }
-
-        return renderedRoutes;
-      });
+      return this._renderer.renderRoutes(routes, this);
     }
   }]);
 
   return Prerenderer;
 }();
-
-Prerenderer.ChromeRenderer = ChromeRenderer;
-Prerenderer.JSDOMRenderer = JSDOMRenderer;
-Prerenderer.BrowserRenderer = BrowserRenderer;
 
 module.exports = Prerenderer;

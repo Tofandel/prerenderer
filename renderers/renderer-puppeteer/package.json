@@ -1,7 +1,7 @@
 {
-  "name": "@prerenderer/prerenderer",
-  "version": "0.5.0",
-  "description": "Fast, flexible, framework-agnostic prerendering for sites and SPAs.",
+  "name": "@prerenderer/renderer-puppeteer",
+  "version": "0.1.0",
+  "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,9 @@
     "spa",
     "ssr",
     "serverside-rendering",
-    "chrome-rdp"
+    "puppeteer",
+    "google-chrome",
+    "headless-chrome"
   ],
   "author": {
     "name": "Joshua Bemenderfer",
@@ -38,8 +40,8 @@
     "email": "tribex10@gmail.com"
   },
   "dependencies": {
-    "express": "^4.16.2",
-    "portfinder": "^1.0.13"
+    "promise-limit": "^2.5.0",
+    "puppeteer": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
