@@ -12,28 +12,91 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var Server = require('./server');
 var PortFinder = require('portfinder');
+var minify = require('html-minifier').minify;
 
-var PackageName = '[Prerenderer]';
+var PACKAGE_NAME = '[Prerenderer]';
 
-function validateOptions(options) {
-  var stringTypes = ['staticDir', 'indexPath'];
-
-  if (!options) throw new Error(`${PackageName} Options must be defined!`);
-
-  if (!options.renderer) {
-    throw new Error(`${PackageName} No renderer was passed to prerenderer.
-If you are not sure wihch renderer to use, see the documentation at https://github.com/tribex/prerenderer.`);
+var OPTION_SCHEMA = {
+  staticDir: {
+    type: String,
+    required: true
+  },
+  indexPath: {
+    type: String,
+    required: false
+  },
+  postprocess: {
+    type: [Boolean, Object],
+    required: false,
+    children: {
+      minifyHTML: {
+        type: [Boolean, Object],
+        default: {
+          collapseBooleanAttributes: true,
+          collapseWhitespace: true,
+          decodeEntities: true,
+          keepClosingSlash: true,
+          sortAttributes: true,
+          sortClassName: false
+        }
+      },
+      minifyCSS: {
+        type: [Boolean, Object],
+        default: {}
+      },
+      HTTP2PushManifest: {
+        type: Boolean,
+        default: true
+      },
+      PreconnectThirdParty: {
+        type: Boolean,
+        default: false
+      }
+    }
   }
+};
 
-  if (!options.staticDir) throw new Error(`${PackageName} Unable to prerender. No "staticDir" was defined.`);
+function validateOptionsSchema(schema, options, parent) {
+  var errors = [];
 
-  stringTypes.forEach(function (type) {
-    if (options[type] && typeof options[type] !== 'string') throw new TypeError(`${PackageName} Unable to prerender. "${type}" must be a string.`);
+  Object.keys(schema).forEach(function (key) {
+    // Required options
+    if (schema[key].required && !options[key]) {
+      errors.push(`"${parent || ''}${key}" option is required!`);
+      return;
+      // Options with default values or potential childre.
+    } else if (!options[key] && (schema[key].default || schema[key].children)) {
+      options[key] = schema[key].default != null ? schema[key].default : {};
+      // Non-required empty options.
+    } else if (!options[key]) return;
+
+    // Array-type options
+    if (Array.isArray(schema[key].type) && schema[key].type.indexOf(options[key].constructor) === -1) {
+      console.log(schema[key].type.indexOf(options[key].constructor));
+      errors.push(`"${parent || ''}${key}" option must be a ${schema[key].type.map(function (t) {
+        return t.name;
+      }).join(' or ')}!`);
+      // Single-type options.
+    } else if (!Array.isArray(schema[key].type) && options[key].constructor !== schema[key].type) {
+      errors.push(`"${parent || ''}${key}" option must be a ${schema[key].type.name}!`);
+      return;
+    }
+
+    if (schema[key].children) {
+      errors.push.apply(errors, _toConsumableArray(validateOptionsSchema(schema[key].children, options[key], key)));
+      return;
+    }
   });
 
-  return true;
+  errors.forEach(function (error) {
+    console.error(`${PACKAGE_NAME} ${error}`);
+  });
+
+  return errors;
 }
 
 var Prerenderer = function () {
@@ -47,7 +110,16 @@ var Prerenderer = function () {
 
     if (this._renderer && this._renderer.preServer) this._renderer.preServer(this);
 
-    validateOptions(this._options);
+    if (!this._options) throw new Error(`${PACKAGE_NAME} Options must be defined!`);
+
+    if (!this._options.renderer) {
+      throw new Error(`${PACKAGE_NAME} No renderer was passed to prerenderer.
+If you are not sure wihch renderer to use, see the documentation at https://github.com/tribex/prerenderer.`);
+    }
+
+    var optionValidationErrors = validateOptionsSchema(OPTION_SCHEMA, this._options);
+
+    if (optionValidationErrors.length !== 0) throw new Error(`${PACKAGE_NAME} Options are invalid. Unable to prerender!`);
   }
 
   _createClass(Prerenderer, [{
@@ -134,10 +206,87 @@ var Prerenderer = function () {
       if (this._renderer.modifyServer) this._renderer.modifyServer(this, server, stage);
     }
   }, {
+    key: 'postProcess',
+    value: function () {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(renderedRoutes) {
+        var _this = this;
+
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (this._options.postprocess.minifyHTML) {
+                  if (this._options.postprocess.minifyHTML.constructor === Boolean) {
+                    this._options.postprocess.minifyHTML = OPTION_SCHEMA.postprocess.children.minifyHTML.default;
+                  }
+
+                  this._options.postprocess.minifyHTML.minifyCSS = this._options.postprocess.minifyCSS;
+
+                  renderedRoutes = renderedRoutes.map(function (route) {
+                    route.html = minify(route.html, _this._options.postprocess.minifyHTML);
+                    return route;
+                  });
+                }
+
+                return _context2.abrupt('return', renderedRoutes);
+
+              case 2:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function postProcess(_x) {
+        return _ref2.apply(this, arguments);
+      }
+
+      return postProcess;
+    }()
+  }, {
     key: 'renderRoutes',
-    value: function renderRoutes(routes) {
-      return this._renderer.renderRoutes(routes, this);
-    }
+    value: function () {
+      var _ref3 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3(routes) {
+        var renderedRoutes;
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.next = 2;
+                return this._renderer.renderRoutes(routes, this);
+
+              case 2:
+                renderedRoutes = _context3.sent;
+
+                if (!(this._options.postprocess !== false)) {
+                  _context3.next = 7;
+                  break;
+                }
+
+                _context3.next = 6;
+                return this.postProcess(renderedRoutes);
+
+              case 6:
+                renderedRoutes = _context3.sent;
+
+              case 7:
+                return _context3.abrupt('return', renderedRoutes);
+
+              case 8:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function renderRoutes(_x2) {
+        return _ref3.apply(this, arguments);
+      }
+
+      return renderRoutes;
+    }()
   }]);
 
   return Prerenderer;
