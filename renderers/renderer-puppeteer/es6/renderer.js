@@ -81,7 +81,6 @@ class PuppeteerRenderer {
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
     const options = this._rendererOptions
-    options.inlineUsedCSS = true
 
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
