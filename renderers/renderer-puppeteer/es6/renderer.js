@@ -7,6 +7,7 @@ const waitForRender = function (options) {
   return new Promise((resolve, reject) => {
     // Render when an event fires on the document.
     if (options.renderAfterDocumentEvent) {
+      if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve()
       document.addEventListener(options.renderAfterDocumentEvent, () => resolve())
 
     // Render once a specific element exists.
@@ -103,7 +104,18 @@ class PuppeteerRenderer {
             if (options.viewport) await page.setViewport(options.viewport)
 
             await this.handleRequestInterception(page, baseURL)
-            await page.goto(`${baseURL}${route}`)
+
+            // Hack just in-case the document event fires before our main listener is added.
+            if (options.renderAfterDocumentEvent) {
+              page.evaluateOnNewDocument(function (options) {
+                window['__PRERENDER_STATUS'] = {}
+                document.addEventListener(options.renderAfterDocumentEvent, () => {
+                  window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED = true
+                })
+              }, this._rendererOptions)
+            }
+
+            await page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' })
 
             // Once this completes, it's safe to capture the page contents.
             await page.evaluate(waitForRender, this._rendererOptions)
