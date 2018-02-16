@@ -15,44 +15,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var promiseLimit = require('promise-limit');
 var puppeteer = require('puppeteer');
 
-var getPageContents = function getPageContents(options, originalRoute) {
+var waitForRender = function waitForRender(options) {
   options = options || {};
 
   return new Promise(function (resolve, reject) {
-    function captureDocument() {
-      var doctype = new window.XMLSerializer().serializeToString(document.doctype);
-      var outerHTML = document.documentElement.outerHTML;
-
-      var result = {
-        route: window.location.pathname,
-        html: doctype + outerHTML
-      };
-
-      return JSON.stringify(result);
-    }
-
-    // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
+    // Render when an event fires on the document.
     if (options.renderAfterDocumentEvent) {
+      if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve();
       document.addEventListener(options.renderAfterDocumentEvent, function () {
-        return resolve(captureDocument());
+        return resolve();
       });
 
-      // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
+      // Render once a specific element exists.
     } else if (options.renderAfterElementExists) {
       // TODO: Try and get something MutationObserver-based working.
       setInterval(function () {
-        if (document.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
+        if (document.querySelector(options.renderAfterElementExists)) resolve();
       }, 100);
 
-      // CAPTURE AFTER A NUMBER OF MILLISECONDS
+      // Render after a certain number of milliseconds.
     } else if (options.renderAfterTime) {
       setTimeout(function () {
-        return resolve(captureDocument());
+        return resolve();
       }, options.renderAfterTime);
 
-      // DEFAULT: RUN IMMEDIATELY
+      // Default: Render immediately after page content loads.
     } else {
-      resolve(captureDocument());
+      resolve();
     }
   });
 };
@@ -96,21 +85,22 @@ var PuppeteerRenderer = function () {
 
               case 4:
                 this._puppeteer = _context.sent;
-                _context.next = 11;
+                _context.next = 12;
                 break;
 
               case 7:
                 _context.prev = 7;
                 _context.t0 = _context['catch'](0);
 
+                console.error(_context.t0);
                 console.error('[Prerenderer - PuppeteerRenderer] Unable to start Puppeteer');
                 // Re-throw the error so it can be handled further up the chain. Good idea or not?
                 throw _context.t0;
 
-              case 11:
+              case 12:
                 return _context.abrupt('return', this._puppeteer);
 
-              case 12:
+              case 13:
               case 'end':
                 return _context.stop();
             }
@@ -125,80 +115,160 @@ var PuppeteerRenderer = function () {
       return initialize;
     }()
   }, {
-    key: 'renderRoutes',
+    key: 'handleRequestInterception',
     value: function () {
-      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3(routes, Prerenderer) {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(page, baseURL) {
         var _this = this;
 
-        var rootOptions, options, limiter, pagePromises;
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return page.setRequestInterception(true);
+
+              case 2:
+
+                page.on('request', function (req) {
+                  // Skip third party requests if needed.
+                  if (!_this._rendererOptions.skipThirdPartyRequests) {
+                    if (!req.url().startsWith(baseURL)) {
+                      req.abort();
+                      return;
+                    }
+                  }
+
+                  req.continue();
+                });
+
+              case 3:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function handleRequestInterception(_x, _x2) {
+        return _ref2.apply(this, arguments);
+      }
+
+      return handleRequestInterception;
+    }()
+  }, {
+    key: 'renderRoutes',
+    value: function () {
+      var _ref3 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee4(routes, Prerenderer) {
+        var _this2 = this;
+
+        var rootOptions, options, limiter, pagePromises;
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 rootOptions = Prerenderer.getOptions();
                 options = this._rendererOptions;
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 pagePromises = Promise.all(routes.map(function (route, index) {
-                  return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
-                    var page, result, parsedResult;
-                    return _regenerator2.default.wrap(function _callee2$(_context2) {
+                  return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+                    var page, baseURL, result;
+                    return _regenerator2.default.wrap(function _callee3$(_context3) {
                       while (1) {
-                        switch (_context2.prev = _context2.next) {
+                        switch (_context3.prev = _context3.next) {
                           case 0:
-                            _context2.next = 2;
-                            return _this._puppeteer.newPage();
+                            _context3.next = 2;
+                            return _this2._puppeteer.newPage();
 
                           case 2:
-                            page = _context2.sent;
+                            page = _context3.sent;
 
                             if (!options.inject) {
-                              _context2.next = 6;
+                              _context3.next = 6;
                               break;
                             }
 
-                            _context2.next = 6;
+                            _context3.next = 6;
                             return page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`);
 
                           case 6:
-                            _context2.next = 8;
-                            return page.goto(`http://localhost:${rootOptions.server.port}${route}`);
+                            baseURL = `http://localhost:${rootOptions.server.port}`;
 
-                          case 8:
-                            _context2.next = 10;
-                            return page.evaluate(getPageContents, _this._rendererOptions, route);
+                            // Allow setting viewport widths and such.
+
+                            if (!options.viewport) {
+                              _context3.next = 10;
+                              break;
+                            }
+
+                            _context3.next = 10;
+                            return page.setViewport(options.viewport);
 
                           case 10:
-                            result = _context2.sent;
-                            parsedResult = JSON.parse(result);
+                            _context3.next = 12;
+                            return _this2.handleRequestInterception(page, baseURL);
 
-                            parsedResult.originalRoute = route;
+                          case 12:
 
-                            _context2.next = 15;
-                            return page.close();
+                            // Hack just in-case the document event fires before our main listener is added.
+                            if (options.renderAfterDocumentEvent) {
+                              page.evaluateOnNewDocument(function (options) {
+                                window['__PRERENDER_STATUS'] = {};
+                                document.addEventListener(options.renderAfterDocumentEvent, function () {
+                                  window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED = true;
+                                });
+                              }, _this2._rendererOptions);
+                            }
+
+                            _context3.next = 15;
+                            return page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' });
 
                           case 15:
-                            return _context2.abrupt('return', Promise.resolve(parsedResult));
+                            _context3.next = 17;
+                            return page.evaluate(waitForRender, _this2._rendererOptions);
 
-                          case 16:
+                          case 17:
+                            _context3.t0 = route;
+                            _context3.next = 20;
+                            return page.evaluate('window.location.pathname');
+
+                          case 20:
+                            _context3.t1 = _context3.sent;
+                            _context3.next = 23;
+                            return page.content();
+
+                          case 23:
+                            _context3.t2 = _context3.sent;
+                            result = {
+                              originalRoute: _context3.t0,
+                              route: _context3.t1,
+                              html: _context3.t2
+                            };
+                            _context3.next = 27;
+                            return page.close();
+
+                          case 27:
+                            return _context3.abrupt('return', Promise.resolve(result));
+
+                          case 28:
                           case 'end':
-                            return _context2.stop();
+                            return _context3.stop();
                         }
                       }
-                    }, _callee2, _this);
+                    }, _callee3, _this2);
                   })));
                 }));
-                return _context3.abrupt('return', pagePromises);
+                return _context4.abrupt('return', pagePromises);
 
               case 5:
               case 'end':
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
 
-      function renderRoutes(_x, _x2) {
-        return _ref2.apply(this, arguments);
+      function renderRoutes(_x3, _x4) {
+        return _ref3.apply(this, arguments);
       }
 
       return renderRoutes;

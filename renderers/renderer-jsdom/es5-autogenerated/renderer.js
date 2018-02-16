@@ -38,6 +38,7 @@ var getPageContents = function getPageContents(window, options, originalRoute) {
 
     function captureDocument() {
       var result = {
+        originalRoute: originalRoute,
         route: originalRoute,
         html: serializeDocument(window.document)
       };
@@ -155,11 +156,7 @@ var JSDOMRenderer = function () {
           `);
                       }
 
-                      return new Promise(function (resolve, reject) {
-                        window.document.addEventListener('DOMContentLoaded', function () {
-                          resolve(getPageContents(window, _this._rendererOptions, route));
-                        });
-                      });
+                      return getPageContents(window, _this._rendererOptions, route);
                     });
                   });
                 })).catch(function (e) {
