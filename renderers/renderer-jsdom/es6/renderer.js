@@ -24,6 +24,7 @@ const getPageContents = function (window, options, originalRoute) {
 
     function captureDocument () {
       const result = {
+        originalRoute: originalRoute,
         route: originalRoute,
         html: serializeDocument(window.document)
       }
@@ -106,11 +107,7 @@ class JSDOMRenderer {
           `)
         }
 
-        return new Promise((resolve, reject) => {
-          window.document.addEventListener('DOMContentLoaded', () => {
-            resolve(getPageContents(window, this._rendererOptions, route))
-          })
-        })
+        return getPageContents(window, this._rendererOptions, route)
       })
     })))
     .catch(e => {

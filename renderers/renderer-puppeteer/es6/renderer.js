@@ -97,9 +97,6 @@ class PuppeteerRenderer {
 
             const baseURL = `http://localhost:${rootOptions.server.port}`
 
-            // Start tracking CSS coverage
-            if (options.inlineUsedCSS) await page.coverage.startCSSCoverage()
-
             // Allow setting viewport widths and such.
             if (options.viewport) await page.setViewport(options.viewport)
 
@@ -119,27 +116,6 @@ class PuppeteerRenderer {
 
             // Once this completes, it's safe to capture the page contents.
             await page.evaluate(waitForRender, this._rendererOptions)
-
-            // Experimental: Inline CSS that was used during rendering.
-            // NOTES: Does not currently support @media queries, which is likely a dealbreaker.
-            if (options.inlineUsedCSS) {
-              const coverage = await page.coverage.stopCSSCoverage()
-
-              let cssToInclude = ''
-
-              coverage.map(result => {
-                result.ranges.map(range => {
-                  cssToInclude += result.text.substring(range.start, range.end)
-                })
-              })
-
-              await page.evaluate(css => {
-                // Remove all included inline styles. TODO: Maybe a bad idea.
-                [...document.querySelectorAll('style')].map(child => child.parentElement.removeChild(child))
-                // Insert only the used styles.
-                document.head.innerHTML += `<style type="text/css">${cssToInclude}</style>`
-              }, cssToInclude)
-            }
 
             const result = {
               originalRoute: route,

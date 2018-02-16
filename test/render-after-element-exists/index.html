@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prerenderer Test</title>
+</head>
+<body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.body.innerHTML += '<p id="test-element">Render Output</p>'
+      }, 500)
+
+      setTimeout(() => {
+        document.body.innerHTML += `<p>Oh no, it's too late!</p>`
+        document.dispatchEvent(new Event('should-already-be-rendered'))
+      }, 1500)
+    })
+  </script>
+</body>
+</html>

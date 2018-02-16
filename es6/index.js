@@ -1,28 +1,54 @@
 const Server = require('./server')
 const PortFinder = require('portfinder')
 
-const PackageName = '[Prerenderer]'
+const PACKAGE_NAME = '[Prerenderer]'
 
-function validateOptions (options) {
-  const stringTypes = [
-    'staticDir',
-    'indexPath'
-  ]
-
-  if (!options) throw new Error(`${PackageName} Options must be defined!`)
-
-  if (!options.renderer) {
-    throw new Error(`${PackageName} No renderer was passed to prerenderer.
-If you are not sure wihch renderer to use, see the documentation at https://github.com/tribex/prerenderer.`)
+const OPTION_SCHEMA = {
+  staticDir: {
+    type: String,
+    required: true
+  },
+  indexPath: {
+    type: String,
+    required: false
   }
+}
 
-  if (!options.staticDir) throw new Error(`${PackageName} Unable to prerender. No "staticDir" was defined.`)
+function validateOptionsSchema (schema, options, parent) {
+  var errors = []
 
-  stringTypes.forEach(type => {
-    if (options[type] && typeof options[type] !== 'string') throw new TypeError(`${PackageName} Unable to prerender. "${type}" must be a string.`)
+  Object.keys(schema).forEach(key => {
+    // Required options
+    if (schema[key].required && !options[key]) {
+      errors.push(`"${parent || ''}${key}" option is required!`)
+      return
+    // Options with default values or potential children.
+    } else if (!options[key] && (schema[key].default || schema[key].children)) {
+      options[key] = schema[key].default != null ? schema[key].default : {}
+      // Non-required empty options.
+    } else if (!options[key]) return
+
+    // Array-type options
+    if (Array.isArray(schema[key].type) && schema[key].type.indexOf(options[key].constructor) === -1) {
+      console.log(schema[key].type.indexOf(options[key].constructor))
+      errors.push(`"${parent || ''}${key}" option must be a ${schema[key].type.map(t => t.name).join(' or ')}!`)
+      // Single-type options.
+    } else if (!Array.isArray(schema[key].type) && options[key].constructor !== schema[key].type) {
+      errors.push(`"${parent || ''}${key}" option must be a ${schema[key].type.name}!`)
+      return
+    }
+
+    if (schema[key].children) {
+      errors.push(...validateOptionsSchema(schema[key].children, options[key], key))
+      return
+    }
   })
 
-  return true
+  errors.forEach(function (error) {
+    console.error(`${PACKAGE_NAME} ${error}`)
+  })
+
+  return errors
 }
 
 class Prerenderer {
@@ -34,7 +60,18 @@ class Prerenderer {
 
     if (this._renderer && this._renderer.preServer) this._renderer.preServer(this)
 
-    validateOptions(this._options)
+    if (!this._options) throw new Error(`${PACKAGE_NAME} Options must be defined!`)
+
+    if (!this._options.renderer) {
+      throw new Error(`${PACKAGE_NAME} No renderer was passed to prerenderer.
+If you are not sure wihch renderer to use, see the documentation at https://github.com/tribex/prerenderer.`)
+    }
+
+    if (!this._options.server) this._options.server = {}
+
+    const optionValidationErrors = validateOptionsSchema(OPTION_SCHEMA, this._options)
+
+    if (optionValidationErrors.length !== 0) throw new Error(`${PACKAGE_NAME} Options are invalid. Unable to prerender!`)
   }
 
   async initialize () {
