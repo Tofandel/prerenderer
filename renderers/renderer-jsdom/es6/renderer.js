@@ -4,7 +4,6 @@ const promiseLimit = require('promise-limit')
 
 const shim = function (window) {
   window.SVGElement = window.HTMLElement
-  window['__PRERENDER_INJECTED'] = {foo: 'bar'}
   window.localStorage = window.sessionStorage = {
 
     getItem: function (key) {

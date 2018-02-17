@@ -18,7 +18,6 @@ var promiseLimit = require('promise-limit');
 
 var shim = function shim(window) {
   window.SVGElement = window.HTMLElement;
-  window['__PRERENDER_INJECTED'] = { foo: 'bar' };
   window.localStorage = window.sessionStorage = {
 
     getItem: function getItem(key) {
