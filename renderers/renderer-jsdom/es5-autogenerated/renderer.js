@@ -18,6 +18,7 @@ var promiseLimit = require('promise-limit');
 
 var shim = function shim(window) {
   window.SVGElement = window.HTMLElement;
+  window['__PRERENDER_INJECTED'] = { foo: 'bar' };
   window.localStorage = window.sessionStorage = {
 
     getItem: function getItem(key) {
@@ -60,7 +61,6 @@ var getPageContents = function getPageContents(window, options, originalRoute) {
       // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
       var doc = window.document;
-      // TODO: Try and get something MutationObserver-based working.
       int = setInterval(function () {
         if (doc.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
       }, 100);
@@ -82,7 +82,6 @@ var JSDOMRenderer = function () {
   function JSDOMRenderer(rendererOptions) {
     _classCallCheck(this, JSDOMRenderer);
 
-    this._jsdom = null;
     this._rendererOptions = rendererOptions || {};
 
     if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0;
@@ -140,22 +139,22 @@ var JSDOMRenderer = function () {
                           SkipExternalResources: false
                         },
                         created: function created(err, window) {
-                          return err ? reject(err) : resolve(window);
+                          // Injection / shimming must happen before we resolve with the window,
+                          // otherwise the page will finish loading before the injection happens.
+                          if (_this._rendererOptions.inject) {
+                            window[_this._rendererOptions.injectProperty] = _this._rendererOptions.inject;
+                          }
+
+                          window.addEventListener('error', function (event) {
+                            console.error(event.error);
+                          });
+
+                          shim(window);
+
+                          err ? reject(err) : resolve(window);
                         }
                       });
                     }).then(function (window) {
-                      window.addEventListener('error', function (event) {
-                        console.error(event.error);
-                      });
-
-                      shim(window);
-
-                      if (_this._rendererOptions.inject) {
-                        window.eval(`
-            (function () { window['${_this._rendererOptions.injectProperty}'] = ${JSON.stringify(_this._rendererOptions.inject)}; })();
-          `);
-                      }
-
                       return getPageContents(window, _this._rendererOptions, route);
                     });
                   });
