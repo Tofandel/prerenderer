@@ -4,6 +4,7 @@ const promiseLimit = require('promise-limit')
 
 const shim = function (window) {
   window.SVGElement = window.HTMLElement
+  window['__PRERENDER_INJECTED'] = {foo: 'bar'}
   window.localStorage = window.sessionStorage = {
 
     getItem: function (key) {
@@ -44,7 +45,6 @@ const getPageContents = function (window, options, originalRoute) {
     // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
       let doc = window.document
-      // TODO: Try and get something MutationObserver-based working.
       int = setInterval(() => {
         if (doc.querySelector(options.renderAfterElementExists)) resolve(captureDocument())
       }, 100)
@@ -62,7 +62,6 @@ const getPageContents = function (window, options, originalRoute) {
 
 class JSDOMRenderer {
   constructor (rendererOptions) {
-    this._jsdom = null
     this._rendererOptions = rendererOptions || {}
 
     if (this._rendererOptions.maxConcurrentRoutes == null) this._rendererOptions.maxConcurrentRoutes = 0
@@ -91,22 +90,24 @@ class JSDOMRenderer {
             ProcessExternalResources: ['script'],
             SkipExternalResources: false
           },
-          created: (err, window) => err ? reject(err) : resolve(window)
+          created: (err, window) => {
+            // Injection / shimming must happen before we resolve with the window,
+            // otherwise the page will finish loading before the injection happens.
+            if (this._rendererOptions.inject) {
+              window[this._rendererOptions.injectProperty] = this._rendererOptions.inject
+            }
+
+            window.addEventListener('error', function (event) {
+              console.error(event.error)
+            })
+
+            shim(window)
+
+            err ? reject(err) : resolve(window)
+          }
         })
       })
       .then(window => {
-        window.addEventListener('error', function (event) {
-          console.error(event.error)
-        })
-
-        shim(window)
-
-        if (this._rendererOptions.inject) {
-          window.eval(`
-            (function () { window['${this._rendererOptions.injectProperty}'] = ${JSON.stringify(this._rendererOptions.inject)}; })();
-          `)
-        }
-
         return getPageContents(window, this._rendererOptions, route)
       })
     })))
