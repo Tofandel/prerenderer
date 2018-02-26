@@ -68,7 +68,7 @@ class PuppeteerRenderer {
 
     page.on('request', req => {
       // Skip third party requests if needed.
-      if (!this._rendererOptions.skipThirdPartyRequests) {
+      if (this._rendererOptions.skipThirdPartyRequests) {
         if (!req.url().startsWith(baseURL)) {
           req.abort()
           return

@@ -131,7 +131,7 @@ var PuppeteerRenderer = function () {
 
                 page.on('request', function (req) {
                   // Skip third party requests if needed.
-                  if (!_this._rendererOptions.skipThirdPartyRequests) {
+                  if (_this._rendererOptions.skipThirdPartyRequests) {
                     if (!req.url().startsWith(baseURL)) {
                       req.abort();
                       return;
