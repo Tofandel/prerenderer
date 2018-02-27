@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-jsdom",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A renderer for @prerenderer/prerenderer that uses JSDOM to prerender pages.",
   "license": "MIT",
   "main": "index.js",

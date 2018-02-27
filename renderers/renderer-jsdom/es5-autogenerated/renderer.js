@@ -138,6 +138,7 @@ var JSDOMRenderer = function () {
                           SkipExternalResources: false
                         },
                         created: function created(err, window) {
+                          if (err) return reject(err);
                           // Injection / shimming must happen before we resolve with the window,
                           // otherwise the page will finish loading before the injection happens.
                           if (_this._rendererOptions.inject) {
@@ -150,7 +151,7 @@ var JSDOMRenderer = function () {
 
                           shim(window);
 
-                          err ? reject(err) : resolve(window);
+                          resolve(window);
                         }
                       });
                     }).then(function (window) {
@@ -159,6 +160,7 @@ var JSDOMRenderer = function () {
                   });
                 })).catch(function (e) {
                   console.error(e);
+                  return Promise.reject(e);
                 });
                 return _context2.abrupt('return', results);
 

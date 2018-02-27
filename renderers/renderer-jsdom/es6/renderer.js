@@ -90,6 +90,7 @@ class JSDOMRenderer {
             SkipExternalResources: false
           },
           created: (err, window) => {
+            if (err) return reject(err)
             // Injection / shimming must happen before we resolve with the window,
             // otherwise the page will finish loading before the injection happens.
             if (this._rendererOptions.inject) {
@@ -102,7 +103,7 @@ class JSDOMRenderer {
 
             shim(window)
 
-            err ? reject(err) : resolve(window)
+            resolve(window)
           }
         })
       })
@@ -112,6 +113,7 @@ class JSDOMRenderer {
     })))
     .catch(e => {
       console.error(e)
+      return Promise.reject(e)
     })
 
     return results
