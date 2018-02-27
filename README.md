@@ -108,7 +108,7 @@ prerenderer.initialize()
       const outputFile = `${outputDir}/index.html`
 
       mkdirp.sync(outputDir)
-      fs.writeFileSync(outputFile, processedRoute.html.trim())
+      fs.writeFileSync(outputFile, renderedRoute.html.trim())
     } catch (e) {
       // Handle errors.
     }
