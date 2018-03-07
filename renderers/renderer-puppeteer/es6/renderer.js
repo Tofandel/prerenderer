@@ -91,9 +91,14 @@ class PuppeteerRenderer {
           async () => {
             const page = await this._puppeteer.newPage()
 
+            if (options.consoleHandler) {
+              page.on('console', message => options.consoleHandler(route, message))
+            }
+
             if (options.inject) {
               await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
             }
+
 
             const baseURL = `http://localhost:${rootOptions.server.port}`
 

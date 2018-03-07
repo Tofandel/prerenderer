@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-puppeteer",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "main": "index.js",

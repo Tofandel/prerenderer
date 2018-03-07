@@ -182,32 +182,39 @@ var PuppeteerRenderer = function () {
                           case 2:
                             page = _context3.sent;
 
+
+                            if (options.consoleHandler) {
+                              page.on('console', function (message) {
+                                return options.consoleHandler(route, message);
+                              });
+                            }
+
                             if (!options.inject) {
-                              _context3.next = 6;
+                              _context3.next = 7;
                               break;
                             }
 
-                            _context3.next = 6;
+                            _context3.next = 7;
                             return page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`);
 
-                          case 6:
+                          case 7:
                             baseURL = `http://localhost:${rootOptions.server.port}`;
 
                             // Allow setting viewport widths and such.
 
                             if (!options.viewport) {
-                              _context3.next = 10;
+                              _context3.next = 11;
                               break;
                             }
 
-                            _context3.next = 10;
+                            _context3.next = 11;
                             return page.setViewport(options.viewport);
 
-                          case 10:
-                            _context3.next = 12;
+                          case 11:
+                            _context3.next = 13;
                             return _this2.handleRequestInterception(page, baseURL);
 
-                          case 12:
+                          case 13:
 
                             // Hack just in-case the document event fires before our main listener is added.
                             if (options.renderAfterDocumentEvent) {
@@ -219,37 +226,37 @@ var PuppeteerRenderer = function () {
                               }, _this2._rendererOptions);
                             }
 
-                            _context3.next = 15;
+                            _context3.next = 16;
                             return page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' });
 
-                          case 15:
-                            _context3.next = 17;
+                          case 16:
+                            _context3.next = 18;
                             return page.evaluate(waitForRender, _this2._rendererOptions);
 
-                          case 17:
+                          case 18:
                             _context3.t0 = route;
-                            _context3.next = 20;
+                            _context3.next = 21;
                             return page.evaluate('window.location.pathname');
 
-                          case 20:
+                          case 21:
                             _context3.t1 = _context3.sent;
-                            _context3.next = 23;
+                            _context3.next = 24;
                             return page.content();
 
-                          case 23:
+                          case 24:
                             _context3.t2 = _context3.sent;
                             result = {
                               originalRoute: _context3.t0,
                               route: _context3.t1,
                               html: _context3.t2
                             };
-                            _context3.next = 27;
+                            _context3.next = 28;
                             return page.close();
 
-                          case 27:
+                          case 28:
                             return _context3.abrupt('return', Promise.resolve(result));
 
-                          case 28:
+                          case 29:
                           case 'end':
                             return _context3.stop();
                         }
