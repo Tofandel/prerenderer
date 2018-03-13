@@ -1,4 +1,5 @@
 const express = require('express')
+const proxy = require('http-proxy-middleware')
 const path = require('path')
 
 class Server {
@@ -21,6 +22,12 @@ class Server {
     this._prerenderer.modifyServer(this, 'post-static')
 
     this._prerenderer.modifyServer(this, 'pre-fallback')
+
+    if (this._options.server && this._options.server.proxy) {
+      for (let proxyPath of Object.keys(this._options.server.proxy)) {
+        server.use(proxyPath, proxy(this._options.server.proxy[proxyPath]))
+      }
+    }
 
     server.get('*', (req, res) => {
       res.sendFile(this._options.indexPath ? this._options.indexPath : path.join(this._options.staticDir, 'index.html'))
