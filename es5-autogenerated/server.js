@@ -5,6 +5,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var express = require('express');
+var proxy = require('http-proxy-middleware');
 var path = require('path');
 
 var Server = function () {
@@ -33,6 +34,33 @@ var Server = function () {
       this._prerenderer.modifyServer(this, 'post-static');
 
       this._prerenderer.modifyServer(this, 'pre-fallback');
+
+      if (this._options.server && this._options.server.proxy) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = Object.keys(this._options.server.proxy)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var proxyPath = _step.value;
+
+            server.use(proxyPath, proxy(this._options.server.proxy[proxyPath]));
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+      }
 
       server.get('*', function (req, res) {
         res.sendFile(_this._options.indexPath ? _this._options.indexPath : path.join(_this._options.staticDir, 'index.html'));
