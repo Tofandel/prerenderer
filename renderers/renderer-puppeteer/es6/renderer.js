@@ -16,24 +16,24 @@ const waitForRender = function (options) {
       const targetNode = document.documentElement
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true }
-      let observed = null
+      let observer = null
       // Callback function to execute when mutations are observed
       const callback = function (mutationsList) {
         for (const mutation of mutationsList) {
-            if (mutation.type == 'childList' && mutation.addedNodes.length) {
-              const hasSpecificElement = [...mutation.addedNodes].some(node => node === document.querySelector(options.renderAfterElementExists))
-              if (hasSpecificElement) {
-                if (observer) {
-                  // Stop observing after find the specific element.
-                  observer.disconnect()
-                }
-                resolve()
+          if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            const hasSpecificElement = [...mutation.addedNodes].some(node => node === document.querySelector(options.renderAfterElementExists))
+            if (hasSpecificElement) {
+              if (observer) {
+                // Stop observing after find the specific element.
+                observer.disconnect()
               }
+              resolve()
             }
+          }
         }
       }
       // Create an observer instance linked to the callback function
-      observer = new MutationObserver(callback)
+      observer = new window.MutationObserver(callback)
 
       // Start observing the target node for configured mutations
       observer.observe(targetNode, config)
@@ -120,7 +120,6 @@ class PuppeteerRenderer {
               await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
             }
 
-
             const baseURL = `http://localhost:${rootOptions.server.port}`
 
             // Allow setting viewport widths and such.
@@ -150,7 +149,7 @@ class PuppeteerRenderer {
             }
 
             await page.close()
-            return Promise.resolve(result)
+            return result
           }
         )
       )

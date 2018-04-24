@@ -12,6 +12,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var promiseLimit = require('promise-limit');
 var puppeteer = require('puppeteer');
 
@@ -28,10 +30,54 @@ var waitForRender = function waitForRender(options) {
 
       // Render once a specific element exists.
     } else if (options.renderAfterElementExists) {
-      // TODO: Try and get something MutationObserver-based working.
-      setInterval(function () {
-        if (document.querySelector(options.renderAfterElementExists)) resolve();
-      }, 100);
+      // Use MutationObserver to observer a specific element exists.
+      var targetNode = document.documentElement;
+      // Options for the observer (which mutations to observe)
+      var config = { childList: true, subtree: true };
+      var observer = null;
+      // Callback function to execute when mutations are observed
+      var callback = function callback(mutationsList) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var mutation = _step.value;
+
+            if (mutation.type === 'childList' && mutation.addedNodes.length) {
+              var hasSpecificElement = [].concat(_toConsumableArray(mutation.addedNodes)).some(function (node) {
+                return node === document.querySelector(options.renderAfterElementExists);
+              });
+              if (hasSpecificElement) {
+                if (observer) {
+                  // Stop observing after find the specific element.
+                  observer.disconnect();
+                }
+                resolve();
+              }
+            }
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+      };
+      // Create an observer instance linked to the callback function
+      observer = new window.MutationObserver(callback);
+
+      // Start observing the target node for configured mutations
+      observer.observe(targetNode, config);
 
       // Render after a certain number of milliseconds.
     } else if (options.renderAfterTime) {
@@ -254,7 +300,7 @@ var PuppeteerRenderer = function () {
                             return page.close();
 
                           case 28:
-                            return _context3.abrupt('return', Promise.resolve(result));
+                            return _context3.abrupt('return', result);
 
                           case 29:
                           case 'end':
