@@ -10,34 +10,6 @@ const waitForRender = function (options) {
       if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve()
       document.addEventListener(options.renderAfterDocumentEvent, () => resolve())
 
-    // Render once a specific element exists.
-    } else if (options.renderAfterElementExists) {
-      // Use MutationObserver to observer a specific element exists.
-      const targetNode = document.documentElement
-      // Options for the observer (which mutations to observe)
-      const config = { childList: true, subtree: true }
-      let observer = null
-      // Callback function to execute when mutations are observed
-      const callback = function (mutationsList) {
-        for (const mutation of mutationsList) {
-          if (mutation.type === 'childList' && mutation.addedNodes.length) {
-            const hasSpecificElement = [...mutation.addedNodes].some(node => node === document.querySelector(options.renderAfterElementExists))
-            if (hasSpecificElement) {
-              if (observer) {
-                // Stop observing after find the specific element.
-                observer.disconnect()
-              }
-              resolve()
-            }
-          }
-        }
-      }
-      // Create an observer instance linked to the callback function
-      observer = new window.MutationObserver(callback)
-
-      // Start observing the target node for configured mutations
-      observer.observe(targetNode, config)
-
     // Render after a certain number of milliseconds.
     } else if (options.renderAfterTime) {
       setTimeout(() => resolve(), options.renderAfterTime)
@@ -139,6 +111,11 @@ class PuppeteerRenderer {
 
             await page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' })
 
+            // Wait for some specific element exists
+            const { renderAfterElementExists } = this._rendererOptions
+            if (renderAfterElementExists && typeof renderAfterElementExists === 'string') {
+              await page.waitForSelector(renderAfterElementExists)
+            }
             // Once this completes, it's safe to capture the page contents.
             await page.evaluate(waitForRender, this._rendererOptions)
 
