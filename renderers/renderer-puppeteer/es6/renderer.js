@@ -12,10 +12,31 @@ const waitForRender = function (options) {
 
     // Render once a specific element exists.
     } else if (options.renderAfterElementExists) {
-      // TODO: Try and get something MutationObserver-based working.
-      setInterval(() => {
-        if (document.querySelector(options.renderAfterElementExists)) resolve()
-      }, 100)
+      // Use MutationObserver to observer a specific element exists.
+      const targetNode = document.documentElement
+      // Options for the observer (which mutations to observe)
+      const config = { childList: true, subtree: true }
+      let observed = null
+      // Callback function to execute when mutations are observed
+      const callback = function (mutationsList) {
+        for (const mutation of mutationsList) {
+            if (mutation.type == 'childList' && mutation.addedNodes.length) {
+              const hasSpecificElement = [...mutation.addedNodes].some(node => node === document.querySelector(options.renderAfterElementExists))
+              if (hasSpecificElement) {
+                if (observer) {
+                  // Stop observing after find the specific element.
+                  observer.disconnect()
+                }
+                resolve()
+              }
+            }
+        }
+      }
+      // Create an observer instance linked to the callback function
+      observer = new MutationObserver(callback)
+
+      // Start observing the target node for configured mutations
+      observer.observe(targetNode, config)
 
     // Render after a certain number of milliseconds.
     } else if (options.renderAfterTime) {
