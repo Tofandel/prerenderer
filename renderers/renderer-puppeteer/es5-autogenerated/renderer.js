@@ -12,8 +12,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var promiseLimit = require('promise-limit');
 var puppeteer = require('puppeteer');
 
@@ -27,57 +25,6 @@ var waitForRender = function waitForRender(options) {
       document.addEventListener(options.renderAfterDocumentEvent, function () {
         return resolve();
       });
-
-      // Render once a specific element exists.
-    } else if (options.renderAfterElementExists) {
-      // Use MutationObserver to observer a specific element exists.
-      var targetNode = document.documentElement;
-      // Options for the observer (which mutations to observe)
-      var config = { childList: true, subtree: true };
-      var observer = null;
-      // Callback function to execute when mutations are observed
-      var callback = function callback(mutationsList) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var mutation = _step.value;
-
-            if (mutation.type === 'childList' && mutation.addedNodes.length) {
-              var hasSpecificElement = [].concat(_toConsumableArray(mutation.addedNodes)).some(function (node) {
-                return node === document.querySelector(options.renderAfterElementExists);
-              });
-              if (hasSpecificElement) {
-                if (observer) {
-                  // Stop observing after find the specific element.
-                  observer.disconnect();
-                }
-                resolve();
-              }
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-      };
-      // Create an observer instance linked to the callback function
-      observer = new window.MutationObserver(callback);
-
-      // Start observing the target node for configured mutations
-      observer.observe(targetNode, config);
 
       // Render after a certain number of milliseconds.
     } else if (options.renderAfterTime) {
@@ -217,7 +164,7 @@ var PuppeteerRenderer = function () {
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 pagePromises = Promise.all(routes.map(function (route, index) {
                   return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
-                    var page, baseURL, result;
+                    var page, baseURL, renderAfterElementExists, result;
                     return _regenerator2.default.wrap(function _callee3$(_context3) {
                       while (1) {
                         switch (_context3.prev = _context3.next) {
@@ -276,33 +223,46 @@ var PuppeteerRenderer = function () {
                             return page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' });
 
                           case 16:
-                            _context3.next = 18;
+
+                            // Wait for some specific element exists
+                            renderAfterElementExists = _this2._rendererOptions.renderAfterElementExists;
+
+                            if (!(renderAfterElementExists && typeof renderAfterElementExists === 'string')) {
+                              _context3.next = 20;
+                              break;
+                            }
+
+                            _context3.next = 20;
+                            return page.waitForSelector(renderAfterElementExists);
+
+                          case 20:
+                            _context3.next = 22;
                             return page.evaluate(waitForRender, _this2._rendererOptions);
 
-                          case 18:
+                          case 22:
                             _context3.t0 = route;
-                            _context3.next = 21;
+                            _context3.next = 25;
                             return page.evaluate('window.location.pathname');
 
-                          case 21:
+                          case 25:
                             _context3.t1 = _context3.sent;
-                            _context3.next = 24;
+                            _context3.next = 28;
                             return page.content();
 
-                          case 24:
+                          case 28:
                             _context3.t2 = _context3.sent;
                             result = {
                               originalRoute: _context3.t0,
                               route: _context3.t1,
                               html: _context3.t2
                             };
-                            _context3.next = 28;
+                            _context3.next = 32;
                             return page.close();
 
-                          case 28:
+                          case 32:
                             return _context3.abrupt('return', result);
 
-                          case 29:
+                          case 33:
                           case 'end':
                             return _context3.stop();
                         }
