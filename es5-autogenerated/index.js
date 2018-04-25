@@ -180,7 +180,17 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
   }, {
     key: 'renderRoutes',
     value: function renderRoutes(routes) {
-      return this._renderer.renderRoutes(routes, this);
+      return this._renderer.renderRoutes(routes, this)
+      // Handle non-ASCII or invalid URL characters in routes by normalizing them back to unicode.
+      // Some browser environments may change unicode or special characters in routes to percent encodings.
+      // We need to convert them back for saving in the filesystem.
+      .then(function (renderedRoutes) {
+        renderedRoutes.forEach(function (rendered) {
+          rendered.route = decodeURIComponent(rendered.route);
+        });
+
+        return renderedRoutes;
+      });
     }
   }]);
 
