@@ -4,6 +4,8 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -164,7 +166,7 @@ var PuppeteerRenderer = function () {
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 pagePromises = Promise.all(routes.map(function (route, index) {
                   return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
-                    var page, baseURL, renderAfterElementExists, result;
+                    var page, baseURL, navigationOptions, renderAfterElementExists, result;
                     return _regenerator2.default.wrap(function _callee3$(_context3) {
                       while (1) {
                         switch (_context3.prev = _context3.next) {
@@ -219,50 +221,51 @@ var PuppeteerRenderer = function () {
                               }, _this2._rendererOptions);
                             }
 
-                            _context3.next = 16;
-                            return page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' });
+                            navigationOptions = options.navigationOptions ? _extends({ waituntil: 'networkidle0' }, options.navigationOptions) : { waituntil: 'networkidle0' };
+                            _context3.next = 17;
+                            return page.goto(`${baseURL}${route}`, navigationOptions);
 
-                          case 16:
+                          case 17:
 
                             // Wait for some specific element exists
                             renderAfterElementExists = _this2._rendererOptions.renderAfterElementExists;
 
                             if (!(renderAfterElementExists && typeof renderAfterElementExists === 'string')) {
-                              _context3.next = 20;
+                              _context3.next = 21;
                               break;
                             }
 
-                            _context3.next = 20;
+                            _context3.next = 21;
                             return page.waitForSelector(renderAfterElementExists);
 
-                          case 20:
-                            _context3.next = 22;
+                          case 21:
+                            _context3.next = 23;
                             return page.evaluate(waitForRender, _this2._rendererOptions);
 
-                          case 22:
+                          case 23:
                             _context3.t0 = route;
-                            _context3.next = 25;
+                            _context3.next = 26;
                             return page.evaluate('window.location.pathname');
 
-                          case 25:
+                          case 26:
                             _context3.t1 = _context3.sent;
-                            _context3.next = 28;
+                            _context3.next = 29;
                             return page.content();
 
-                          case 28:
+                          case 29:
                             _context3.t2 = _context3.sent;
                             result = {
                               originalRoute: _context3.t0,
                               route: _context3.t1,
                               html: _context3.t2
                             };
-                            _context3.next = 32;
+                            _context3.next = 33;
                             return page.close();
 
-                          case 32:
+                          case 33:
                             return _context3.abrupt('return', result);
 
-                          case 33:
+                          case 34:
                           case 'end':
                             return _context3.stop();
                         }
