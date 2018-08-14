@@ -108,8 +108,9 @@ class PuppeteerRenderer {
                 })
               }, this._rendererOptions)
             }
-
-            await page.goto(`${baseURL}${route}`, { waituntil: 'networkidle0' })
+            
+            const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' };
+            await page.goto(`${baseURL}${route}`, navigationOptions);
 
             // Wait for some specific element exists
             const { renderAfterElementExists } = this._rendererOptions
