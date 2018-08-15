@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-puppeteer",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "main": "index.js",
@@ -41,13 +41,13 @@
   },
   "dependencies": {
     "promise-limit": "^2.5.0",
-    "puppeteer": "^1.0.0"
+    "puppeteer": "^1.7.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^7.2.3",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-stage-2": "^6.24.1",
     "eslint": "^2.5.1",
     "eslint-config-standard": "^5.1.0",
