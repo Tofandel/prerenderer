@@ -68,6 +68,19 @@ class PuppeteerRenderer {
         }
       }
 
+      const assetsPublicPath = this._rendererOptions.assetsPublicPath
+
+      if (assetsPublicPath) {
+        const url = req.url()
+
+        if (url.indexOf(assetsPublicPath) === 0) {
+          req.continue({
+            url: url.replace(assetsPublicPath, baseURL)
+          })
+          return;
+        }
+      }
+
       req.continue()
     })
   }

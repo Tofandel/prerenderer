@@ -133,6 +133,19 @@ var PuppeteerRenderer = function () {
                     }
                   }
 
+                  var assetsPublicPath = _this._rendererOptions.assetsPublicPath;
+
+                  if (assetsPublicPath) {
+                    var url = req.url();
+
+                    if (url.indexOf(assetsPublicPath) === 0) {
+                      req.continue({
+                        url: url.replace(assetsPublicPath, baseURL)
+                      });
+                      return;
+                    }
+                  }
+
                   req.continue();
                 });
 
