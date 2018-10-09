@@ -18,6 +18,7 @@ const waitForRender = function (options) {
     } else {
       resolve()
     }
+    reject()
   })
 }
 
@@ -118,7 +119,11 @@ class PuppeteerRenderer {
               await page.waitForSelector(renderAfterElementExists)
             }
             // Once this completes, it's safe to capture the page contents.
-            await page.evaluate(waitForRender, this._rendererOptions)
+            try {
+              await page.evaluate(waitForRender, this._rendererOptions)
+            } catch(err) {
+              console.error(err);
+            }
 
             const result = {
               originalRoute: route,
