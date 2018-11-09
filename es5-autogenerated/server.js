@@ -27,7 +27,7 @@ var Server = function () {
 
       this._prerenderer.modifyServer(this, 'pre-static');
 
-      server.get('*.*', express.static(this._options.staticDir, {
+      server.get('*', express.static(this._options.staticDir, {
         dotfiles: 'allow'
       }));
 
