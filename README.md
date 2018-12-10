@@ -104,7 +104,7 @@ prerenderer.initialize()
     try {
       // A smarter implementation would be required, but this does okay for an example.
       // Don't copy this directly!!!
-      const outputDir = path.join(__dirname, 'app', renderedRoute.route
+      const outputDir = path.join(__dirname, 'app', renderedRoute.route)
       const outputFile = `${outputDir}/index.html`
 
       mkdirp.sync(outputDir)
