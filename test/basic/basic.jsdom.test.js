@@ -45,7 +45,7 @@ test('renders 10 routes', async () => {
   prerenderer.destroy()
 
   renderedRoutes.forEach((renderedRoute, i) => {
-    expect(renderedRoute.route).toEqual(routes[i])
+    expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))
     expect(renderedRoute.originalRoute).toEqual(routes[i])
     expect(renderedRoute.html).toEqual(EXPECTED_HTML)
   })
@@ -64,7 +64,7 @@ test('renders 1000 routes', async () => {
   prerenderer.destroy()
 
   renderedRoutes.forEach((renderedRoute, i) => {
-    expect(renderedRoute.route).toEqual(routes[i])
+    expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))
     expect(renderedRoute.originalRoute).toEqual(routes[i])
     expect(renderedRoute.html).toEqual(EXPECTED_HTML)
   })
