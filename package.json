@@ -15,7 +15,8 @@
     "prepublishOnly": "npm run build"
   },
   "jest": {
-    "transform": {}
+    "transform": {},
+    "testURL": "http://localhost/"
   },
   "files": [
     "es6/*",
