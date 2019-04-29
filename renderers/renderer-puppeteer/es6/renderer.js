@@ -84,6 +84,10 @@ class PuppeteerRenderer {
           async () => {
             const page = await this._puppeteer.newPage()
 
+            if (options.userAgent) {
+              await page.setUserAgent(options.userAgent)
+            }
+            
             if (options.consoleHandler) {
               page.on('console', message => options.consoleHandler(route, message))
             }
