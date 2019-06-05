@@ -92,7 +92,7 @@ class PuppeteerRenderer {
               await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
             }
 
-            const baseURL = `http://localhost:${rootOptions.server.port}`
+            const baseURL = `http://${rootOptions.server.host || 'localhost'}:${rootOptions.server.port}`
 
             // Allow setting viewport widths and such.
             if (options.viewport) await page.setViewport(options.viewport)
