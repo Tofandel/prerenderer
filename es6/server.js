@@ -47,7 +47,12 @@ class Server {
   }
 
   destroy () {
-    this._nativeServer.close()
+    return new Promise((resolve, reject) => {
+      this._nativeServer.close(err => {
+        if (err) reject(err)
+        resolve()
+      })
+    })
   }
 }
 

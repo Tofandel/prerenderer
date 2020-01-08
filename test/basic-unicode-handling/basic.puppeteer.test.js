@@ -18,6 +18,6 @@ test('normalizes t%C3%A9st to tést in route path', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/tést.html'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })

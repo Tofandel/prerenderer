@@ -19,6 +19,6 @@ test('renders 1 route', async () => {
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/tést.html'])
   console.log(renderedRoutes)
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })

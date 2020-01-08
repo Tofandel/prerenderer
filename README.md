@@ -115,11 +115,11 @@ prerenderer.initialize()
   })
 
   // Shut down the file server and renderer.
-  prerenderer.destroy()
+  await prerenderer.destroy()
 })
 .catch(err => {
   // Shut down the server and renderer.
-  prerenderer.destroy()
+  await prerenderer.destroy()
   // Handle errors.
 })
 ```

@@ -1,5 +1,5 @@
-const JSDOM = require('jsdom/lib/old-api.js').jsdom
-const serializeDocument = require('jsdom/lib/old-api.js').serializeDocument
+const jsdom = require('jsdom')
+const { JSDOM } = jsdom
 const promiseLimit = require('promise-limit')
 
 const shim = function (window) {
@@ -16,9 +16,9 @@ const shim = function (window) {
   }
 }
 
-const getPageContents = function (window, options, originalRoute) {
+const getPageContents = function (dom, options, originalRoute) {
   options = options || {}
-
+  let timeout
   return new Promise((resolve, reject) => {
     let int
 
@@ -26,33 +26,46 @@ const getPageContents = function (window, options, originalRoute) {
       const result = {
         originalRoute: originalRoute,
         route: originalRoute,
-        html: serializeDocument(window.document)
+        html: dom.serialize()
       }
 
       if (int != null) {
         clearInterval(int)
       }
 
-      window.close()
+      clearTimeout(timeout)
+
+      dom.window.close()
       return result
+    }
+
+    if (options.timeout) {
+      timeout = setTimeout(() => {
+        console.log(originalRoute, 'timed out waiting to capture')
+        dom.window.close()
+        resolve({
+          originalRoute: originalRoute,
+          route: originalRoute,
+          html: ''
+        })
+      }, timeout)
     }
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
     if (options.renderAfterDocumentEvent) {
-      window.document.addEventListener(options.renderAfterDocumentEvent, () => resolve(captureDocument()))
-
-    // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
+      dom.window.document.addEventListener(options.renderAfterDocumentEvent, () => resolve(captureDocument()))
+      // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
-      let doc = window.document
+      let doc = dom.window.document
       int = setInterval(() => {
         if (doc.querySelector(options.renderAfterElementExists)) resolve(captureDocument())
       }, 100)
 
-    // CAPTURE AFTER A NUMBER OF MILLISECONDS
+      // CAPTURE AFTER A NUMBER OF MILLISECONDS
     } else if (options.renderAfterTime) {
       setTimeout(() => resolve(captureDocument()), options.renderAfterTime)
 
-    // DEFAULT: RUN IMMEDIATELY
+      // DEFAULT: RUN IMMEDIATELY
     } else {
       resolve(captureDocument())
     }
@@ -78,43 +91,33 @@ class JSDOMRenderer {
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
 
+    const _rendererOptions = this._rendererOptions
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
     const results = Promise.all(routes.map(route => limiter(() => {
-      return new Promise((resolve, reject) => {
-        JSDOM.env({
-          url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
-          features: {
-            FetchExternalResources: ['script'],
-            ProcessExternalResources: ['script'],
-            SkipExternalResources: false
-          },
-          created: (err, window) => {
-            if (err) return reject(err)
-            // Injection / shimming must happen before we resolve with the window,
-            // otherwise the page will finish loading before the injection happens.
-            if (this._rendererOptions.inject) {
-              window[this._rendererOptions.injectProperty] = this._rendererOptions.inject
-            }
+      const vconsole = new jsdom.VirtualConsole()
+      // vconsole.sendTo(console, {omitJSDOMErrors: true})
 
-            window.addEventListener('error', function (event) {
-              console.error(event.error)
-            })
-
-            shim(window)
-
-            resolve(window)
+      return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
+        resources: 'usable',
+        runScripts: 'dangerously',
+        virtualConsole: vconsole,
+        beforeParse (window) {
+          // Injection / shimming must happen before we resolve with the window,
+          // otherwise the page will finish loading before the injection happens.
+          if (_rendererOptions.inject) {
+            window[_rendererOptions.injectProperty] = _rendererOptions.inject
           }
-        })
+        }
       })
-      .then(window => {
-        return getPageContents(window, this._rendererOptions, route)
-      })
-    })))
-    .catch(e => {
-      console.error(e)
-      return Promise.reject(e)
     })
+      .then(dom => {
+        return getPageContents(dom, _rendererOptions, route)
+      })
+      .catch(e => {
+        console.error('caught error', e)
+        return Promise.reject(e)
+      })))
 
     return results
   }

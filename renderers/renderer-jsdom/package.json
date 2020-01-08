@@ -38,8 +38,11 @@
     "email": "tribex10@gmail.com"
   },
   "dependencies": {
-    "jsdom": "^11.12.0",
-    "promise-limit": "^2.5.0"
+    "bufferutil": "^4.0.1",
+    "canvas": "^2.6.1",
+    "jsdom": "^15.2.1",
+    "promise-limit": "^2.5.0",
+    "utf-8-validate": "^5.0.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

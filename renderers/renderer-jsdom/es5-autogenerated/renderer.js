@@ -12,8 +12,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var JSDOM = require('jsdom/lib/old-api.js').jsdom;
-var serializeDocument = require('jsdom/lib/old-api.js').serializeDocument;
+var jsdom = require('jsdom');
+var JSDOM = jsdom.JSDOM;
+
 var promiseLimit = require('promise-limit');
 
 var shim = function shim(window) {
@@ -30,36 +31,42 @@ var shim = function shim(window) {
   };
 };
 
-var getPageContents = function getPageContents(window, options, originalRoute) {
+var getPageContents = function getPageContents(dom, options, originalRoute) {
   options = options || {};
-
   return new Promise(function (resolve, reject) {
     var int = void 0;
+    var now = Date.now();
 
     function captureDocument() {
       var result = {
         originalRoute: originalRoute,
         route: originalRoute,
-        html: serializeDocument(window.document)
+        html: dom.serialize()
       };
 
       if (int != null) {
         clearInterval(int);
       }
 
-      window.close();
+      console.log('waited', Date.now() - now, 'ms');
+
+      dom.window.close();
       return result;
     }
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
     if (options.renderAfterDocumentEvent) {
-      window.document.addEventListener(options.renderAfterDocumentEvent, function () {
+      dom.window.document.addEventListener(options.renderAfterDocumentEvent, function () {
         return resolve(captureDocument());
       });
+      setTimeout(function () {
+        console.log('waited too long for render event', originalRoute);
+        resolve(captureDocument());
+      }, 8000);
 
       // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
-      var doc = window.document;
+      var doc = dom.window.document;
       int = setInterval(function () {
         if (doc.querySelector(options.renderAfterElementExists)) resolve(captureDocument());
       }, 100);
@@ -76,6 +83,17 @@ var getPageContents = function getPageContents(window, options, originalRoute) {
     }
   });
 };
+
+// class CustomResourceLoader extends jsdom.ResourceLoader {
+//   fetch (url, options) {
+//     // Override the contents of this script to do something unusual.
+//     if (url.includes( === 'https://example.com/some-specific-script.js') {
+//       return Promise.resolve(Buffer.from('window.someGlobal = 5;'))
+//     }
+
+//     return super.fetch(url, options)
+//   }
+// }
 
 var JSDOMRenderer = function () {
   function JSDOMRenderer(rendererOptions) {
@@ -118,53 +136,46 @@ var JSDOMRenderer = function () {
     key: 'renderRoutes',
     value: function () {
       var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
-        var _this = this;
+        var rootOptions, _rendererOptions, limiter, results;
 
-        var rootOptions, limiter, results;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 rootOptions = Prerenderer.getOptions();
+                _rendererOptions = this._rendererOptions;
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 results = Promise.all(routes.map(function (route) {
                   return limiter(function () {
-                    return new Promise(function (resolve, reject) {
-                      JSDOM.env({
-                        url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
-                        features: {
-                          FetchExternalResources: ['script'],
-                          ProcessExternalResources: ['script'],
-                          SkipExternalResources: false
-                        },
-                        created: function created(err, window) {
-                          if (err) return reject(err);
-                          // Injection / shimming must happen before we resolve with the window,
-                          // otherwise the page will finish loading before the injection happens.
-                          if (_this._rendererOptions.inject) {
-                            window[_this._rendererOptions.injectProperty] = _this._rendererOptions.inject;
-                          }
-
-                          window.addEventListener('error', function (event) {
-                            console.error(event.error);
-                          });
-
-                          shim(window);
-
-                          resolve(window);
+                    return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
+                      resources: 'usable',
+                      runScripts: 'dangerously',
+                      beforeParse(window) {
+                        // Injection / shimming must happen before we resolve with the window,
+                        // otherwise the page will finish loading before the injection happens.
+                        if (_rendererOptions.inject) {
+                          window[_rendererOptions.injectProperty] = _rendererOptions.inject;
                         }
-                      });
-                    }).then(function (window) {
-                      return getPageContents(window, _this._rendererOptions, route);
+
+                        // window.console.log = () => console.log.apply(global, arguments)
+                        // window.console.error = () => console.error.apply(global, arguments)
+                        // window.console.warn = () => console.warn.apply(global, arguments)
+
+                        window.addEventListener('error', function (event) {
+                          // console.error(event.error)
+                        });
+                      }
+                    }).then(function (dom) {
+                      return getPageContents(dom, _rendererOptions, route);
+                    }).catch(function (e) {
+                      console.error('caught error', e);
+                      return Promise.reject(e);
                     });
                   });
-                })).catch(function (e) {
-                  console.error(e);
-                  return Promise.reject(e);
-                });
+                }));
                 return _context2.abrupt('return', results);
 
-              case 4:
+              case 5:
               case 'end':
                 return _context2.stop();
             }

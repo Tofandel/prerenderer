@@ -18,7 +18,7 @@ test('changes the route property when history.pushState is used to change the pa
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })
 
@@ -38,7 +38,7 @@ test('changes the route property when history.replaceState is used to change the
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })
 
@@ -58,6 +58,6 @@ test('mtaintains the correct route value when history.pushState is followed by h
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })

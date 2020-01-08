@@ -20,6 +20,6 @@ test('renders after 600 milliseconds, before should-already-be-rendered is dispa
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })

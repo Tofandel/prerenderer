@@ -17,6 +17,6 @@ test(`adds custom middleware to server using before hook`, async () => {
   })  
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes[0].html).toEqual(CUSTOM_MIDDLEWARE_RESPONSE)
 })

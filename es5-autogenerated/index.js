@@ -153,10 +153,30 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
     }()
   }, {
     key: 'destroy',
-    value: function destroy() {
-      this._renderer.destroy();
-      this._server.destroy();
-    }
+    value: function () {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this._renderer.destroy();
+                _context2.next = 3;
+                return this._server.destroy();
+
+              case 3:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function destroy() {
+        return _ref2.apply(this, arguments);
+      }
+
+      return destroy;
+    }()
   }, {
     key: 'getServer',
     value: function getServer() {

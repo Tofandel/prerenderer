@@ -28,11 +28,11 @@ test('renders 1 route', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })
 
-test('renders 10 routes', async () => {
+test.only('renders 10 routes', async () => {
   const routes = new Array(10).fill().map(i => generateRandomRoute())
 
   const prerenderer = new Prerenderer({
@@ -42,7 +42,7 @@ test('renders 10 routes', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(routes)
-  prerenderer.destroy()
+  await prerenderer.destroy()
 
   renderedRoutes.forEach((renderedRoute, i) => {
     expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))
@@ -61,7 +61,7 @@ test('renders 1000 routes', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(routes)
-  prerenderer.destroy()
+  await prerenderer.destroy()
 
   renderedRoutes.forEach((renderedRoute, i) => {
     expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))

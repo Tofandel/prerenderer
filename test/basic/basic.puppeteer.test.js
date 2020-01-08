@@ -28,7 +28,7 @@ test('renders 1 route', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })
 
@@ -42,7 +42,7 @@ test('renders 10 routes', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(routes)
-  prerenderer.destroy()
+  await prerenderer.destroy()
 
   renderedRoutes.forEach((renderedRoute, i) => {
     expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))
@@ -61,7 +61,7 @@ test('renders 500 routes', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(routes)
-  prerenderer.destroy()
+  await prerenderer.destroy()
 
   renderedRoutes.forEach((renderedRoute, i) => {
     expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))

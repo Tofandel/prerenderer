@@ -83,9 +83,9 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
     return Promise.resolve()
   }
 
-  destroy () {
+  async destroy () {
     this._renderer.destroy()
-    this._server.destroy()
+    await this._server.destroy()
   }
 
   getServer () {
