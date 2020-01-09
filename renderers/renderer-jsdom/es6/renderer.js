@@ -48,7 +48,7 @@ const getPageContents = function (dom, options, originalRoute) {
           route: originalRoute,
           html: ''
         })
-      }, timeout)
+      }, options.timeout)
     }
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT

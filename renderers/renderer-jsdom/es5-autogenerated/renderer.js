@@ -33,9 +33,9 @@ var shim = function shim(window) {
 
 var getPageContents = function getPageContents(dom, options, originalRoute) {
   options = options || {};
+  var timeout = void 0;
   return new Promise(function (resolve, reject) {
     var int = void 0;
-    var now = Date.now();
 
     function captureDocument() {
       var result = {
@@ -48,10 +48,22 @@ var getPageContents = function getPageContents(dom, options, originalRoute) {
         clearInterval(int);
       }
 
-      console.log('waited', Date.now() - now, 'ms');
+      clearTimeout(timeout);
 
       dom.window.close();
       return result;
+    }
+
+    if (options.timeout) {
+      timeout = setTimeout(function () {
+        console.log(originalRoute, 'timed out waiting to capture');
+        dom.window.close();
+        resolve({
+          originalRoute: originalRoute,
+          route: originalRoute,
+          html: ''
+        });
+      }, options.timeout);
     }
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
@@ -59,11 +71,6 @@ var getPageContents = function getPageContents(dom, options, originalRoute) {
       dom.window.document.addEventListener(options.renderAfterDocumentEvent, function () {
         return resolve(captureDocument());
       });
-      setTimeout(function () {
-        console.log('waited too long for render event', originalRoute);
-        resolve(captureDocument());
-      }, 8000);
-
       // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
     } else if (options.renderAfterElementExists) {
       var doc = dom.window.document;
@@ -83,17 +90,6 @@ var getPageContents = function getPageContents(dom, options, originalRoute) {
     }
   });
 };
-
-// class CustomResourceLoader extends jsdom.ResourceLoader {
-//   fetch (url, options) {
-//     // Override the contents of this script to do something unusual.
-//     if (url.includes( === 'https://example.com/some-specific-script.js') {
-//       return Promise.resolve(Buffer.from('window.someGlobal = 5;'))
-//     }
-
-//     return super.fetch(url, options)
-//   }
-// }
 
 var JSDOMRenderer = function () {
   function JSDOMRenderer(rendererOptions) {
@@ -147,30 +143,26 @@ var JSDOMRenderer = function () {
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 results = Promise.all(routes.map(function (route) {
                   return limiter(function () {
+                    var vconsole = new jsdom.VirtualConsole();
+                    // vconsole.sendTo(console, {omitJSDOMErrors: true})
+
                     return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
                       resources: 'usable',
                       runScripts: 'dangerously',
+                      virtualConsole: vconsole,
                       beforeParse(window) {
                         // Injection / shimming must happen before we resolve with the window,
                         // otherwise the page will finish loading before the injection happens.
                         if (_rendererOptions.inject) {
                           window[_rendererOptions.injectProperty] = _rendererOptions.inject;
                         }
-
-                        // window.console.log = () => console.log.apply(global, arguments)
-                        // window.console.error = () => console.error.apply(global, arguments)
-                        // window.console.warn = () => console.warn.apply(global, arguments)
-
-                        window.addEventListener('error', function (event) {
-                          // console.error(event.error)
-                        });
                       }
-                    }).then(function (dom) {
-                      return getPageContents(dom, _rendererOptions, route);
-                    }).catch(function (e) {
-                      console.error('caught error', e);
-                      return Promise.reject(e);
                     });
+                  }).then(function (dom) {
+                    return getPageContents(dom, _rendererOptions, route);
+                  }).catch(function (e) {
+                    console.error('caught error', e);
+                    return Promise.reject(e);
                   });
                 }));
                 return _context2.abrupt('return', results);
