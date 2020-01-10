@@ -18,7 +18,6 @@ const shim = function (window) {
 
 const getPageContents = function (dom, options, originalRoute) {
   options = options || {}
-  let timeout
   return new Promise((resolve, reject) => {
     let int
 
@@ -33,22 +32,8 @@ const getPageContents = function (dom, options, originalRoute) {
         clearInterval(int)
       }
 
-      clearTimeout(timeout)
-
       dom.window.close()
       return result
-    }
-
-    if (options.timeout) {
-      timeout = setTimeout(() => {
-        console.log(originalRoute, 'timed out waiting to capture')
-        dom.window.close()
-        resolve({
-          originalRoute: originalRoute,
-          route: originalRoute,
-          html: ''
-        })
-      }, options.timeout)
     }
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
@@ -94,10 +79,8 @@ class JSDOMRenderer {
     const _rendererOptions = this._rendererOptions
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
-    const results = Promise.all(routes.map(route => limiter(() => {
+    function render (route, allowRetry = true) {
       const vconsole = new jsdom.VirtualConsole()
-      // vconsole.sendTo(console, {omitJSDOMErrors: true})
-
       return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
         resources: 'usable',
         runScripts: 'dangerously',
@@ -110,16 +93,31 @@ class JSDOMRenderer {
           }
         }
       })
-    })
       .then(dom => {
-        return getPageContents(dom, _rendererOptions, route)
+        let timeout
+        if (_rendererOptions.timeout) {
+          timeout = setTimeout(() => {
+            console.log(route, 'timed out waiting to capture')
+            dom.window.close()
+            throw new Error('rerender-timeout')
+          }, _rendererOptions.timeout)
+        }
+
+        const content = getPageContents(dom, _rendererOptions, route)
+        clearTimeout(timeout)
+        return content
       })
       .catch(e => {
+        if (e.message === 'rerender-timeout' && allowRetry) {
+          console.log('retrying render of', route)
+          return render(route, false)
+        }
         console.error('caught error', e)
         return Promise.reject(e)
-      })))
+      })
+    }
 
-    return results
+    return Promise.all(routes.map(route => limiter(() => render(route))))
   }
 
   destroy () {
