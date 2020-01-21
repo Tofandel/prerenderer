@@ -80,6 +80,8 @@ class JSDOMRenderer {
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
     function render (route, allowRetry = true) {
+      console.log(route)
+      let timeout
       const vconsole = new jsdom.VirtualConsole()
       return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
         resources: 'usable',
@@ -94,21 +96,24 @@ class JSDOMRenderer {
         }
       })
       .then(dom => {
-        let timeout
-        if (_rendererOptions.timeout) {
-          timeout = setTimeout(() => {
-            console.log(route, 'timed out waiting to capture')
-            dom.window.close()
-            throw new Error('rerender-timeout')
-          }, _rendererOptions.timeout)
-        }
-
-        const content = getPageContents(dom, _rendererOptions, route)
+        return new Promise((resolve, reject) => {
+          if (_rendererOptions.timeout) {
+            timeout = setTimeout(() => {
+              const timeoutMsg = `${route} timed out waiting to capture`
+              console.log(timeoutMsg)
+              dom.window.close()
+              reject(new Error('rerender-timeout'))
+            }, _rendererOptions.timeout)
+          }
+          getPageContents(dom, _rendererOptions, route).then(resolve)
+        })
+      })
+      .then(content => {
         clearTimeout(timeout)
         return content
       })
       .catch(e => {
-        if (e.message === 'rerender-timeout' && allowRetry) {
+        if (allowRetry) {
           console.log('retrying render of', route)
           return render(route, false)
         }
