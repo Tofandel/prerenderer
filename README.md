@@ -152,11 +152,12 @@ prerenderer.initialize()
 
 #### Server Options
 
-| Option | Type     | Required? | Default                    | Description                            |
-|--------|----------|-----------|----------------------------|----------------------------------------|
-| port   | Integer  | No        | First free port after 8000 | The port for the app server to run on. |
-| proxy  | Object   | No        | No proxying                | Proxy configuration. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-proxy) |
-| before | Function | No        | No operation               | Function for adding custom server middleware. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-before) |
+| Option | Type     | Required? | Default                     | Description                            |
+|--------|----------|-----------|-----------------------------|----------------------------------------|
+| port   | Integer  | No        | First free port after 8000  | The port for the app server to run on. |
+| host   | String   | No        | :: / 0.0.0.0                | The host for the app server to run on. |
+| proxy  | Object   | No        | No proxying                 | Proxy configuration. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-proxy) |
+| before | Function | No        | No operation                | Function for adding custom server middleware. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-before) |
 
 ### Prerenderer Methods
 
