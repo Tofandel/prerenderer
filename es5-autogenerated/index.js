@@ -127,17 +127,19 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
 
               case 8:
                 this._options.server.port = _context.t0;
-                _context.next = 11;
+
+                this._options.server.host = this._options.server.host || '::';
+                _context.next = 12;
                 return this._server.initialize();
 
-              case 11:
-                _context.next = 13;
+              case 12:
+                _context.next = 14;
                 return this._renderer.initialize();
 
-              case 13:
+              case 14:
                 return _context.abrupt('return', Promise.resolve());
 
-              case 14:
+              case 15:
               case 'end':
                 return _context.stop();
             }
