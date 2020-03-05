@@ -137,7 +137,16 @@ class PuppeteerRenderer {
   }
 
   destroy () {
-    this._puppeteer.close()
+    if(this._puppeteer) {
+      try {
+        this._puppeteer.close()
+      } catch (e) {
+        console.error(e)
+        console.error('[Prerenderer - PuppeteerRenderer] Unable to close Puppeteer')
+		  
+        throw e
+      }
+    }
   }
 }
 
