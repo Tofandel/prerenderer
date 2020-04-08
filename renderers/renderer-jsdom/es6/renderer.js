@@ -83,8 +83,11 @@ class JSDOMRenderer {
       console.log(route)
       let timeout
       const vconsole = new jsdom.VirtualConsole()
+      // vconsole.sendTo(console)
       return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
-        resources: 'usable',
+        resources: new jsdom.ResourceLoader({
+          strictSSL: false
+        }),
         runScripts: 'dangerously',
         virtualConsole: vconsole,
         beforeParse (window) {

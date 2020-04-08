@@ -33,7 +33,6 @@ var shim = function shim(window) {
 
 var getPageContents = function getPageContents(dom, options, originalRoute) {
   options = options || {};
-  var timeout = void 0;
   return new Promise(function (resolve, reject) {
     var int = void 0;
 
@@ -48,22 +47,8 @@ var getPageContents = function getPageContents(dom, options, originalRoute) {
         clearInterval(int);
       }
 
-      clearTimeout(timeout);
-
       dom.window.close();
       return result;
-    }
-
-    if (options.timeout) {
-      timeout = setTimeout(function () {
-        console.log(originalRoute, 'timed out waiting to capture');
-        dom.window.close();
-        resolve({
-          originalRoute: originalRoute,
-          route: originalRoute,
-          html: ''
-        });
-      }, options.timeout);
     }
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
@@ -132,40 +117,65 @@ var JSDOMRenderer = function () {
     key: 'renderRoutes',
     value: function () {
       var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
-        var rootOptions, _rendererOptions, limiter, results;
+        var rootOptions, _rendererOptions, limiter, render;
 
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                rootOptions = Prerenderer.getOptions();
-                _rendererOptions = this._rendererOptions;
-                limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
-                results = Promise.all(routes.map(function (route) {
-                  return limiter(function () {
-                    var vconsole = new jsdom.VirtualConsole();
-                    // vconsole.sendTo(console, {omitJSDOMErrors: true})
+                render = function render(route) {
+                  var allowRetry = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
-                    return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
-                      resources: 'usable',
-                      runScripts: 'dangerously',
-                      virtualConsole: vconsole,
-                      beforeParse(window) {
-                        // Injection / shimming must happen before we resolve with the window,
-                        // otherwise the page will finish loading before the injection happens.
-                        if (_rendererOptions.inject) {
-                          window[_rendererOptions.injectProperty] = _rendererOptions.inject;
-                        }
+                  console.log(route);
+                  var timeout = void 0;
+                  var vconsole = new jsdom.VirtualConsole();
+                  // vconsole.sendTo(console)
+                  return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
+                    resources: new jsdom.ResourceLoader({
+                      strictSSL: false
+                    }),
+                    runScripts: 'dangerously',
+                    virtualConsole: vconsole,
+                    beforeParse(window) {
+                      // Injection / shimming must happen before we resolve with the window,
+                      // otherwise the page will finish loading before the injection happens.
+                      if (_rendererOptions.inject) {
+                        window[_rendererOptions.injectProperty] = _rendererOptions.inject;
                       }
-                    });
+                    }
                   }).then(function (dom) {
-                    return getPageContents(dom, _rendererOptions, route);
+                    return new Promise(function (resolve, reject) {
+                      if (_rendererOptions.timeout) {
+                        timeout = setTimeout(function () {
+                          var timeoutMsg = `${route} timed out waiting to capture`;
+                          console.log(timeoutMsg);
+                          dom.window.close();
+                          reject(new Error('rerender-timeout'));
+                        }, _rendererOptions.timeout);
+                      }
+                      getPageContents(dom, _rendererOptions, route).then(resolve);
+                    });
+                  }).then(function (content) {
+                    clearTimeout(timeout);
+                    return content;
                   }).catch(function (e) {
+                    if (allowRetry) {
+                      console.log('retrying render of', route);
+                      return render(route, false);
+                    }
                     console.error('caught error', e);
                     return Promise.reject(e);
                   });
-                }));
-                return _context2.abrupt('return', results);
+                };
+
+                rootOptions = Prerenderer.getOptions();
+                _rendererOptions = this._rendererOptions;
+                limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
+                return _context2.abrupt('return', Promise.all(routes.map(function (route) {
+                  return limiter(function () {
+                    return render(route);
+                  });
+                })));
 
               case 5:
               case 'end':
