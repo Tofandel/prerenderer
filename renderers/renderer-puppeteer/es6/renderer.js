@@ -1,5 +1,5 @@
 const promiseLimit = require('promise-limit')
-const puppeteer = require('puppeteer')
+const PCR = require('puppeteer-chromium-resolver')
 
 const waitForRender = function (options) {
   options = options || {}
@@ -10,11 +10,11 @@ const waitForRender = function (options) {
       if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve()
       document.addEventListener(options.renderAfterDocumentEvent, () => resolve())
 
-    // Render after a certain number of milliseconds.
+      // Render after a certain number of milliseconds.
     } else if (options.renderAfterTime) {
       setTimeout(() => resolve(), options.renderAfterTime)
 
-    // Default: Render immediately after page content loads.
+      // Default: Render immediately after page content loads.
     } else {
       resolve()
     }
@@ -22,7 +22,7 @@ const waitForRender = function (options) {
 }
 
 class PuppeteerRenderer {
-  constructor (rendererOptions) {
+  constructor(rendererOptions) {
     this._puppeteer = null
     this._rendererOptions = rendererOptions || {}
 
@@ -33,7 +33,7 @@ class PuppeteerRenderer {
     }
   }
 
-  async initialize () {
+  async initialize() {
     try {
       // Workaround for Linux SUID Sandbox issues.
       if (process.platform === 'linux') {
@@ -44,8 +44,11 @@ class PuppeteerRenderer {
           this._rendererOptions.args.push('--disable-setuid-sandbox')
         }
       }
+      const pcr = await PCR({
+        hosts: ['https://npm.taobao.org/mirrors']
+      })
 
-      this._puppeteer = await puppeteer.launch(this._rendererOptions)
+      this._puppeteer = await pcr.puppeteer.launch(this._rendererOptions)
     } catch (e) {
       console.error(e)
       console.error('[Prerenderer - PuppeteerRenderer] Unable to start Puppeteer')
@@ -56,7 +59,7 @@ class PuppeteerRenderer {
     return this._puppeteer
   }
 
-  async handleRequestInterception (page, baseURL) {
+  async handleRequestInterception(page, baseURL) {
     await page.setRequestInterception(true)
 
     page.on('request', req => {
@@ -72,7 +75,7 @@ class PuppeteerRenderer {
     })
   }
 
-  async renderRoutes (routes, Prerenderer) {
+  async renderRoutes(routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
     const options = this._rendererOptions
 
@@ -108,9 +111,9 @@ class PuppeteerRenderer {
                 })
               }, this._rendererOptions)
             }
-            
-            const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' };
-            await page.goto(`${baseURL}${route}`, navigationOptions);
+
+            const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' }
+            await page.goto(`${baseURL}${route}`, navigationOptions)
 
             // Wait for some specific element exists
             const { renderAfterElementExists } = this._rendererOptions
@@ -136,7 +139,7 @@ class PuppeteerRenderer {
     return pagePromises
   }
 
-  destroy () {
+  destroy() {
     this._puppeteer.close()
   }
 }
