@@ -56,22 +56,6 @@ class PuppeteerRenderer {
     return this._puppeteer
   }
 
-  async handleRequestInterception (page, baseURL) {
-    await page.setRequestInterception(true)
-
-    page.on('request', req => {
-      // Skip third party requests if needed.
-      if (this._rendererOptions.skipThirdPartyRequests) {
-        if (!req.url().startsWith(baseURL)) {
-          req.abort()
-          return
-        }
-      }
-
-      req.continue()
-    })
-  }
-
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
     const options = this._rendererOptions
@@ -97,7 +81,24 @@ class PuppeteerRenderer {
             // Allow setting viewport widths and such.
             if (options.viewport) await page.setViewport(options.viewport)
 
-            await this.handleRequestInterception(page, baseURL)
+            await page.setRequestInterception(true)
+            await page.on('request', req => {
+              // Skip third party requests if needed.
+              if (options.skipThirdPartyRequests) {
+                if (!req.url().startsWith(baseURL)) {
+                  req.abort()
+                  return
+                }
+              }
+
+              // Run the user's custom request interceptor, if available.
+              if (options.requestInterceptor) {
+                options.requestInterceptor(req)
+                return
+              }
+
+              req.continue()
+            })
 
             // Hack just in-case the document event fires before our main listener is added.
             if (options.renderAfterDocumentEvent) {

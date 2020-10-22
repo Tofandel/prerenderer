@@ -110,72 +110,31 @@ var PuppeteerRenderer = function () {
       return initialize;
     }()
   }, {
-    key: 'handleRequestInterception',
-    value: function () {
-      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(page, baseURL) {
-        var _this = this;
-
-        return _regenerator2.default.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                _context2.next = 2;
-                return page.setRequestInterception(true);
-
-              case 2:
-
-                page.on('request', function (req) {
-                  // Skip third party requests if needed.
-                  if (_this._rendererOptions.skipThirdPartyRequests) {
-                    if (!req.url().startsWith(baseURL)) {
-                      req.abort();
-                      return;
-                    }
-                  }
-
-                  req.continue();
-                });
-
-              case 3:
-              case 'end':
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this);
-      }));
-
-      function handleRequestInterception(_x, _x2) {
-        return _ref2.apply(this, arguments);
-      }
-
-      return handleRequestInterception;
-    }()
-  }, {
     key: 'renderRoutes',
     value: function () {
-      var _ref3 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee4(routes, Prerenderer) {
-        var _this2 = this;
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3(routes, Prerenderer) {
+        var _this = this;
 
         var rootOptions, options, limiter;
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 rootOptions = Prerenderer.getOptions();
                 options = this._rendererOptions;
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
-                return _context4.abrupt('return', Promise.all(routes.map(function (route) {
-                  return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+                return _context3.abrupt('return', Promise.all(routes.map(function (route) {
+                  return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
                     var page, baseURL, navigationOptions, renderAfterElementExists, result;
-                    return _regenerator2.default.wrap(function _callee3$(_context3) {
+                    return _regenerator2.default.wrap(function _callee2$(_context2) {
                       while (1) {
-                        switch (_context3.prev = _context3.next) {
+                        switch (_context2.prev = _context2.next) {
                           case 0:
-                            _context3.next = 2;
-                            return _this2._puppeteer.newPage();
+                            _context2.next = 2;
+                            return _this._puppeteer.newPage();
 
                           case 2:
-                            page = _context3.sent;
+                            page = _context2.sent;
 
 
                             if (options.consoleHandler) {
@@ -185,11 +144,11 @@ var PuppeteerRenderer = function () {
                             }
 
                             if (!options.inject) {
-                              _context3.next = 7;
+                              _context2.next = 7;
                               break;
                             }
 
-                            _context3.next = 7;
+                            _context2.next = 7;
                             return page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`);
 
                           case 7:
@@ -198,18 +157,38 @@ var PuppeteerRenderer = function () {
                             // Allow setting viewport widths and such.
 
                             if (!options.viewport) {
-                              _context3.next = 11;
+                              _context2.next = 11;
                               break;
                             }
 
-                            _context3.next = 11;
+                            _context2.next = 11;
                             return page.setViewport(options.viewport);
 
                           case 11:
-                            _context3.next = 13;
-                            return _this2.handleRequestInterception(page, baseURL);
+                            _context2.next = 13;
+                            return page.setRequestInterception(true);
 
                           case 13:
+                            _context2.next = 15;
+                            return page.on('request', function (req) {
+                              // Skip third party requests if needed.
+                              if (options.skipThirdPartyRequests) {
+                                if (!req.url().startsWith(baseURL)) {
+                                  req.abort();
+                                  return;
+                                }
+                              }
+
+                              // Run the user's custom request interceptor, if available.
+                              if (options.requestInterceptor) {
+                                options.requestInterceptor(req);
+                                return;
+                              }
+
+                              req.continue();
+                            });
+
+                          case 15:
 
                             // Hack just in-case the document event fires before our main listener is added.
                             if (options.renderAfterDocumentEvent) {
@@ -218,72 +197,72 @@ var PuppeteerRenderer = function () {
                                 document.addEventListener(options.renderAfterDocumentEvent, function () {
                                   window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED = true;
                                 });
-                              }, _this2._rendererOptions);
+                              }, _this._rendererOptions);
                             }
 
                             navigationOptions = options.navigationOptions ? _extends({ waituntil: 'networkidle0' }, options.navigationOptions) : { waituntil: 'networkidle0' };
-                            _context3.next = 17;
+                            _context2.next = 19;
                             return page.goto(`${baseURL}${route}`, navigationOptions);
 
-                          case 17:
+                          case 19:
 
                             // Wait for some specific element exists
-                            renderAfterElementExists = _this2._rendererOptions.renderAfterElementExists;
+                            renderAfterElementExists = _this._rendererOptions.renderAfterElementExists;
 
                             if (!(renderAfterElementExists && typeof renderAfterElementExists === 'string')) {
-                              _context3.next = 21;
+                              _context2.next = 23;
                               break;
                             }
 
-                            _context3.next = 21;
+                            _context2.next = 23;
                             return page.waitForSelector(renderAfterElementExists);
 
-                          case 21:
-                            _context3.next = 23;
-                            return page.evaluate(waitForRender, _this2._rendererOptions);
-
                           case 23:
-                            _context3.t0 = route;
-                            _context3.next = 26;
+                            _context2.next = 25;
+                            return page.evaluate(waitForRender, _this._rendererOptions);
+
+                          case 25:
+                            _context2.t0 = route;
+                            _context2.next = 28;
                             return page.evaluate('window.location.pathname');
 
-                          case 26:
-                            _context3.t1 = _context3.sent;
-                            _context3.next = 29;
+                          case 28:
+                            _context2.t1 = _context2.sent;
+                            _context2.next = 31;
                             return page.content();
 
-                          case 29:
-                            _context3.t2 = _context3.sent;
+                          case 31:
+                            _context2.t2 = _context2.sent;
                             result = {
-                              originalRoute: _context3.t0,
-                              route: _context3.t1,
-                              html: _context3.t2
+                              originalRoute: _context2.t0,
+                              route: _context2.t1,
+                              html: _context2.t2
                             };
-                            _context3.next = 33;
+                            _context2.next = 35;
                             return page.close();
 
-                          case 33:
-                            return _context3.abrupt('return', result);
+                          case 35:
+                            return _context2.abrupt('return', result);
 
-                          case 34:
+                          case 36:
                           case 'end':
-                            return _context3.stop();
+                            return _context2.stop();
                         }
                       }
-                    }, _callee3, _this2);
+                    }, _callee2, _this);
                   })));
                 })));
 
               case 4:
               case 'end':
-                return _context4.stop();
+                return _context3.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee3, this);
       }));
 
-      function renderRoutes(_x3, _x4) {
-        return _ref3.apply(this, arguments);
+      function renderRoutes(_x, _x2) {
+        return _ref2.apply(this, arguments);
       }
 
       return renderRoutes;
