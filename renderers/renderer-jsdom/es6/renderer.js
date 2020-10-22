@@ -19,7 +19,7 @@ const shim = function (window) {
 const getPageContents = function (window, options, originalRoute) {
   options = options || {}
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let int
 
     function captureDocument () {
@@ -80,7 +80,7 @@ class JSDOMRenderer {
 
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
-    const results = Promise.all(routes.map(route => limiter(() => {
+    return Promise.all(routes.map(route => limiter(() => {
       return new Promise((resolve, reject) => {
         JSDOM.env({
           url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
@@ -107,16 +107,14 @@ class JSDOMRenderer {
           }
         })
       })
-      .then(window => {
-        return getPageContents(window, this._rendererOptions, route)
-      })
+        .then(window => {
+          return getPageContents(window, this._rendererOptions, route)
+        })
     })))
-    .catch(e => {
-      console.error(e)
-      return Promise.reject(e)
-    })
-
-    return results
+      .catch(e => {
+        console.error(e)
+        return Promise.reject(e)
+      })
   }
 
   destroy () {

@@ -58,7 +58,6 @@ function validateOptionsSchema(schema, options, parent) {
 
     if (schema[key].children) {
       errors.push.apply(errors, _toConsumableArray(validateOptionsSchema(schema[key].children, options[key], key)));
-      return;
     }
   });
 

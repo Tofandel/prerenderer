@@ -33,7 +33,7 @@ var shim = function shim(window) {
 var getPageContents = function getPageContents(window, options, originalRoute) {
   options = options || {};
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     var int = void 0;
 
     function captureDocument() {
@@ -120,14 +120,14 @@ var JSDOMRenderer = function () {
       var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
         var _this = this;
 
-        var rootOptions, limiter, results;
+        var rootOptions, limiter;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 rootOptions = Prerenderer.getOptions();
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
-                results = Promise.all(routes.map(function (route) {
+                return _context2.abrupt('return', Promise.all(routes.map(function (route) {
                   return limiter(function () {
                     return new Promise(function (resolve, reject) {
                       JSDOM.env({
@@ -161,10 +161,9 @@ var JSDOMRenderer = function () {
                 })).catch(function (e) {
                   console.error(e);
                   return Promise.reject(e);
-                });
-                return _context2.abrupt('return', results);
+                }));
 
-              case 4:
+              case 3:
               case 'end':
                 return _context2.stop();
             }

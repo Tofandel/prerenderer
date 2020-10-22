@@ -25,6 +25,10 @@ var Server = function () {
 
       var server = this._expressServer;
 
+      if (this._options.server && this._options.server.before) {
+        this._options.server.before(server);
+      }
+
       this._prerenderer.modifyServer(this, 'pre-static');
 
       server.get('*', express.static(this._options.staticDir, {
@@ -68,7 +72,7 @@ var Server = function () {
 
       this._prerenderer.modifyServer(this, 'post-fallback');
 
-      return new Promise(function (resolve, reject) {
+      return new Promise(function (resolve) {
         _this._nativeServer = server.listen(_this._options.server.port, function () {
           resolve();
         });

@@ -15,7 +15,7 @@ const OPTION_SCHEMA = {
 }
 
 function validateOptionsSchema (schema, options, parent) {
-  var errors = []
+  const errors = []
 
   Object.keys(schema).forEach(key => {
     // Required options
@@ -40,7 +40,6 @@ function validateOptionsSchema (schema, options, parent) {
 
     if (schema[key].children) {
       errors.push(...validateOptionsSchema(schema[key].children, options[key], key))
-      return
     }
   })
 
@@ -109,13 +108,13 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
     // Handle non-ASCII or invalid URL characters in routes by normalizing them back to unicode.
     // Some browser environments may change unicode or special characters in routes to percent encodings.
     // We need to convert them back for saving in the filesystem.
-    .then(renderedRoutes => {
-      renderedRoutes.forEach(rendered => {
-        rendered.route = decodeURIComponent(rendered.route)
-      })
+      .then(renderedRoutes => {
+        renderedRoutes.forEach(rendered => {
+          rendered.route = decodeURIComponent(rendered.route)
+        })
 
-      return renderedRoutes
-    })
+        return renderedRoutes
+      })
   }
 }
 

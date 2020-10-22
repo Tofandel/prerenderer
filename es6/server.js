@@ -39,7 +39,7 @@ class Server {
 
     this._prerenderer.modifyServer(this, 'post-fallback')
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this._nativeServer = server.listen(this._options.server.port, () => {
         resolve()
       })

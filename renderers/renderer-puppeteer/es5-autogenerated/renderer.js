@@ -20,7 +20,7 @@ var puppeteer = require('puppeteer');
 var waitForRender = function waitForRender(options) {
   options = options || {};
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     // Render when an event fires on the document.
     if (options.renderAfterDocumentEvent) {
       if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve();
@@ -156,7 +156,7 @@ var PuppeteerRenderer = function () {
       var _ref3 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee4(routes, Prerenderer) {
         var _this2 = this;
 
-        var rootOptions, options, limiter, pagePromises;
+        var rootOptions, options, limiter;
         return _regenerator2.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -164,7 +164,7 @@ var PuppeteerRenderer = function () {
                 rootOptions = Prerenderer.getOptions();
                 options = this._rendererOptions;
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
-                pagePromises = Promise.all(routes.map(function (route, index) {
+                return _context4.abrupt('return', Promise.all(routes.map(function (route) {
                   return limiter(_asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
                     var page, baseURL, navigationOptions, renderAfterElementExists, result;
                     return _regenerator2.default.wrap(function _callee3$(_context3) {
@@ -272,10 +272,9 @@ var PuppeteerRenderer = function () {
                       }
                     }, _callee3, _this2);
                   })));
-                }));
-                return _context4.abrupt('return', pagePromises);
+                })));
 
-              case 5:
+              case 4:
               case 'end':
                 return _context4.stop();
             }
@@ -292,7 +291,16 @@ var PuppeteerRenderer = function () {
   }, {
     key: 'destroy',
     value: function destroy() {
-      this._puppeteer.close();
+      if (this._puppeteer) {
+        try {
+          this._puppeteer.close();
+        } catch (e) {
+          console.error(e);
+          console.error('[Prerenderer - PuppeteerRenderer] Unable to close Puppeteer');
+
+          throw e;
+        }
+      }
     }
   }]);
 

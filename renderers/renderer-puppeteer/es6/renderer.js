@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer')
 const waitForRender = function (options) {
   options = options || {}
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Render when an event fires on the document.
     if (options.renderAfterDocumentEvent) {
       if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve()
@@ -78,9 +78,9 @@ class PuppeteerRenderer {
 
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
-    const pagePromises = Promise.all(
+    return Promise.all(
       routes.map(
-        (route, index) => limiter(
+        (route) => limiter(
           async () => {
             const page = await this._puppeteer.newPage()
 
@@ -108,9 +108,9 @@ class PuppeteerRenderer {
                 })
               }, this._rendererOptions)
             }
-            
-            const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' };
-            await page.goto(`${baseURL}${route}`, navigationOptions);
+
+            const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' }
+            await page.goto(`${baseURL}${route}`, navigationOptions)
 
             // Wait for some specific element exists
             const { renderAfterElementExists } = this._rendererOptions
@@ -132,18 +132,16 @@ class PuppeteerRenderer {
         )
       )
     )
-
-    return pagePromises
   }
 
   destroy () {
-    if(this._puppeteer) {
+    if (this._puppeteer) {
       try {
         this._puppeteer.close()
       } catch (e) {
         console.error(e)
         console.error('[Prerenderer - PuppeteerRenderer] Unable to close Puppeteer')
-		  
+
         throw e
       }
     }
