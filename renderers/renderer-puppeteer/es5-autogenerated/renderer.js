@@ -169,8 +169,7 @@ var PuppeteerRenderer = function () {
                             return page.setRequestInterception(true);
 
                           case 13:
-                            _context2.next = 15;
-                            return page.on('request', function (req) {
+                            page.on('request', function (req) {
                               // Skip third party requests if needed.
                               if (options.skipThirdPartyRequests) {
                                 if (!req.url().startsWith(baseURL)) {
@@ -180,15 +179,19 @@ var PuppeteerRenderer = function () {
                               }
 
                               // Run the user's custom request interceptor, if available.
-                              if (options.requestInterceptor) {
-                                options.requestInterceptor(req);
+                              if (options.onRequest) {
+                                options.onRequest(req);
                                 return;
                               }
 
                               req.continue();
                             });
-
-                          case 15:
+                            if (options.onRequestFinished) {
+                              page.on('requestfinished', options.onRequestFinished);
+                            }
+                            if (options.onRequestFailed) {
+                              page.on('requestfailed', options.onRequestFailed);
+                            }
 
                             // Hack just in-case the document event fires before our main listener is added.
                             if (options.renderAfterDocumentEvent) {
@@ -201,50 +204,50 @@ var PuppeteerRenderer = function () {
                             }
 
                             navigationOptions = options.navigationOptions ? _extends({ waituntil: 'networkidle0' }, options.navigationOptions) : { waituntil: 'networkidle0' };
-                            _context2.next = 19;
+                            _context2.next = 20;
                             return page.goto(`${baseURL}${route}`, navigationOptions);
 
-                          case 19:
+                          case 20:
 
                             // Wait for some specific element exists
                             renderAfterElementExists = _this._rendererOptions.renderAfterElementExists;
 
                             if (!(renderAfterElementExists && typeof renderAfterElementExists === 'string')) {
-                              _context2.next = 23;
+                              _context2.next = 24;
                               break;
                             }
 
-                            _context2.next = 23;
+                            _context2.next = 24;
                             return page.waitForSelector(renderAfterElementExists);
 
-                          case 23:
-                            _context2.next = 25;
+                          case 24:
+                            _context2.next = 26;
                             return page.evaluate(waitForRender, _this._rendererOptions);
 
-                          case 25:
+                          case 26:
                             _context2.t0 = route;
-                            _context2.next = 28;
+                            _context2.next = 29;
                             return page.evaluate('window.location.pathname');
 
-                          case 28:
+                          case 29:
                             _context2.t1 = _context2.sent;
-                            _context2.next = 31;
+                            _context2.next = 32;
                             return page.content();
 
-                          case 31:
+                          case 32:
                             _context2.t2 = _context2.sent;
                             result = {
                               originalRoute: _context2.t0,
                               route: _context2.t1,
                               html: _context2.t2
                             };
-                            _context2.next = 35;
+                            _context2.next = 36;
                             return page.close();
 
-                          case 35:
+                          case 36:
                             return _context2.abrupt('return', result);
 
-                          case 36:
+                          case 37:
                           case 'end':
                             return _context2.stop();
                         }
