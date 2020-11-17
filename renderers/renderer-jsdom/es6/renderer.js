@@ -1,5 +1,6 @@
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
+const cachingResourceLoader = require('./CachingResourceLoader')
 const promiseLimit = require('promise-limit')
 
 const shim = function (window) {
@@ -78,6 +79,9 @@ class JSDOMRenderer {
 
     const _rendererOptions = this._rendererOptions
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
+    const resourceLoader = new cachingResourceLoader({
+      strictSSL: false
+    })
 
     function render (route, allowRetry = true) {
       console.log(route)
@@ -85,9 +89,7 @@ class JSDOMRenderer {
       const vconsole = new jsdom.VirtualConsole()
       // vconsole.sendTo(console)
       return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
-        resources: new jsdom.ResourceLoader({
-          strictSSL: false
-        }),
+        resources: resourceLoader,
         runScripts: 'dangerously',
         virtualConsole: vconsole,
         beforeParse (window) {
