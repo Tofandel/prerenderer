@@ -80,12 +80,15 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
     await this._server.initialize()
     await this._renderer.initialize()
 
-    return Promise.resolve()
+    return;
   }
 
   async destroy () {
     this._renderer.destroy()
     await this._server.destroy()
+    this._server = null;
+    this._renderer = null;
+    this._options = null;
   }
 
   getServer () {

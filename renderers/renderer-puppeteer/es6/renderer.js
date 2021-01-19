@@ -9,13 +9,13 @@ const waitForRender = function (options) {
     if (options.renderAfterDocumentEvent) {
       if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve()
       document.addEventListener(options.renderAfterDocumentEvent, () => resolve())
-
-    // Render after a certain number of milliseconds.
-    } else if (options.renderAfterTime) {
+    } 
+    
+    if (options.renderAfterTime) {
       setTimeout(() => resolve(), options.renderAfterTime)
-
-    // Default: Render immediately after page content loads.
-    } else {
+    } 
+    
+    if (!options.renderAfterDocumentEvent && !options.renderAfterTime) {
       resolve()
     }
   })

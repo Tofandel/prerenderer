@@ -1,5 +1,6 @@
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
+const cachingResourceLoader = require('./CachingResourceLoader')
 const promiseLimit = require('promise-limit')
 
 const shim = function (window) {
@@ -21,7 +22,7 @@ const getPageContents = function (dom, options, originalRoute) {
   return new Promise((resolve, reject) => {
     let int
 
-    function captureDocument () {
+    let captureDocument = () => {
       const result = {
         originalRoute: originalRoute,
         route: originalRoute,
@@ -32,9 +33,10 @@ const getPageContents = function (dom, options, originalRoute) {
         clearInterval(int)
       }
 
-      dom.window.close()
+      dom.window.close();
+      dom = null;
       return result
-    }
+    };
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
     if (options.renderAfterDocumentEvent) {
@@ -66,28 +68,30 @@ class JSDOMRenderer {
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED'
     }
+
+    this.resourceLoader = new cachingResourceLoader({
+      strictSSL: false
+    })
   }
 
   async initialize () {
     // NOOP
-    return Promise.resolve()
+    return;
   }
 
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
-
+    var rl = this.resourceLoader;
     const _rendererOptions = this._rendererOptions
     const limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes)
 
-    function render (route, allowRetry = true) {
+    function render (route, retriesRemaining = 2) {
       console.log(route)
       let timeout
       const vconsole = new jsdom.VirtualConsole()
       // vconsole.sendTo(console)
       return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
-        resources: new jsdom.ResourceLoader({
-          strictSSL: false
-        }),
+        resources: rl,
         runScripts: 'dangerously',
         virtualConsole: vconsole,
         beforeParse (window) {
@@ -103,22 +107,26 @@ class JSDOMRenderer {
           if (_rendererOptions.timeout) {
             timeout = setTimeout(() => {
               const timeoutMsg = `${route} timed out waiting to capture`
-              console.log(timeoutMsg)
-              dom.window.close()
+              dom.window.close();
+              dom = null;
               reject(new Error('rerender-timeout'))
             }, _rendererOptions.timeout)
           }
-          getPageContents(dom, _rendererOptions, route).then(resolve)
+          getPageContents(dom, _rendererOptions, route).then(contents => {
+              dom = null;
+              resolve(contents);
+          });
         })
       })
       .then(content => {
-        clearTimeout(timeout)
+        clearTimeout(timeout);
+        timeout = null;
         return content
       })
       .catch(e => {
-        if (allowRetry) {
+        if (retriesRemaining > 0) {
           console.log('retrying render of', route)
-          return render(route, false)
+          return render(route, --retriesRemaining)
         }
         console.error('caught error', e)
         return Promise.reject(e)
@@ -129,7 +137,6 @@ class JSDOMRenderer {
   }
 
   destroy () {
-    // NOOP
   }
 }
 

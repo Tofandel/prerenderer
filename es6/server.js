@@ -51,6 +51,10 @@ class Server {
       this._nativeServer.close(err => {
         if (err) reject(err)
         resolve()
+        this._nativeServer = null;
+        this._expressServer = null;
+        this._prerenderer = null;
+        this._options = null;
       })
     })
   }
