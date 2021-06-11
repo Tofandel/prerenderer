@@ -27,15 +27,15 @@ var waitForRender = function waitForRender(options) {
       document.addEventListener(options.renderAfterDocumentEvent, function () {
         return resolve();
       });
+    }
 
-      // Render after a certain number of milliseconds.
-    } else if (options.renderAfterTime) {
+    if (options.renderAfterTime) {
       setTimeout(function () {
         return resolve();
       }, options.renderAfterTime);
+    }
 
-      // Default: Render immediately after page content loads.
-    } else {
+    if (!options.renderAfterDocumentEvent && !options.renderAfterTime) {
       resolve();
     }
   });

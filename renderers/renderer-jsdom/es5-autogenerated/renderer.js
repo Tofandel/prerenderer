@@ -15,6 +15,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var jsdom = require('jsdom');
 var JSDOM = jsdom.JSDOM;
 
+var cachingResourceLoader = require('./CachingResourceLoader');
 var promiseLimit = require('promise-limit');
 
 var shim = function shim(window) {
@@ -36,7 +37,7 @@ var getPageContents = function getPageContents(dom, options, originalRoute) {
   return new Promise(function (resolve, reject) {
     var int = void 0;
 
-    function captureDocument() {
+    var captureDocument = function captureDocument() {
       var result = {
         originalRoute: originalRoute,
         route: originalRoute,
@@ -48,8 +49,9 @@ var getPageContents = function getPageContents(dom, options, originalRoute) {
       }
 
       dom.window.close();
+      dom = null;
       return result;
-    }
+    };
 
     // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
     if (options.renderAfterDocumentEvent) {
@@ -87,6 +89,10 @@ var JSDOMRenderer = function () {
     if (this._rendererOptions.inject && !this._rendererOptions.injectProperty) {
       this._rendererOptions.injectProperty = '__PRERENDER_INJECTED';
     }
+
+    this.resourceLoader = new cachingResourceLoader({
+      strictSSL: false
+    });
   }
 
   _createClass(JSDOMRenderer, [{
@@ -97,7 +103,7 @@ var JSDOMRenderer = function () {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                return _context.abrupt('return', Promise.resolve());
+                return _context.abrupt('return');
 
               case 1:
               case 'end':
@@ -117,23 +123,21 @@ var JSDOMRenderer = function () {
     key: 'renderRoutes',
     value: function () {
       var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2(routes, Prerenderer) {
-        var rootOptions, _rendererOptions, limiter, render;
+        var rootOptions, rl, _rendererOptions, limiter, render;
 
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 render = function render(route) {
-                  var allowRetry = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+                  var retriesRemaining = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
 
                   console.log(route);
                   var timeout = void 0;
                   var vconsole = new jsdom.VirtualConsole();
                   // vconsole.sendTo(console)
                   return JSDOM.fromURL(`http://127.0.0.1:${rootOptions.server.port}${route}`, {
-                    resources: new jsdom.ResourceLoader({
-                      strictSSL: false
-                    }),
+                    resources: rl,
                     runScripts: 'dangerously',
                     virtualConsole: vconsole,
                     beforeParse(window) {
@@ -148,20 +152,24 @@ var JSDOMRenderer = function () {
                       if (_rendererOptions.timeout) {
                         timeout = setTimeout(function () {
                           var timeoutMsg = `${route} timed out waiting to capture`;
-                          console.log(timeoutMsg);
                           dom.window.close();
+                          dom = null;
                           reject(new Error('rerender-timeout'));
                         }, _rendererOptions.timeout);
                       }
-                      getPageContents(dom, _rendererOptions, route).then(resolve);
+                      getPageContents(dom, _rendererOptions, route).then(function (contents) {
+                        dom = null;
+                        resolve(contents);
+                      });
                     });
                   }).then(function (content) {
                     clearTimeout(timeout);
+                    timeout = null;
                     return content;
                   }).catch(function (e) {
-                    if (allowRetry) {
+                    if (retriesRemaining > 0) {
                       console.log('retrying render of', route);
-                      return render(route, false);
+                      return render(route, --retriesRemaining);
                     }
                     console.error('caught error', e);
                     return Promise.reject(e);
@@ -169,6 +177,7 @@ var JSDOMRenderer = function () {
                 };
 
                 rootOptions = Prerenderer.getOptions();
+                rl = this.resourceLoader;
                 _rendererOptions = this._rendererOptions;
                 limiter = promiseLimit(this._rendererOptions.maxConcurrentRoutes);
                 return _context2.abrupt('return', Promise.all(routes.map(function (route) {
@@ -177,7 +186,7 @@ var JSDOMRenderer = function () {
                   });
                 })));
 
-              case 5:
+              case 6:
               case 'end':
                 return _context2.stop();
             }
@@ -193,9 +202,7 @@ var JSDOMRenderer = function () {
     }()
   }, {
     key: 'destroy',
-    value: function destroy() {
-      // NOOP
-    }
+    value: function destroy() {}
   }]);
 
   return JSDOMRenderer;
