@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "bufferutil": "^4.0.1",
-    "canvas": "^2.6.1",
     "jsdom": "^15.2.1",
     "promise-limit": "^2.5.0",
     "utf-8-validate": "^5.0.2"
