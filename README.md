@@ -1,3 +1,6 @@
+**Looking for new maintainers, please reply to [this issue](https://github.com/JoshTheDerf/prerenderer/issues/57) if you are interested.**
+
+
 <h1 align="center">Prerenderer</h1>
 <p align="center">
   <em>Fast, flexible, framework-agnostic prerendering for sites and SPAs.</em>
@@ -9,9 +12,9 @@
 
 <div align="center">
 
+[![Maintainers Wanted](https://img.shields.io/badge/maintainers-wanted-red.svg)](https://github.com/pickhardt/maintainers-wanted)
 [![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)]()
 [![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)]()
-[![Dependency Status](https://img.shields.io/david/tribex/prerenderer.svg)](https://david-dm.org/tribex/prerenderer)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
 [![license](https://img.shields.io/github/license/tribex/prerenderer.svg)]()
 
@@ -26,8 +29,6 @@
 </div>
 
 ## About prerenderer
-
-**Note: This package is unstable and still under active development. Use at your own risk.**
 
 The goal of this package is to provide a simple, framework-agnostic prerendering solution that is easily extensible and usable for any site or single-page-app.
 
