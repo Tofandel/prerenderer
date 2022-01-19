@@ -135,7 +135,7 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
                 return this._renderer.initialize();
 
               case 13:
-                return _context.abrupt('return', Promise.resolve());
+                return _context.abrupt('return');
 
               case 14:
               case 'end':
@@ -164,6 +164,11 @@ If you are not sure wihch renderer to use, see the documentation at https://gith
                 return this._server.destroy();
 
               case 3:
+                this._server = null;
+                this._renderer = null;
+                this._options = null;
+
+              case 6:
               case 'end':
                 return _context2.stop();
             }

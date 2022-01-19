@@ -87,6 +87,10 @@ var Server = function () {
         _this2._nativeServer.close(function (err) {
           if (err) reject(err);
           resolve();
+          _this2._nativeServer = null;
+          _this2._expressServer = null;
+          _this2._prerenderer = null;
+          _this2._options = null;
         });
       });
     }

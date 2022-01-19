@@ -9,12 +9,12 @@ const waitForRender = function (options) {
     if (options.renderAfterDocumentEvent) {
       if (window['__PRERENDER_STATUS'] && window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED) resolve()
       document.addEventListener(options.renderAfterDocumentEvent, () => resolve())
-    } 
-    
+    }
+
     if (options.renderAfterTime) {
       setTimeout(() => resolve(), options.renderAfterTime)
-    } 
-    
+    }
+
     if (!options.renderAfterDocumentEvent && !options.renderAfterTime) {
       resolve()
     }
@@ -72,6 +72,85 @@ class PuppeteerRenderer {
     })
   }
 
+  async renderRoute (route, rootOptions, options, tries = 1) {
+    const page = await this._puppeteer.newPage()
+
+    try {
+      if (options.consoleHandler) {
+        page.on('console', message => options.consoleHandler(route, message))
+      }
+
+      if (options.inject) {
+        await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
+      }
+
+      const baseURL = `http://localhost:${rootOptions.server.port}`
+
+      // Allow setting viewport widths and such.
+      if (options.viewport) await page.setViewport(options.viewport)
+
+      await this.handleRequestInterception(page, baseURL)
+
+      // Hack just in-case the document event fires before our main listener is added.
+      if (options.renderAfterDocumentEvent) {
+        page.evaluateOnNewDocument(function (options) {
+          window['__PRERENDER_STATUS'] = {}
+          document.addEventListener(options.renderAfterDocumentEvent, () => {
+            window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED = true
+          })
+        }, this._rendererOptions)
+      }
+
+      const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' }
+      try {
+        await page.goto(`${baseURL}${route}`, navigationOptions)
+      } catch (e) {
+        throw Error('failed to navigate.')
+      }
+
+    // Wait for some specific element exists
+      const { renderAfterElementExists } = this._rendererOptions
+      if (renderAfterElementExists && typeof renderAfterElementExists === 'string') {
+        try {
+          await page.waitForSelector(renderAfterElementExists)
+        } catch (e) {
+          throw Error('failed to wait for element to exist.')
+        }
+      }
+
+      try {
+        // Once this completes, it's safe to capture the page contents.
+        await page.evaluate(waitForRender, this._rendererOptions)
+      } catch (e) {
+        throw Error('failed to evaluate.')
+      }
+
+      const result = {
+        originalRoute: route,
+        route: await page.evaluate('window.location.pathname'),
+        html: await page.content()
+      }
+
+      if (!page.isClosed()) {
+        await page.close()
+      }
+      console.log('PASS:', route)
+      return result
+    } catch (e) {
+      if (!page.isClosed()) {
+        await page.close()
+      }
+
+      if (tries < 5) {
+        console.error(`Failed on try ${tries}:`, route + ',', e.message)
+        return this.renderRoute(route, rootOptions, options, ++tries)
+      } else {
+        console.error('Failed:', route + ',', e.message)
+        throw new Error(e)
+      }
+    }
+  }
+
   async renderRoutes (routes, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
     const options = this._rendererOptions
@@ -81,54 +160,7 @@ class PuppeteerRenderer {
     const pagePromises = Promise.all(
       routes.map(
         (route, index) => limiter(
-          async () => {
-            const page = await this._puppeteer.newPage()
-
-            if (options.consoleHandler) {
-              page.on('console', message => options.consoleHandler(route, message))
-            }
-
-            if (options.inject) {
-              await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
-            }
-
-            const baseURL = `http://localhost:${rootOptions.server.port}`
-
-            // Allow setting viewport widths and such.
-            if (options.viewport) await page.setViewport(options.viewport)
-
-            await this.handleRequestInterception(page, baseURL)
-
-            // Hack just in-case the document event fires before our main listener is added.
-            if (options.renderAfterDocumentEvent) {
-              page.evaluateOnNewDocument(function (options) {
-                window['__PRERENDER_STATUS'] = {}
-                document.addEventListener(options.renderAfterDocumentEvent, () => {
-                  window['__PRERENDER_STATUS'].__DOCUMENT_EVENT_RESOLVED = true
-                })
-              }, this._rendererOptions)
-            }
-            
-            const navigationOptions = (options.navigationOptions) ? { waituntil: 'networkidle0', ...options.navigationOptions } : { waituntil: 'networkidle0' };
-            await page.goto(`${baseURL}${route}`, navigationOptions);
-
-            // Wait for some specific element exists
-            const { renderAfterElementExists } = this._rendererOptions
-            if (renderAfterElementExists && typeof renderAfterElementExists === 'string') {
-              await page.waitForSelector(renderAfterElementExists)
-            }
-            // Once this completes, it's safe to capture the page contents.
-            await page.evaluate(waitForRender, this._rendererOptions)
-
-            const result = {
-              originalRoute: route,
-              route: await page.evaluate('window.location.pathname'),
-              html: await page.content()
-            }
-
-            await page.close()
-            return result
-          }
+         async () => this.renderRoute(route, rootOptions, options)
         )
       )
     )
@@ -137,7 +169,11 @@ class PuppeteerRenderer {
   }
 
   destroy () {
-    this._puppeteer.close()
+    try {
+      this._puppeteer.close()
+    } catch (e) {
+      console.error('Puppeteer already destroyed')
+    }
   }
 }
 
