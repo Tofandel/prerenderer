@@ -38,7 +38,7 @@
     "email": "tribex10@gmail.com"
   },
   "dependencies": {
-    "jsdom": "^11.12.0",
+    "jsdom": "^16.5.0",
     "promise-limit": "^2.5.0"
   },
   "devDependencies": {
