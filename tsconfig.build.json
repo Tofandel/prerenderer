@@ -3,6 +3,7 @@
   "references": [
     { "path": "packages/prerenderer" },
     { "path": "packages/renderer-jsdom" },
-    { "path": "packages/renderer-puppeteer" }
+    { "path": "packages/renderer-puppeteer" },
+    { "path": "packages/webpack-plugin" }
   ]
 }

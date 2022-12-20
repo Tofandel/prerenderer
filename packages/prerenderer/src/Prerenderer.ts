@@ -1,9 +1,9 @@
 import Server from './Server'
 import { getPortPromise } from 'portfinder'
-import validateOptionsSchema from './validateOptionsSchema'
-import optionSchema, { Options } from './optionSchema'
+import { schema, Options } from './Options'
 import IRenderer from './IRenderer'
-import PackageName from './packageName'
+import PackageName from './PackageName'
+import { validate } from 'schema-utils'
 
 export default class Prerenderer {
   private readonly options: Options
@@ -11,6 +11,7 @@ export default class Prerenderer {
   private readonly renderer: IRenderer
 
   constructor (options: Options) {
+    validate(schema, options, { name: PackageName })
     this.options = options
 
     this.server = new Server(this)
@@ -26,10 +27,6 @@ If you are not sure which renderer to use, see the documentation at https://gith
     }
 
     if (!this.options.server) this.options.server = {}
-
-    const optionValidationErrors = validateOptionsSchema(optionSchema, this.options)
-
-    if (optionValidationErrors.length !== 0) throw new Error(`${PackageName} Options are invalid. Unable to prerender!`)
   }
 
   async initialize () {

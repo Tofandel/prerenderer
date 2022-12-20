@@ -1,7 +1,8 @@
-import IRenderer from '../../prerenderer/src/IRenderer'
+import { IRenderer, RenderedRoute } from '@prerenderer/prerenderer'
 
-const promiseLimit = require('promise-limit')
-const puppeteer = require('puppeteer')
+import promiseLimit from 'promise-limit'
+import puppeteer from 'puppeteer'
+import { RendererPuppeteerOptions } from './Options'
 
 declare global {
   interface Window {
@@ -38,11 +39,11 @@ const waitForRender = function (options) {
   })
 }
 
-class PuppeteerRenderer implements IRenderer {
+export default class PuppeteerRenderer implements IRenderer {
   private puppeteer = null
-  private readonly rendererOptions
+  private readonly rendererOptions: RendererPuppeteerOptions
 
-  constructor (rendererOptions) {
+  constructor (rendererOptions: RendererPuppeteerOptions) {
     this.rendererOptions = rendererOptions || {}
 
     if (this.rendererOptions.maxConcurrentRoutes == null) this.rendererOptions.maxConcurrentRoutes = 0
@@ -91,7 +92,7 @@ class PuppeteerRenderer implements IRenderer {
     })
   }
 
-  async renderRoutes (routes, Prerenderer) {
+  async renderRoutes (routes: Array<string>, Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
     const options = this.rendererOptions
 
@@ -139,7 +140,7 @@ class PuppeteerRenderer implements IRenderer {
             // Once this completes, it's safe to capture the page contents.
             await page.evaluate(waitForRender, this.rendererOptions)
 
-            const result = {
+            const result: RenderedRoute = {
               originalRoute: route,
               route: await page.evaluate('window.location.pathname'),
               html: await page.content()
@@ -166,5 +167,3 @@ class PuppeteerRenderer implements IRenderer {
     }
   }
 }
-
-module.exports = PuppeteerRenderer

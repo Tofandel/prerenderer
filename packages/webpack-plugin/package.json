@@ -1,0 +1,76 @@
+{
+  "name": "@prerenderer/webpack-plugin",
+  "version": "5.0.0",
+  "description": "Flexible, framework-agnostic static site generation for sites and SPAs built with webpack.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint --ext .ts,.js --ignore-path .gitignore .",
+    "lint:fix": "eslint --ext .ts,.js --fix --ignore-path .gitignore .",
+    "build": "NODE_ENV=production babel src -d dist --copy-files",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "prerender",
+    "spa",
+    "ssr",
+    "server-side-rendering"
+  ],
+  "author": {
+    "name": "Adrien Foulon",
+    "email": "adrien.foulon@tukan.hu"
+  },
+  "contributors": [
+    {
+      "name": "Adrien Foulon",
+      "email": "adrien.foulon@tukan.hu"
+    },
+    {
+      "name": "Chris Fritz",
+      "email": "chrisvfritz@gmail.com",
+      "url": "https://twitter.com/chrisvfritz"
+    },
+    {
+      "name": "Drew Lustro",
+      "url": "https://drewlustro.com/"
+    },
+    {
+      "name": "Joshua Bemenderfer",
+      "email": "tribex10@gmail.com",
+      "url": "https://joshderf.com/"
+    },
+    {
+      "name": "qkdreyer",
+      "email": "quentin.dreyer@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/JoshTheDerf/prerenderer.git",
+    "directory": "packages/webpacky-plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/JoshTheDerf/prerenderer/issues"
+  },
+  "dependencies": {
+    "@prerenderer/prerenderer": "*",
+    "schema-utils": "^4.0.0"
+  },
+  "optionalDependencies": {
+    "@prerenderer/renderer-puppeteer": "*"
+  },
+  "peerDependencies": {
+    "html-webpack-plugin": "^5",
+    "webpack": "^5"
+  },
+  "devDependencies": {
+    "@prerenderer/prerenderer": "file:../prerenderer",
+    "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer"
+  },
+  "engines": {
+    "node": ">=10.13.0"
+  }
+}

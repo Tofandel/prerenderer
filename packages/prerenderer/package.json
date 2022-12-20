@@ -5,8 +5,9 @@
   "license": "MIT",
   "type": "module",
   "exports": "./dist/index.js",
+  "types": "types",
   "scripts": {
-    "build": "babel src --out-dir dist",
+    "build": "tsc",
     "test": "jest ./test --silent --runInBand",
     "test:logs": "jest ./test --runInBand",
     "prepublishOnly": "npm run build"

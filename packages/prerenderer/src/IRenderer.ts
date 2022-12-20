@@ -12,6 +12,6 @@ export default interface IRenderer {
   destroy(),
   initialize(),
   modifyServer?(prerenderer: Prerenderer, server: Server, stage: string),
-  renderRoutes(routes, prerenderer: Prerenderer): Promise<Array<RenderedRoute>>,
+  renderRoutes(routes: Array<string>, prerenderer: Prerenderer): Promise<Array<RenderedRoute>>,
   preServer?(prerendererer: Prerenderer)
 }

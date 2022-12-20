@@ -48,6 +48,9 @@
     "jsdom": "^20.0.3",
     "promise-limit": "^2.7.0"
   },
+  "devDependencies": {
+    "@prerenderer/prerenderer": "file:../prerenderer"
+  },
   "engines": {
     "node": ">=8.0.0"
   },

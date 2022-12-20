@@ -51,6 +51,9 @@
   "peerDependencies": {
     "puppeteer": ">= 2"
   },
+  "devDependencies": {
+    "@prerenderer/prerenderer": "file:../prerenderer"
+  },
   "engines": {
     "node": ">=8.0.0"
   },

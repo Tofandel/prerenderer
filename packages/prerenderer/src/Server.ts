@@ -2,7 +2,7 @@ import express from 'express'
 
 import path from 'path'
 import Prerenderer from './Prerenderer'
-import { Options } from './optionSchema'
+import { Options } from './Options'
 import { Server as HttpServer } from 'http'
 
 export default class Server {

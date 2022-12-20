@@ -1,27 +1,22 @@
-import IRenderer from '../../prerenderer/src/IRenderer'
+import Prerenderer, { IRenderer } from '@prerenderer/prerenderer'
 import Storage from './Storage'
 
 import { DOMWindow, JSDOM } from 'jsdom'
 import promiseLimit from 'promise-limit'
-import Prerenderer from '../../prerenderer/src'
+import { RendererJSDOMOptions } from './Options'
 
 const shim = function (window: DOMWindow) {
+  /* eslint-disable @typescript-eslint/ban-ts-comment */
+  // @ts-ignore
   window.SVGElement = window.HTMLElement
+  // @ts-ignore
   window.localStorage = new Storage()
+  // @ts-ignore
   window.sessionStorage = new Storage()
+  /* eslint-enable */
 }
 
-type Options = {
-  maxConcurrentRoutes?: number
-  renderAfterDocumentEvent?: string
-  renderAfterElementExists?: string
-  inject?: unknown
-  injectProperty?: string
-  renderAfterTime?: number
-  timeout?: number
-}
-
-const getPageContents = function (window: DOMWindow, options: Options, originalRoute: string) {
+const getPageContents = function (window: DOMWindow, options: RendererJSDOMOptions, originalRoute: string) {
   options = options || {}
 
   return new Promise((resolve, reject) => {
@@ -96,7 +91,7 @@ class JSDOMRenderer implements IRenderer {
     return Promise.resolve()
   }
 
-  async renderRoutes (routes, Prerenderer: Prerenderer) {
+  async renderRoutes (routes: Array<string>, Prerenderer: Prerenderer) {
     const rootOptions = Prerenderer.getOptions()
 
     const limiter = promiseLimit(this.rendererOptions.maxConcurrentRoutes)
