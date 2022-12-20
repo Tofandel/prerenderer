@@ -1,0 +1,78 @@
+import Server from './Server'
+import { getPortPromise } from 'portfinder'
+import validateOptionsSchema from './validateOptionsSchema'
+import optionSchema, { Options } from './optionSchema'
+import IRenderer from './IRenderer'
+import PackageName from './packageName'
+
+export default class Prerenderer {
+  private readonly options: Options
+  private readonly server: Server
+  private readonly renderer: IRenderer
+
+  constructor (options: Options) {
+    this.options = options
+
+    this.server = new Server(this)
+    this.renderer = options.renderer
+
+    if (this.renderer && this.renderer.preServer) this.renderer.preServer(this)
+
+    if (!this.options) throw new Error(`${PackageName} Options must be defined!`)
+
+    if (!this.options.renderer) {
+      throw new Error(`${PackageName} No renderer was passed to prerenderer.
+If you are not sure which renderer to use, see the documentation at https://github.com/JoshTheDerf/prerenderer.`)
+    }
+
+    if (!this.options.server) this.options.server = {}
+
+    const optionValidationErrors = validateOptionsSchema(optionSchema, this.options)
+
+    if (optionValidationErrors.length !== 0) throw new Error(`${PackageName} Options are invalid. Unable to prerender!`)
+  }
+
+  async initialize () {
+    // Initialization is separate from construction because science? (Ideally to initialize the server and renderer separately.)
+    this.options.server.port = this.options.server.port || await getPortPromise() || 13010
+    await this.server.initialize()
+    await this.renderer.initialize()
+
+    return Promise.resolve()
+  }
+
+  destroy () {
+    this.renderer.destroy()
+    this.server.destroy()
+  }
+
+  public getServer () {
+    return this.server
+  }
+
+  public getRenderer () {
+    return this.renderer
+  }
+
+  public getOptions () {
+    return this.options
+  }
+
+  modifyServer (stage: string) {
+    if (this.renderer.modifyServer) this.renderer.modifyServer(this, this.server, stage)
+  }
+
+  renderRoutes (routes) {
+    return this.renderer.renderRoutes(routes, this)
+      // Handle non-ASCII or invalid URL characters in routes by normalizing them back to unicode.
+      // Some browser environments may change unicode or special characters in routes to percent encodings.
+      // We need to convert them back for saving in the filesystem.
+      .then(renderedRoutes => {
+        renderedRoutes.forEach(rendered => {
+          rendered.route = decodeURIComponent(rendered.route)
+        })
+
+        return renderedRoutes
+      })
+  }
+}

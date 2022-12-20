@@ -1,0 +1,59 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "standard"
+  ],
+  "plugins": [
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2021
+  },
+  "rules": {
+    "no-console": "error"
+  },
+  "overrides": [
+    {
+      "files": [
+        "*.test.js"
+      ],
+      "plugins": [
+        "jest"
+      ],
+      "env": {
+        "jest/globals": true
+      },
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": [
+        "*.ts",
+        "*.tsx",
+        "*.mts",
+        "*.cts"
+      ],
+      "parserOptions": {
+        "project": "packages/*/tsconfig.json",
+        "EXPERIMENTAL_useSourceOfProjectReferenceRedirect": true
+      },
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+      "rules": {
+        "quotes": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+          }
+        ]
+      }
+    }
+  ]
+}

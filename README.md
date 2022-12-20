@@ -1,18 +1,12 @@
-**Looking for new maintainers, please reply to [this issue](https://github.com/JoshTheDerf/prerenderer/issues/57) if you are interested.**
-
-
-<h1 align="center">Prerenderer</h1>
+<h1 align="center"><img width="64" src="assets/logo.png?raw=true"> Prerenderer</h1>
 <p align="center">
   <em>Fast, flexible, framework-agnostic prerendering for sites and SPAs.</em>
 </p>
-
-<p align="center"><img width="300" src="/assets/logo.png?raw=true"></p>
 
 ---
 
 <div align="center">
 
-[![Maintainers Wanted](https://img.shields.io/badge/maintainers-wanted-red.svg)](https://github.com/pickhardt/maintainers-wanted)
 [![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)]()
 [![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)]()
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
@@ -57,7 +51,7 @@ In the interest of transparency, there are some use-cases where prerendering mig
 ```
 app/
 ├── index.html
-└── index.js // Whatever JS controls the SPA, loaded by index.html
+└── index.ts // Whatever JS controls the SPA, loaded by index.html
 ```
 
 **Output**
@@ -66,7 +60,7 @@ app/
 ├── about
 │   └── index.html // Static rendered /about route.
 ├── index.html // Static rendered / route.
-├── index.js // Whatever JS controls the SPA, loaded by index.html
+├── index.ts // Whatever JS controls the SPA, loaded by index.html
 └── some
     └── deep
         └── nested
@@ -149,7 +143,7 @@ prerenderer.initialize()
 | staticDir   | String                                    | Yes       | None                      | The root path to serve your app from.                                                                                                                                                                                                                                                                                                                                                                                                                |
 | indexPath   | String                                    | No        | `staticDir/index.html`    | The index file to fall back on for SPAs.                                                                                                                                                                                                                                                                                                                                                                                                             |
 | server      | Object                                    | No        | None                      | App server configuration options (See below)                                                                                                                                                                                                                                                                                                                                                                                                         |
-| renderer    | Renderer Instance or Configuration Object | No        | `new PuppeteerRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to `@prerenderer/renderer-puppeteer`.                                                                                                                                                                                                                                                                                        |
+| renderer    | IRenderer Instance or Configuration Object | No        | `new PuppeteerRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to `@prerenderer/renderer-puppeteer`.                                                                                                                                                                                                                                                                                        |
 
 #### Server Options
 
@@ -165,7 +159,7 @@ prerenderer.initialize()
 - `initialize(): Promise<>` - Starts the static file server and renderer instance (where appropriate).
 - `getOptions(): Object` - Returns the options used to configure `prerenderer`
 - `getServer(): (Internal Server Class)` - Gets the instanced server class. **INTERNAL**
-- `getRenderer(): (Instanced Renderer Class)` - Gets the instanced renderer class. **INTERNAL**
+- `getRenderer(): (Instanced IRenderer Class)` - Gets the instanced renderer class. **INTERNAL**
 - `modifyServer(Server: Server Instance, stage: string)` - **DANGEROUS** Called by the server to allow renderers to modify the server at various stages. Avoid if at all possible. **INTERNAL**
 - `destroy()` - Destroys the static file server and renderer, freeing the resources.
 - `renderRoutes(routes: Array<String>): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise resolving to an array of rendered routes in the form of:

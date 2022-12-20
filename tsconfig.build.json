@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/prerenderer" },
+    { "path": "packages/renderer-jsdom" },
+    { "path": "packages/renderer-puppeteer" }
+  ]
+}
