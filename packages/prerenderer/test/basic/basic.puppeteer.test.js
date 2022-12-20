@@ -1,6 +1,6 @@
 const path = require('path')
-const Prerenderer = require('../../')
-const Renderer = require('../../../renderer-puppeteer')
+const Prerenderer = require('@prerenderer/prerenderer')
+const Renderer = require('@prerenderer/renderer-puppeteer')
 const Chance = require('chance')
 const chance = new Chance()
 
@@ -9,8 +9,8 @@ const EXPECTED_HTML = '<!DOCTYPE html><html><head>\n  <title>Prerenderer Test</t
 function generateRandomRoute () {
   // Builds a "route" out of 1 - 100 path segments made of random strings.
   return '/' + new Array(chance.integer({ min: 1, max: 100 }))
-    .fill()
-    .map(item => encodeURIComponent(chance.string()))
+    .fill('')
+    .map(() => encodeURIComponent(chance.string()))
     .join('/')
 }
 
@@ -18,12 +18,12 @@ test('renders 1 route', async () => {
   const expectedResult = [{
     originalRoute: '/',
     route: '/',
-    html: EXPECTED_HTML
+    html: EXPECTED_HTML,
   }]
 
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
-    renderer: new Renderer()
+    renderer: new Renderer(),
   })
 
   await prerenderer.initialize()
@@ -37,7 +37,7 @@ test('renders 10 routes', async () => {
 
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
-    renderer: new Renderer()
+    renderer: new Renderer(),
   })
 
   await prerenderer.initialize()
@@ -56,7 +56,7 @@ test('renders 500 routes', async () => {
 
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
-    renderer: new Renderer()
+    renderer: new Renderer(),
   })
 
   await prerenderer.initialize()

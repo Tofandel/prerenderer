@@ -1,6 +1,6 @@
 import { Schema } from 'schema-utils/declarations/validate'
 
-export interface RendererJSDOMOptions {
+export interface JSDOMRendererOptions {
   maxConcurrentRoutes?: number
   renderAfterDocumentEvent?: string
   renderAfterElementExists?: string
@@ -14,5 +14,5 @@ export interface RendererJSDOMOptions {
 
 export const schema: Schema = {
   properties: {
-  }
+  },
 }

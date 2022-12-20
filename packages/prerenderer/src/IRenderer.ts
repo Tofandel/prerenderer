@@ -9,9 +9,9 @@ export type RenderedRoute =
 }
 
 export default interface IRenderer {
-  destroy(),
-  initialize(),
-  modifyServer?(prerenderer: Prerenderer, server: Server, stage: string),
+  destroy(): Promise<void> | void,
+  initialize(): Promise<void> | void,
+  modifyServer?(prerenderer: Prerenderer, server: Server, stage: string): void,
   renderRoutes(routes: Array<string>, prerenderer: Prerenderer): Promise<Array<RenderedRoute>>,
-  preServer?(prerendererer: Prerenderer)
+  preServer?(prerendererer: Prerenderer): void
 }

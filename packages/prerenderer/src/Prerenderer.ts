@@ -1,16 +1,16 @@
 import Server from './Server'
 import { getPortPromise } from 'portfinder'
-import { schema, Options } from './Options'
+import { schema, PrerendererOptions } from './PrerendererOptions'
 import IRenderer from './IRenderer'
 import PackageName from './PackageName'
 import { validate } from 'schema-utils'
 
 export default class Prerenderer {
-  private readonly options: Options
+  private readonly options: PrerendererOptions
   private readonly server: Server
   private readonly renderer: IRenderer
 
-  constructor (options: Options) {
+  constructor (options: PrerendererOptions) {
     validate(schema, options, { name: PackageName })
     this.options = options
 
@@ -38,9 +38,8 @@ If you are not sure which renderer to use, see the documentation at https://gith
     return Promise.resolve()
   }
 
-  destroy () {
-    this.renderer.destroy()
-    this.server.destroy()
+  async destroy () {
+    await Promise.all([this.renderer.destroy(), this.server.destroy()])
   }
 
   public getServer () {
@@ -56,10 +55,12 @@ If you are not sure which renderer to use, see the documentation at https://gith
   }
 
   modifyServer (stage: string) {
-    if (this.renderer.modifyServer) this.renderer.modifyServer(this, this.server, stage)
+    if (this.renderer.modifyServer) {
+      this.renderer.modifyServer(this, this.server, stage)
+    }
   }
 
-  renderRoutes (routes) {
+  renderRoutes (routes: string[]) {
     return this.renderer.renderRoutes(routes, this)
       // Handle non-ASCII or invalid URL characters in routes by normalizing them back to unicode.
       // Some browser environments may change unicode or special characters in routes to percent encodings.

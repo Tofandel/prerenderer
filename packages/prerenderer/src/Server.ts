@@ -2,12 +2,12 @@ import express from 'express'
 
 import path from 'path'
 import Prerenderer from './Prerenderer'
-import { Options } from './Options'
+import { PrerendererOptions } from './PrerendererOptions'
 import { Server as HttpServer } from 'http'
 
 export default class Server {
   private prerenderer: Prerenderer
-  private options: Options
+  private options: PrerendererOptions
   private expressServer = express()
   private nativeServer: HttpServer = null
 
@@ -26,7 +26,7 @@ export default class Server {
     this.prerenderer.modifyServer('pre-static')
 
     server.get('*', express.static(this.options.staticDir, {
-      dotfiles: 'allow'
+      dotfiles: 'allow',
     }))
 
     this.prerenderer.modifyServer('post-static')
@@ -57,6 +57,8 @@ export default class Server {
   }
 
   destroy () {
-    this.nativeServer?.close()
+    return new Promise<void>(resolve => {
+      this.nativeServer?.close(() => resolve())
+    })
   }
 }

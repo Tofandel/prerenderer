@@ -1,7 +1,7 @@
 const path = require('path')
 const express = require('express')
-const Prerenderer = require('../../')
-const Renderer = require('../../../renderer-puppeteer')
+const Prerenderer = require('@prerenderer/prerenderer')
+const Renderer = require('@prerenderer/renderer-puppeteer')
 
 const app = express()
 const proxyPort = 3040
@@ -18,7 +18,7 @@ test('proxies a request to an alternative server', async () => {
   const expectedResult = [{
     originalRoute: '/',
     route: '/',
-    html: EXPECTED_HTML
+    html: EXPECTED_HTML,
   }]
 
   const prerenderer = new Prerenderer({
@@ -29,14 +29,14 @@ test('proxies a request to an alternative server', async () => {
           target: `http://localhost:${proxyPort}`,
           changeOrigin: true,
           pathRewrite: {
-            '^/api': ''
-          }
-        }
-      }
+            '^/api': '',
+          },
+        },
+      },
     },
     renderer: new Renderer({
-      renderAfterDocumentEvent: 'please-render'
-    })
+      renderAfterDocumentEvent: 'please-render',
+    }),
   })
 
   await prerenderer.initialize()

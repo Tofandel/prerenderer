@@ -1,4 +1,4 @@
-<h1 align="center"><img width="64" src="assets/logo.png?raw=true"> Prerenderer</h1>
+<h1 align="center"><img width="42" style="vertical-align:middle" alt="" src="assets/logo.png?raw=true"> Prerenderer</h1>
 <p align="center">
   <em>Fast, flexible, framework-agnostic prerendering for sites and SPAs.</em>
 </p>

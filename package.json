@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "clean": "rimraf ./packages/*/dist",
+    "prebuild": "rimraf ./packages/*/dist ./packages/*/types",
     "build": "npm run build -w packages",
     "test": "npm run test -w packages",
     "lint": "eslint .",

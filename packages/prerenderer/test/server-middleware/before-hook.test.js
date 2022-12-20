@@ -1,6 +1,6 @@
 const path = require('path')
-const Prerenderer = require('../../')
-const Renderer = require('../../../renderer-jsdom')
+const Prerenderer = require('@prerenderer/prerenderer')
+const Renderer = require('@prerenderer/renderer-jsdom')
 
 test('adds custom middleware to server using before hook', async () => {
   function customMiddleware (req, res) {
@@ -11,8 +11,8 @@ test('adds custom middleware to server using before hook', async () => {
     staticDir: path.resolve(__dirname),
     renderer: new Renderer(),
     server: {
-      before: app => app.use(customMiddleware)
-    }
+      before: app => app.use(customMiddleware),
+    },
   })
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])

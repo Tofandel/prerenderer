@@ -1,6 +1,6 @@
 const path = require('path')
-const Prerenderer = require('../../')
-const Renderer = require('@prerender/renderer-jsdom')
+const Prerenderer = require('@prerenderer/prerenderer')
+const Renderer = require('@prerenderer/renderer-jsdom')
 
 test("injects {foo: 'bar'} into window['__PRERENDER_INJECTED']", async () => {
   const EXPECTED_HTML =
@@ -20,7 +20,7 @@ test("injects {foo: 'bar'} into window['__PRERENDER_INJECTED']", async () => {
   const expectedResult = [{
     originalRoute: '/',
     route: '/',
-    html: EXPECTED_HTML
+    html: EXPECTED_HTML,
   }]
 
   const prerenderer = new Prerenderer({
@@ -29,9 +29,9 @@ test("injects {foo: 'bar'} into window['__PRERENDER_INJECTED']", async () => {
     renderer: new Renderer({
       renderAfterTime: 500,
       inject: {
-        foo: 'bar'
-      }
-    })
+        foo: 'bar',
+      },
+    }),
   })
 
   await prerenderer.initialize()
@@ -58,7 +58,7 @@ test("injects {foo: 'bar'} into window['__CUSTOM_INJECTED']", async () => {
   const expectedResult = [{
     originalRoute: '/',
     route: '/',
-    html: EXPECTED_HTML
+    html: EXPECTED_HTML,
   }]
 
   const prerenderer = new Prerenderer({
@@ -67,9 +67,9 @@ test("injects {foo: 'bar'} into window['__CUSTOM_INJECTED']", async () => {
     renderer: new Renderer({
       injectProperty: '__CUSTOM_INJECTED',
       inject: {
-        foo: 'bar'
-      }
-    })
+        foo: 'bar',
+      },
+    }),
   })
 
   await prerenderer.initialize()

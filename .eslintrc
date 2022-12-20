@@ -12,8 +12,9 @@
     "ecmaVersion": 2021
   },
   "rules": {
+    "no-void": "off",
     "no-console": "off",
-    "comma-dangle": "error"
+    "comma-dangle": ["error", "always-multiline"]
   },
   "ignorePatterns": ["packages/*/dist/*", "packages/*/types/*", "*.html"],
   "overrides": [
@@ -49,7 +50,7 @@
       "rules": {
         "quotes": "error",
         "comma-dangle": "off",
-        "@typescript-eslint/comma-dangle": "error",
+        "@typescript-eslint/comma-dangle": ["error", "always-multiline"],
         "@typescript-eslint/no-unused-vars": [
           "error",
           {
