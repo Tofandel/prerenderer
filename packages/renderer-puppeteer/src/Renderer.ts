@@ -2,26 +2,22 @@ import Prerenderer, { IRenderer, RenderedRoute } from '@prerenderer/prerenderer'
 
 import promiseLimit from 'promise-limit'
 import puppeteer, { Browser, Page } from 'puppeteer'
-import { PuppeteerRendererOptions, schema } from './Options'
+import { PuppeteerRendererFinalOptions, PuppeteerRendererOptions, schema, defaultOptions } from './Options'
 import { waitForRender, listenForRender } from './waitForRender'
 import { validate } from 'schema-utils'
+import { Schema } from 'schema-utils/declarations/validate'
+import deepMerge from 'ts-deepmerge'
 
 export default class PuppeteerRenderer implements IRenderer {
   private puppeteer: Browser
-  private readonly options: PuppeteerRendererOptions
+  private readonly options: PuppeteerRendererFinalOptions
 
   constructor (options: PuppeteerRendererOptions) {
-    validate(schema, options, {
+    validate(schema as Schema, options, {
       name: 'Renderer Puppeteer',
       baseDataPath: 'options',
     })
-    this.options = options || {}
-
-    if (this.options.maxConcurrentRoutes == null) this.options.maxConcurrentRoutes = 0
-
-    if (this.options.inject && !this.options.injectProperty) {
-      this.options.injectProperty = '__PRERENDER_INJECTED'
-    }
+    this.options = deepMerge(defaultOptions, options) as PuppeteerRendererFinalOptions
   }
 
   async initialize () {
@@ -75,14 +71,15 @@ export default class PuppeteerRenderer implements IRenderer {
             const page = await this.puppeteer.newPage()
 
             if (options.consoleHandler) {
-              page.on('console', message => options.consoleHandler(route, message))
+              const handler = options.consoleHandler
+              page.on('console', message => handler(route, message))
             }
 
             if (options.inject) {
               await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
             }
 
-            const baseURL = `http://localhost:${rootOptions.server.port}`
+            const baseURL = `http://${rootOptions.server.host}:${rootOptions.server.port}`
 
             // Allow setting viewport widths and such.
             if (options.viewport) await page.setViewport(options.viewport)
@@ -90,12 +87,20 @@ export default class PuppeteerRenderer implements IRenderer {
             await this.handleRequestInterception(page, baseURL)
 
             // Expire after 2 minutes by default
-            const timeoutAfter = typeof options.timeout === 'number' ? options.timeout : 120000
-            let timeout: NodeJS.Timeout
+            const timeoutAfter = options.timeout
+            let timeout: NodeJS.Timeout | null = null
             if (timeoutAfter && !options.renderAfterTime) {
               timeout = setTimeout(() => {
-                throw new Error(
+                if (options.renderAfterDocumentEvent) {
+                  throw new Error(
                     `Could not prerender: event '${options.renderAfterDocumentEvent}' did not occur within ${Math.round(timeoutAfter / 1000)}s`)
+                }
+                if (options.renderAfterElementExists) {
+                  throw new Error(
+                    `Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${Math.round(timeoutAfter / 1000)}s`)
+                }
+                throw new Error(
+                    `Could not prerender: timed-out after ${Math.round(timeoutAfter / 1000)}s`)
               }, timeoutAfter)
             }
 

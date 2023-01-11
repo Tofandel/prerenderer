@@ -3,13 +3,6 @@ const Prerenderer = require('@prerenderer/prerenderer')
 const Renderer = require('@prerenderer/renderer-puppeteer')
 
 test('changes the route property when history.pushState is used to change the page URL', async () => {
-  const EXPECTED_HTML = '<!DOCTYPE html><html><head>\n  <title>Prerenderer Test</title>\n</head>\n<body>\n  <script>\n    document.addEventListener(\'DOMContentLoaded\', () => {\n      history.pushState({}, \'\', \'/nested/test\')\n      document.body.innerHTML += \'<p>Render Output</p>\'\n    })\n  </script>\n\n\n<p>Render Output</p></body></html>'
-  const expectedResult = [{
-    originalRoute: '/',
-    route: '/nested/test',
-    html: EXPECTED_HTML,
-  }]
-
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
     indexPath: path.resolve(__dirname, 'push-state.html'),
@@ -18,18 +11,11 @@ test('changes the route property when history.pushState is used to change the pa
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
-  expect(renderedRoutes).toEqual(expectedResult)
+  await prerenderer.destroy()
+  expect(renderedRoutes).toMatchSnapshot()
 })
 
 test('changes the route property when history.replaceState is used to change the page URL', async () => {
-  const EXPECTED_HTML = '<!DOCTYPE html><html><head>\n  <title>Prerenderer Test</title>\n</head>\n<body>\n  <script>\n    document.addEventListener(\'DOMContentLoaded\', () => {\n      history.replaceState({}, \'\', \'/nested/test\')\n      document.body.innerHTML += \'<p>Render Output</p>\'\n    })\n  </script>\n\n\n<p>Render Output</p></body></html>'
-  const expectedResult = [{
-    originalRoute: '/',
-    route: '/nested/test',
-    html: EXPECTED_HTML,
-  }]
-
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
     indexPath: path.resolve(__dirname, 'replace-state.html'),
@@ -38,18 +24,11 @@ test('changes the route property when history.replaceState is used to change the
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
-  expect(renderedRoutes).toEqual(expectedResult)
+  await prerenderer.destroy()
+  expect(renderedRoutes).toMatchSnapshot()
 })
 
 test('mtaintains the correct route value when history.pushState is followed by history.back', async () => {
-  const EXPECTED_HTML = '<!DOCTYPE html><html><head>\n  <title>Prerenderer Test</title>\n</head>\n<body>\n  <script>\n    document.addEventListener(\'DOMContentLoaded\', () => {\n      history.pushState({}, \'\', \'/nested/test\')\n      history.back()\n      document.body.innerHTML += \'<p>Render Output</p>\'\n    })\n  </script>\n\n\n<p>Render Output</p></body></html>'
-  const expectedResult = [{
-    originalRoute: '/',
-    route: '/',
-    html: EXPECTED_HTML,
-  }]
-
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
     indexPath: path.resolve(__dirname, 'push-state-back.html'),
@@ -58,6 +37,6 @@ test('mtaintains the correct route value when history.pushState is followed by h
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
-  expect(renderedRoutes).toEqual(expectedResult)
+  await prerenderer.destroy()
+  expect(renderedRoutes).toMatchSnapshot()
 })

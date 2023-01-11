@@ -1,7 +1,7 @@
-import { Schema } from 'schema-utils/declarations/validate'
 import { ConsoleMessage, PuppeteerLaunchOptions, Viewport, WaitForOptions } from 'puppeteer'
+import { JSONSchemaType } from 'ajv'
 
-export interface PuppeteerRendererOptions extends PuppeteerLaunchOptions {
+export interface PuppeteerRendererOptions {
   maxConcurrentRoutes?: number
   renderAfterDocumentEvent?: string
   renderAfterElementExists?: string
@@ -10,53 +10,71 @@ export interface PuppeteerRendererOptions extends PuppeteerLaunchOptions {
   inject?: unknown
   injectProperty?: string
   skipThirdPartyRequests?: boolean
+  headless?: boolean
+  launchOptions?: PuppeteerLaunchOptions
+  args?: string[]
 
-  consoleHandler?(route: string, message: ConsoleMessage): void
+  consoleHandler?: (route: string, message: ConsoleMessage) => void
 
   viewport?: Viewport
   navigationOptions?: WaitForOptions
 }
 
-export const schema: Schema = {
+export const defaultOptions = {
+  injectProperty: '__PRERENDER_INJECTED',
+  maxConcurrentRoutes: 0,
+  timeout: 1000 * 60 * 2,
+}
+
+export type PuppeteerRendererFinalOptions = PuppeteerRendererOptions & typeof defaultOptions
+
+export const schema: JSONSchemaType<Omit<PuppeteerRendererOptions, 'inject'>> = {
+  type: 'object',
   additionalProperties: true,
-  minProperties: 1, // There should at least be a renderAfter option
+  oneOf: [
+    { required: ['renderAfterDocumentEvent'] },
+    { required: ['renderAfterElementExists'] },
+    { required: ['renderAfterTime'] },
+  ],
   properties: {
+    launchOptions: {
+      type: 'object',
+      additionalProperties: true,
+      required: [],
+      nullable: true,
+    },
     headless: {
       type: 'boolean',
-      default: true,
+      nullable: true,
     },
     maxConcurrentRoutes: {
       type: 'number',
-      default: 10,
+      nullable: true,
     },
     renderAfterDocumentEvent: {
       type: 'string',
       description: 'The name of the event that should trigger the rendering of the page',
+      nullable: true,
     },
     renderAfterElementExists: {
       type: 'string',
       description: 'Wait until this selector is found on the page',
+      nullable: true,
     },
     renderAfterTime: {
       type: 'number',
       description: 'Time to wait for in ms before rendering the page',
+      nullable: true,
     },
     timeout: {
       type: 'number',
       description: 'The time in ms after which we should stop waiting and throw an error',
-      default: 12000,
+      nullable: true,
     },
     injectProperty: {
       type: 'string',
       description: 'The key of the injected value into window',
-    },
-    inject: {
-      anyOf: [
-        { type: 'object' },
-        { type: 'string' },
-        { type: 'array' },
-      ],
-      description: 'The value of the injected value',
+      nullable: true,
     },
     args: {
       type: 'array',
@@ -64,19 +82,24 @@ export const schema: Schema = {
       items: {
         type: 'string',
       },
+      nullable: true,
     },
     skipThirdPartyRequests: {
       type: 'boolean',
       description: 'Setting this option to true will ignore all requests to external urls',
+      nullable: true,
     },
     consoleHandler: {
+      type: 'object',
       instanceOf: 'Function',
       description: 'A custom handler for console messages happening on the page',
+      nullable: true,
     },
     viewport: {
       type: 'object',
       additionalProperties: true, // If ever options are added
       required: ['height', 'width'],
+      nullable: true,
       properties: {
         width: {
           type: 'number',
@@ -88,37 +111,48 @@ export const schema: Schema = {
         },
         deviceScaleFactor: {
           type: 'number',
-          description: '' +
-            'Specify device scale factor. See https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio for more info.',
-          default: 1,
+          description: 'Specify device scale factor. See https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio for more info.',
+          nullable: true,
         },
         isMobile: {
           type: 'boolean',
           description: 'Whether the `meta viewport` tag is taken into account.',
+          nullable: true,
         },
         isLandscape: {
           type: 'boolean',
           description: 'Specifies if the viewport is in landscape mode.',
+          nullable: true,
         },
         hasTouch: {
           type: 'boolean',
           description: 'Specify if the viewport supports touch events.',
+          nullable: true,
         },
       },
     },
     navigationOptions: {
       type: 'object',
+      nullable: true,
       properties: {
         timeout: {
           type: 'number',
+          nullable: true,
         },
         waitUntil: {
+          nullable: true,
           anyOf: [
             {
               type: 'string',
               enum: ['load', 'domcontentloaded', 'networkidle0', 'networkidle2'],
             },
-            { type: 'array' },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['load', 'domcontentloaded', 'networkidle0', 'networkidle2'],
+              },
+            },
           ],
         },
       },

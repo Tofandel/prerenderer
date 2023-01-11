@@ -2,18 +2,25 @@ import express from 'express'
 
 import path from 'path'
 import Prerenderer from './Prerenderer'
-import { PrerendererOptions } from './PrerendererOptions'
+import { PrerendererFinalOptions } from './PrerendererOptions'
 import { Server as HttpServer } from 'http'
+
+export type Stage = 'pre-static' | 'post-static' | 'pre-fallback' | 'post-fallback'
 
 export default class Server {
   private prerenderer: Prerenderer
-  private options: PrerendererOptions
-  private expressServer = express()
-  private nativeServer: HttpServer = null
+  private options: PrerendererFinalOptions
+  private readonly expressServer: ReturnType<typeof express>
+  private nativeServer: HttpServer | null = null
 
   constructor (prerenderer: Prerenderer) {
     this.prerenderer = prerenderer
+    this.expressServer = express()
     this.options = prerenderer.getOptions()
+  }
+
+  public getExpressServer () {
+    return this.expressServer
   }
 
   initialize () {
@@ -34,10 +41,10 @@ export default class Server {
     this.prerenderer.modifyServer('pre-fallback')
 
     if (this.options.server && this.options.server.proxy) {
+      const proxy = this.options.server.proxy // Avoid possible external mutation to undefined
       import('http-proxy-middleware').then(({ createProxyMiddleware }) => {
-        for (const proxyPath of Object.keys(this.options.server.proxy)) {
-          server.use(proxyPath, createProxyMiddleware(this.options.server.proxy[proxyPath]))
-        }
+        Object.keys(proxy).forEach((proxyPath) =>
+          server.use(proxyPath, createProxyMiddleware(proxy[proxyPath])))
       }).catch(() => {
         throw new Error('The http-proxy-middleware module could not be loaded, did you install it?')
       })
@@ -50,7 +57,7 @@ export default class Server {
     this.prerenderer.modifyServer('post-fallback')
 
     return new Promise<void>((resolve) => {
-      this.nativeServer = server.listen(this.options.server.port, () => {
+      this.nativeServer = server.listen(this.options.server.port, this.options.server.listenHost, () => {
         resolve()
       })
     })

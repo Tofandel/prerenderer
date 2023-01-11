@@ -3,8 +3,10 @@ import Storage from './Storage'
 
 import { DOMWindow, JSDOM } from 'jsdom'
 import promiseLimit from 'promise-limit'
-import { JSDOMRendererOptions, schema } from './Options'
+import { defaultOptions, JSDOMRendererFinalOptions, JSDOMRendererOptions, schema } from './Options'
 import { validate } from 'schema-utils'
+import { Schema } from 'schema-utils/declarations/validate'
+import deepMerge from 'ts-deepmerge'
 
 const shim = function (window: DOMWindow) {
   /* eslint-disable @typescript-eslint/ban-ts-comment */
@@ -18,20 +20,14 @@ const shim = function (window: DOMWindow) {
 }
 
 export default class JSDOMRenderer implements IRenderer {
-  private options: JSDOMRendererOptions
+  private options: JSDOMRendererFinalOptions
 
-  constructor (options: JSDOMRendererOptions) {
-    validate(schema, options, {
+  constructor (options: JSDOMRendererOptions = {}) {
+    validate(schema as Schema, options, {
       name: 'Renderer JSDOM',
       baseDataPath: 'options',
     })
-    this.options = options || {}
-
-    if (this.options.maxConcurrentRoutes == null) this.options.maxConcurrentRoutes = 0
-
-    if (this.options.inject && !this.options.injectProperty) {
-      this.options.injectProperty = '__PRERENDER_INJECTED'
-    }
+    this.options = deepMerge(defaultOptions, options) as JSDOMRendererFinalOptions
   }
 
   async initialize () {
@@ -43,9 +39,10 @@ export default class JSDOMRenderer implements IRenderer {
 
     const limiter = promiseLimit<RenderedRoute>(this.options.maxConcurrentRoutes)
 
+    const host = `http://${rootOptions.server.host}:${rootOptions.server.port}`
     return Promise.all(routes.map(route => limiter(() => {
       const dom = new JSDOM('', {
-        url: `http://127.0.0.1:${rootOptions.server.port}${route}`,
+        url: `http://${host}${route}`,
         runScripts: 'dangerously',
         resources: 'usable',
         pretendToBeVisual: true,
@@ -91,31 +88,32 @@ export default class JSDOMRenderer implements IRenderer {
         resolve(result)
       }
 
+      // Expire after 2 minutes by default
+      const timeout = this.options.timeout
+
       // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
       if (this.options.renderAfterDocumentEvent) {
-        window.document.addEventListener(this.options.renderAfterDocumentEvent, captureDocument)
+        const event = this.options.renderAfterDocumentEvent
+        window.document.addEventListener(event, captureDocument)
 
-        // Expire after 2 minutes by default
-        const timeout = typeof this.options.timeout === 'number' ? this.options.timeout : 1000 * 60 * 2
         if (timeout) {
           setTimeout(() => reject(new Error(
-            `Could not prerender: event '${this.options.renderAfterDocumentEvent}' did not occur within ${Math.round(timeout / 1000)}s`),
+            `Could not prerender: event '${event}' did not occur within ${Math.round(timeout / 1000)}s`),
           ), timeout)
         }
         // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
       } else if (this.options.renderAfterElementExists) {
+        const selector = this.options.renderAfterElementExists
         const doc = window.document
         int = setInterval(() => {
-          if (doc.querySelector(this.options.renderAfterElementExists)) {
+          if (doc.querySelector(selector)) {
             captureDocument()
           }
         }, 100)
 
-        // Expire after 2 minutes by default
-        const timeout = typeof this.options.timeout === 'number' ? this.options.timeout : 1000 * 60 * 2
         if (timeout) {
           setTimeout(() => reject(new Error(
-            `Could not prerender: element '${this.options.renderAfterElementExists}' not found after ${Math.round(timeout / 1000)}s`),
+            `Could not prerender: element '${selector}' not found after ${Math.round(timeout / 1000)}s`),
           ), timeout)
         }
         // CAPTURE AFTER A NUMBER OF MILLISECONDS

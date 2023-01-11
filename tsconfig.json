@@ -8,5 +8,6 @@
     "esModuleInterop": true,
     // Ensure that .d.ts files are created by tsc, but not .js files
     "declaration": true,
+    "strictNullChecks": true
   }
 }

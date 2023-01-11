@@ -1,4 +1,4 @@
-import { PuppeteerRendererOptions } from './Options'
+import { PuppeteerRendererFinalOptions } from './Options'
 
 declare global {
   interface Window {
@@ -8,14 +8,17 @@ declare global {
   }
 }
 
-export const listenForRender = (options: PuppeteerRendererOptions) => {
-  window.__PRERENDER_STATUS = {}
-  document.addEventListener(options.renderAfterDocumentEvent, () => {
-    window.__PRERENDER_STATUS._DOCUMENT_EVENT_RESOLVED = true
-  })
+export const listenForRender = (options: PuppeteerRendererFinalOptions) => {
+  if (options.renderAfterDocumentEvent) {
+    window.__PRERENDER_STATUS = {}
+    document.addEventListener(options.renderAfterDocumentEvent, () => {
+      window.__PRERENDER_STATUS = window.__PRERENDER_STATUS || {}
+      window.__PRERENDER_STATUS._DOCUMENT_EVENT_RESOLVED = true
+    })
+  }
 }
 
-export const waitForRender = (options: PuppeteerRendererOptions) => {
+export const waitForRender = (options: PuppeteerRendererFinalOptions) => {
   return new Promise<void>((resolve) => {
     // Render when an event fires on the document.
     if (options.renderAfterDocumentEvent) {

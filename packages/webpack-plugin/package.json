@@ -69,6 +69,7 @@
     "webpack": "^5"
   },
   "devDependencies": {
+    "express": "^4.18.2",
     "webpack": "^5.75.0",
     "@prerenderer/prerenderer": "file:../prerenderer",
     "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer"

@@ -54,7 +54,8 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "portfinder": "^1.0.32"
+    "portfinder": "^1.0.32",
+    "ts-deepmerge": "^5.0.0"
   },
   "optionalDependencies": {
     "http-proxy-middleware": "^2.0.6"

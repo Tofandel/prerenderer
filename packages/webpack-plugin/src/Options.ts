@@ -1,34 +1,38 @@
-import { Schema } from 'schema-utils/declarations/validate'
-import { IRenderer, RenderedRoute, PrerendererOptions } from '@prerenderer/prerenderer'
+import { RenderedRoute, PrerendererOptions } from '@prerenderer/prerenderer'
+import { JSONSchemaType } from 'ajv'
+import { JSDOMRendererOptions } from '@prerenderer/renderer-jsdom'
+import { PuppeteerRendererOptions } from '@prerenderer/renderer-puppeteer'
 
-export interface WebpackPrerenderSPAOptions extends PrerendererOptions {
-  indexPath?: string
+export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir'> {
   entryPath?: string
-  renderer?: IRenderer
   routes: Array<string>
-  postProcess?(renderedRoutes: Array<RenderedRoute>): Promise<void> | void
+  postProcess?: (renderedRoutes: RenderedRoute) => Promise<void> | void
   urlModifier?(url: string): string
-  rendererOptions?: Record<string, unknown>
+  rendererOptions?: JSDOMRendererOptions | PuppeteerRendererOptions | Record<string, unknown>
 }
 
-export const schema: Schema = {
+export const defaultOptions = {
+  indexPath: 'index.html',
+  rendererOptions: {
+    headless: true,
+  },
+}
+
+export type WebpackPrerenderSPAFinalOptions = WebpackPrerenderSPAOptions & typeof defaultOptions
+
+export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof PrerendererOptions>> = {
+  type: 'object',
+  required: ['routes'],
   properties: {
-    indexPath: {
-      description: 'The location of index.html',
-      type: 'string',
-    },
     entryPath: {
       description: 'The entry index.html file to use',
       type: 'string',
-    },
-    renderer: {
-      description: 'A custom PuppeteerRenderer instance',
-      required: true,
+      nullable: true,
     },
     routes: {
       description: 'A list of routes to pre-render',
       type: 'array',
-      required: true,
+      nullable: false,
       items: {
         description: 'The path of the route',
         type: 'string',
@@ -36,57 +40,21 @@ export const schema: Schema = {
     },
     postProcess: {
       description: 'Allows you to customize the HTML and output path before writing the rendered contents to a file.',
-      instanceof: 'Function',
-    },
-    server: {
       type: 'object',
-      properties: {
-        port: {
-          description: 'Normally a free port is autodetected, but feel free to set this if needed.',
-          type: 'number',
-        },
-      },
-      additionalProperties: true,
+      instanceof: 'Function',
+      nullable: true,
     },
     urlModifier: {
+      type: 'object',
       instanceof: 'Function',
       description: 'Hook to be able to modify the url to retrieve the compiled asset',
+      nullable: true,
     },
     rendererOptions: {
       type: 'object',
+      description: 'The options to pass to the renderer',
       additionalProperties: true,
-      properties: {
-        injectProperty: {
-          description: 'The name of the property to add to the window object with the contents of `inject`',
-          type: 'string',
-        },
-        inject: {
-          description: "Any values you'd like your app to have access to via `window.injectProperty",
-          type: 'object',
-          additionalProperties: true,
-        },
-        maxConcurrentRoutes: {
-          type: 'number',
-          description: 'Use this to limit the number of routes rendered in parallel. Defaults to 0, no limit',
-        },
-        renderAfterDocumentEvent: {
-          type: 'string',
-          description: "Wait to render until the specified event is dispatched on the document. eg: with `document.dispatchEvent(new Event('custom-render-trigger')",
-        },
-        renderAfterElementExists: {
-          type: 'string',
-          description: 'Wait to render until the specified element is detected using `document.querySelector`',
-        },
-        renderAfterTime: {
-          type: 'number',
-          description: 'Wait to render until a certain amount of time has passed. NOT RECOMMENDED',
-        },
-        headless: {
-          type: 'boolean',
-          description: 'Display the browser window when rendering. Useful for debugging.',
-        },
-      },
+      nullable: true,
     },
   },
-  type: 'object',
 }

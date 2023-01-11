@@ -1,18 +1,27 @@
-import Server from './Server'
+import Server, { Stage } from './Server'
 import { getPortPromise } from 'portfinder'
-import { schema, PrerendererOptions } from './PrerendererOptions'
+import { schema, PrerendererOptions, defaultOptions, PrerendererFinalOptions } from './PrerendererOptions'
 import IRenderer from './IRenderer'
 import PackageName from './PackageName'
 import { validate } from 'schema-utils'
+import deepMerge from 'ts-deepmerge'
+import { Schema } from 'schema-utils/declarations/validate'
+
+type HookCallback = (server: Server) => void
 
 export default class Prerenderer {
-  private readonly options: PrerendererOptions
+  private readonly options: PrerendererFinalOptions
   private readonly server: Server
   private readonly renderer: IRenderer
+  private hooks: Record<Stage | string, Array<HookCallback>> = {}
 
   constructor (options: PrerendererOptions) {
-    validate(schema, options, { name: PackageName })
-    this.options = options
+    validate(schema as Schema, options, {
+      name: PackageName,
+      baseDataPath: 'options',
+    })
+
+    this.options = deepMerge(defaultOptions, options) as PrerendererFinalOptions
 
     this.server = new Server(this)
     this.renderer = options.renderer
@@ -25,8 +34,6 @@ export default class Prerenderer {
       throw new Error(`${PackageName} No renderer was passed to prerenderer.
 If you are not sure which renderer to use, see the documentation at https://github.com/JoshTheDerf/prerenderer.`)
     }
-
-    if (!this.options.server) this.options.server = {}
   }
 
   async initialize () {
@@ -54,9 +61,18 @@ If you are not sure which renderer to use, see the documentation at https://gith
     return this.options
   }
 
-  modifyServer (stage: string) {
+  public hookServer (stage: Stage, callback: HookCallback) {
+    const hooks = this.hooks[stage] || []
+    hooks.push(callback)
+    this.hooks[stage] = hooks
+  }
+
+  modifyServer (stage: Stage) {
     if (this.renderer.modifyServer) {
       this.renderer.modifyServer(this, this.server, stage)
+    }
+    if (this.hooks[stage]) {
+      this.hooks[stage].forEach((cb) => cb(this.server))
     }
   }
 

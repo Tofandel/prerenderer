@@ -1,79 +1,77 @@
 import { validate } from 'schema-utils'
-import { schema, WebpackPrerenderSPAOptions } from './Options'
-import { Compiler, Compilation } from 'webpack'
-
+import { defaultOptions, schema, WebpackPrerenderSPAFinalOptions, WebpackPrerenderSPAOptions } from './Options'
+import { Compiler, Compilation, WebpackError } from 'webpack'
+import deepMerge from 'ts-deepmerge'
 import path from 'path'
-import IRenderer from '@prerenderer/prerenderer/src/IRenderer'
+
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import { Schema } from 'schema-utils/declarations/validate'
 
 export default class WebpackPrerenderSPAPlugin {
-  private readonly options: WebpackPrerenderSPAOptions
-  private renderer: IRenderer
+  private readonly options: WebpackPrerenderSPAFinalOptions
+
   constructor (options: WebpackPrerenderSPAOptions) {
-    validate(schema, options, {
+    validate(schema as Schema, options, {
       name: 'Prerender SPA Plugin',
       baseDataPath: 'options',
     })
 
-    this.options = options
-
-    this.options.indexPath = this.options.indexPath || 'index.html'
-    this.options.rendererOptions = Object.assign({ headless: true }, this.options.rendererOptions)
+    this.options = deepMerge(defaultOptions, options) as WebpackPrerenderSPAFinalOptions
   }
 
   async prerender (compiler: Compiler, compilation: Compilation) {
-    const { default: Prerenderer } = await import('@prerenderer/prerenderer')
     const indexPath = this.options.indexPath
     const entryPath = this.options.entryPath || indexPath
 
     if (!(entryPath in compilation.assets)) {
       return false
     }
+    const { default: Prerenderer } = await import('@prerenderer/prerenderer')
     const PrerendererInstance = new Prerenderer({
-      staticDir: compiler.options.output.path,
+      staticDir: compiler.options.output.path || '/',
       ...this.options,
     })
-    const prev = PrerendererInstance.modifyServer.bind(PrerendererInstance)
-    PrerendererInstance.modifyServer = (server, stage) => {
-      if (stage === 'post-fallback') {
-        server = server._expressServer
-        const routes = server._router.stack
-        routes.forEach((route, i) => {
-          if (route.route && route.route.path === '*') {
-            routes.splice(i, 1)
-          }
-        })
+    PrerendererInstance.hookServer('post-fallback', (server) => {
+      const express = server.getExpressServer()
+      // Express doesn't have complete typings yet
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const routes = express._router.stack as Array<{route:{path:string}}>
+      routes.forEach((route, i) => {
+        if (route.route && route.route.path === '*') {
+          routes.splice(i, 1)
+        }
+      })
 
-        server.get('*', (req, res) => {
-          let url = req.path.slice(1, req.path.endsWith('/') ? -1 : undefined)
-          url = url in compilation.assets || url.includes('.') ? url : url + '/' + indexPath
-          if (url.startsWith('/')) {
-            url = url.slice(1)
-          }
-          if (this.options.urlModifier) {
-            url = this.options.urlModifier(url)
-          }
-          if (url in compilation.assets) {
-            if (url.endsWith('.json')) {
-              res.json(JSON.parse(compilation.assets[url].source()))
-            } else {
-              try {
-                res.type(path.extname(url))
-                res.send(compilation.assets[url].source())
-              } catch (e) {
-                res.status(500)
-                compilation.errors.push(new Error('[prerender-spa-plugin] Failed to deliver ' + url + ', is the type of the file correct?'))
-              }
-            }
-          } else if (entryPath in compilation.assets) {
-            res.send(compilation.assets[entryPath].source())
+      express.get('*', (req, res) => {
+        let url = req.path.slice(1, req.path.endsWith('/') ? -1 : undefined)
+        url = url in compilation.assets || url.includes('.') ? url : url + '/' + indexPath
+        if (url.startsWith('/')) {
+          url = url.slice(1)
+        }
+        if (this.options.urlModifier) {
+          url = this.options.urlModifier(url)
+        }
+        if (url in compilation.assets) {
+          if (url.endsWith('.json')) {
+            const source = compilation.assets[url].source()
+            res.json(JSON.parse(typeof source === 'string' ? source : source.toString()))
           } else {
-            compilation.errors.push(new Error('[prerender-spa-plugin] ' + url + ' not found during prerender'))
-            res.status(404)
+            try {
+              res.type(path.extname(url))
+              res.send(compilation.assets[url].source())
+            } catch (e) {
+              res.status(500)
+              compilation.errors.push(new WebpackError('[prerender-spa-plugin] Failed to deliver ' + url + ', is the type of the file correct?'))
+            }
           }
-        })
-      }
-      prev.call(PrerendererInstance, server, stage)
-    }
+        } else if (entryPath in compilation.assets) {
+          res.send(compilation.assets[entryPath].source())
+        } else {
+          compilation.errors.push(new WebpackError('[prerender-spa-plugin] ' + url + ' not found during prerender'))
+          res.status(404)
+        }
+      })
+    })
 
     try {
       await PrerendererInstance.initialize()
@@ -81,9 +79,10 @@ export default class WebpackPrerenderSPAPlugin {
 
       // Run postProcess hooks.
       if (typeof this.options.postProcess === 'function') {
-        await Promise.all(renderedRoutes.map(renderedRoute => this.options.postProcess(renderedRoute)))
-        // Check to ensure postProcess hooks returned the renderedRoute object properly.
+        const postProcess = this.options.postProcess
+        await Promise.all(renderedRoutes.map(renderedRoute => postProcess(renderedRoute)))
 
+        // Check to ensure postProcess hooks returned the renderedRoute object properly.
         const isValid = renderedRoutes.every(r => typeof r === 'object')
         if (!isValid) {
           throw new Error('[prerender-spa-plugin] Rendered routes are not object, did you do something weird in postProcess?')
@@ -100,27 +99,33 @@ export default class WebpackPrerenderSPAPlugin {
             processedRoute.outputPath = processedRoute.outputPath.slice(1)
           }
         }
+        // false positive as calling call(compilation) right after
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         const fn = processedRoute.outputPath in compilation.assets ? compilation.updateAsset : compilation.emitAsset
         fn.call(compilation, processedRoute.outputPath, new compiler.webpack.sources.RawSource(processedRoute.html.trim(), false), {
           prerendered: true,
         })
       })
-    } catch (err) {
+    } catch (err: unknown) {
       const msg = '[prerender-spa-plugin] Unable to prerender all routes!'
-      compilation.errors.push(new Error(msg))
-      compilation.errors.push(err)
+      compilation.errors.push(new WebpackError(msg))
+      if (typeof err === 'object' && err && err.toString) {
+        compilation.errors.push(new WebpackError(err.toString()))
+      }
     }
 
-    PrerendererInstance.destroy()
+    await PrerendererInstance.destroy()
   }
 
-  apply (compiler) {
+  apply (compiler: Compiler) {
     const pluginName = this.constructor.name
     compiler.hooks.compilation.tap(pluginName, (compilation) => {
-      const HtmlWebpackPlugin = require('html-webpack-plugin')
       const hooks = HtmlWebpackPlugin.getHooks(compilation)
 
-      hooks.afterEmit.tapPromise(pluginName, async () => await this.prerender(compiler, compilation))
+      hooks.afterEmit.tapPromise(pluginName, async (out) => {
+        await this.prerender(compiler, compilation)
+        return out
+      })
     })
   }
 }
