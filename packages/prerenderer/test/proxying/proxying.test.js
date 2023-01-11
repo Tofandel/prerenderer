@@ -41,7 +41,7 @@ test('proxies a request to an alternative server', async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   server.close()
   expect(renderedRoutes).toEqual(expectedResult)
 })

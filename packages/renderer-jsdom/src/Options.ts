@@ -15,7 +15,7 @@ export const defaultOptions = {
   injectProperty: '__PRERENDER_INJECTED',
   maxConcurrentRoutes: 0,
   skipThirdPartyRequests: false,
-  timeout: 1000 * 60 * 2,
+  timeout: 1000 * 30, // 30sec timeout default
 }
 
 export type JSDOMRendererFinalOptions = JSDOMRendererOptions & typeof defaultOptions
@@ -23,11 +23,6 @@ export type JSDOMRendererFinalOptions = JSDOMRendererOptions & typeof defaultOpt
 export const schema: JSONSchemaType<Omit<JSDOMRendererOptions, 'inject'>> = {
   type: 'object',
   additionalProperties: true,
-  oneOf: [
-    { required: ['renderAfterDocumentEvent'] },
-    { required: ['renderAfterElementExists'] },
-    { required: ['renderAfterTime'] },
-  ],
   properties: {
     maxConcurrentRoutes: {
       type: 'number',

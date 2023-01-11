@@ -5,7 +5,7 @@ import IRenderer from './IRenderer'
 import PackageName from './PackageName'
 import { validate } from 'schema-utils'
 import deepMerge from 'ts-deepmerge'
-import { Schema } from 'schema-utils/declarations/validate'
+// import { Schema } from 'schema-utils/declarations/validate'
 
 type HookCallback = (server: Server) => void
 
@@ -16,7 +16,7 @@ export default class Prerenderer {
   private hooks: Record<Stage | string, Array<HookCallback>> = {}
 
   constructor (options: PrerendererOptions) {
-    validate(schema as Schema, options, {
+    validate(schema, options, {
       name: PackageName,
       baseDataPath: 'options',
     })

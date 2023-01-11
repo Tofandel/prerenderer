@@ -23,7 +23,7 @@ export default class Server {
     return this.expressServer
   }
 
-  initialize () {
+  async initialize () {
     const server = this.expressServer
 
     if (this.options.server && this.options.server.before) {
@@ -42,7 +42,7 @@ export default class Server {
 
     if (this.options.server && this.options.server.proxy) {
       const proxy = this.options.server.proxy // Avoid possible external mutation to undefined
-      import('http-proxy-middleware').then(({ createProxyMiddleware }) => {
+      await import('http-proxy-middleware').then(({ createProxyMiddleware }) => {
         Object.keys(proxy).forEach((proxyPath) =>
           server.use(proxyPath, createProxyMiddleware(proxy[proxyPath])))
       }).catch(() => {
@@ -51,12 +51,12 @@ export default class Server {
     }
 
     server.get('*', (req, res) => {
-      res.sendFile(this.options.indexPath ? this.options.indexPath : path.join(this.options.staticDir, 'index.html'))
+      res.sendFile(this.options.indexPath ? path.resolve(this.options.staticDir, this.options.indexPath) : path.join(this.options.staticDir, 'index.html'))
     })
 
     this.prerenderer.modifyServer('post-fallback')
 
-    return new Promise<void>((resolve) => {
+    await new Promise<void>((resolve) => {
       this.nativeServer = server.listen(this.options.server.port, this.options.server.listenHost, () => {
         resolve()
       })

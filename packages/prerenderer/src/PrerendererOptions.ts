@@ -1,7 +1,8 @@
 import IRenderer from './IRenderer'
 import { Options as ProxyOptions } from 'http-proxy-middleware'
 import { Express } from 'express'
-import { JSONSchemaType } from 'ajv'
+// import { JSONSchemaType } from 'ajv'
+import { Schema } from 'schema-utils/declarations/validate'
 
 interface ServerOptions {
   port?: number
@@ -29,7 +30,8 @@ export interface PrerendererOptions {
 
 export type PrerendererFinalOptions = PrerendererOptions & typeof defaultOptions
 
-export const schema: JSONSchemaType<PrerendererOptions> = {
+// AVJ's typing is very buggy
+export const schema: Schema /* JSONSchemaType<PrerendererOptions> */ = {
   type: 'object',
   required: ['staticDir'],
   properties: {
@@ -66,10 +68,8 @@ export const schema: JSONSchemaType<PrerendererOptions> = {
           nullable: true,
         },
         before: {
-          type: 'object',
           instanceOf: 'Function',
           description: 'A hook to run before starting the express server',
-          nullable: true,
         },
         proxy: {
           type: 'object',

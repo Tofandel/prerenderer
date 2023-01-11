@@ -36,7 +36,7 @@ test("injects {foo: 'bar'} into window['__PRERENDER_INJECTED']", async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })
 
@@ -74,6 +74,6 @@ test("injects {foo: 'bar'} into window['__CUSTOM_INJECTED']", async () => {
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })

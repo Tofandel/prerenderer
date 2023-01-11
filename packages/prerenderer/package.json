@@ -15,6 +15,9 @@
     "test:logs": "jest ./test --runInBand",
     "prepublishOnly": "npm run build"
   },
+  "jest": {
+    "testTimeout": 10000
+  },
   "files": [
     "dist",
     "types"

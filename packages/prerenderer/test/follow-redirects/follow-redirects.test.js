@@ -28,7 +28,7 @@ test('changes the route property when history.replaceState is used to change the
   expect(renderedRoutes).toMatchSnapshot()
 })
 
-test('mtaintains the correct route value when history.pushState is followed by history.back', async () => {
+test('maintains the correct route value when history.pushState is followed by history.back', async () => {
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
     indexPath: path.resolve(__dirname, 'push-state-back.html'),

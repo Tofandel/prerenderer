@@ -16,7 +16,7 @@ export default class WebpackPrerenderSPAPlugin {
       baseDataPath: 'options',
     })
 
-    this.options = deepMerge(defaultOptions, options) as WebpackPrerenderSPAFinalOptions
+    this.options = deepMerge.withOptions({ mergeArrays: false }, defaultOptions, options) as WebpackPrerenderSPAFinalOptions
   }
 
   async prerender (compiler: Compiler, compilation: Compilation) {

@@ -27,7 +27,11 @@ export default class JSDOMRenderer implements IRenderer {
       name: 'Renderer JSDOM',
       baseDataPath: 'options',
     })
+
     this.options = deepMerge(defaultOptions, options) as JSDOMRendererFinalOptions
+    if (options.renderAfterTime && this.options.timeout < options.renderAfterTime) {
+      this.options.timeout = options.renderAfterTime + 1000
+    }
   }
 
   async initialize () {
@@ -40,9 +44,42 @@ export default class JSDOMRenderer implements IRenderer {
     const limiter = promiseLimit<RenderedRoute>(this.options.maxConcurrentRoutes)
 
     const host = `http://${rootOptions.server.host}:${rootOptions.server.port}`
-    return Promise.all(routes.map(route => limiter(() => {
-      const dom = new JSDOM('', {
-        url: `http://${host}${route}`,
+    return Promise.all(
+      routes.map(
+        route => limiter(() => this.getPageContent(host, route)),
+      ),
+    ).catch(e => {
+      console.error(e)
+      return Promise.reject(e)
+    })
+  }
+
+  private getPageContent (host: string, originalRoute: string) {
+    return new Promise<RenderedRoute>((resolve, reject) => {
+      let int: NodeJS.Timer | null = null
+      let tim: NodeJS.Timeout | null = null
+
+      const captureDocument = () => {
+        if (int !== null) {
+          clearInterval(int)
+        }
+        void pr.then((dom) => {
+          if (tim !== null) {
+            clearTimeout(tim)
+          }
+
+          const result: RenderedRoute = {
+            originalRoute,
+            route: originalRoute,
+            html: dom.serialize(),
+          }
+
+          dom.window.close()
+          resolve(result)
+        })
+      }
+
+      const pr = JSDOM.fromURL(`${host}${originalRoute}`, {
         runScripts: 'dangerously',
         resources: 'usable',
         pretendToBeVisual: true,
@@ -57,73 +94,52 @@ export default class JSDOMRenderer implements IRenderer {
             console.error(event.error)
           })
 
+          const timeout = this.options.timeout
+
+          const doc = window.document
+
+          // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
+          if (this.options.renderAfterDocumentEvent) {
+            const event = this.options.renderAfterDocumentEvent
+            doc.addEventListener(event, captureDocument)
+
+            if (timeout) {
+              tim = setTimeout(() => reject(new Error(
+                `Could not prerender: event '${event}' did not occur within ${Math.round(timeout / 1000)}s`),
+              ), timeout)
+            }
+            // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
+          } else if (this.options.renderAfterElementExists) {
+            const selector = this.options.renderAfterElementExists
+            int = setInterval(() => {
+              if (doc.querySelector(selector)) {
+                captureDocument()
+              }
+            }, 50)
+
+            if (timeout) {
+              tim = setTimeout(() => reject(new Error(
+                `Could not prerender: element '${selector}' not found after ${Math.round(timeout / 1000)}s`),
+              ), timeout)
+            }
+          } else if (this.options.renderAfterTime) {
+            // CAPTURE AFTER A NUMBER OF MILLISECONDS
+            setTimeout(captureDocument, this.options.renderAfterTime)
+          } else {
+            // DEFAULT: RUN IMMEDIATELY
+
+            if (timeout) {
+              tim = setTimeout(() => reject(new Error(
+                `Could not prerender: timed-out after ${Math.round(timeout / 1000)}s`),
+              ), timeout)
+            }
+
+            captureDocument()
+          }
           shim(window)
         },
       })
-
-      return this.getPageContents(dom, route)
-    })))
-      .catch(e => {
-        console.error(e)
-        return Promise.reject(e)
-      })
-  }
-
-  getPageContents (dom: JSDOM, originalRoute: string) {
-    return new Promise<RenderedRoute>((resolve, reject) => {
-      let int: NodeJS.Timer
-
-      const captureDocument = () => {
-        const result: RenderedRoute = {
-          originalRoute,
-          route: originalRoute,
-          html: dom.serialize(),
-        }
-
-        if (int != null) {
-          clearInterval(int)
-        }
-
-        dom.window.close()
-        resolve(result)
-      }
-
-      // Expire after 2 minutes by default
-      const timeout = this.options.timeout
-
-      // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
-      if (this.options.renderAfterDocumentEvent) {
-        const event = this.options.renderAfterDocumentEvent
-        window.document.addEventListener(event, captureDocument)
-
-        if (timeout) {
-          setTimeout(() => reject(new Error(
-            `Could not prerender: event '${event}' did not occur within ${Math.round(timeout / 1000)}s`),
-          ), timeout)
-        }
-        // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
-      } else if (this.options.renderAfterElementExists) {
-        const selector = this.options.renderAfterElementExists
-        const doc = window.document
-        int = setInterval(() => {
-          if (doc.querySelector(selector)) {
-            captureDocument()
-          }
-        }, 100)
-
-        if (timeout) {
-          setTimeout(() => reject(new Error(
-            `Could not prerender: element '${selector}' not found after ${Math.round(timeout / 1000)}s`),
-          ), timeout)
-        }
-        // CAPTURE AFTER A NUMBER OF MILLISECONDS
-      } else if (this.options.renderAfterTime) {
-        setTimeout(captureDocument, this.options.renderAfterTime)
-
-        // DEFAULT: RUN IMMEDIATELY
-      } else {
-        captureDocument()
-      }
+      pr.catch(reject)
     })
   }
 

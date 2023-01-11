@@ -23,7 +23,7 @@ export interface PuppeteerRendererOptions {
 export const defaultOptions = {
   injectProperty: '__PRERENDER_INJECTED',
   maxConcurrentRoutes: 0,
-  timeout: 1000 * 60 * 2,
+  timeout: 1000 * 30, // 30 sec timeout by default
 }
 
 export type PuppeteerRendererFinalOptions = PuppeteerRendererOptions & typeof defaultOptions
@@ -31,20 +31,15 @@ export type PuppeteerRendererFinalOptions = PuppeteerRendererOptions & typeof de
 export const schema: JSONSchemaType<Omit<PuppeteerRendererOptions, 'inject'>> = {
   type: 'object',
   additionalProperties: true,
-  oneOf: [
-    { required: ['renderAfterDocumentEvent'] },
-    { required: ['renderAfterElementExists'] },
-    { required: ['renderAfterTime'] },
-  ],
   properties: {
     launchOptions: {
       type: 'object',
       additionalProperties: true,
-      required: [],
       nullable: true,
     },
     headless: {
       type: 'boolean',
+      description: 'Set to true if you want to the browser to open when rendering',
       nullable: true,
     },
     maxConcurrentRoutes: {
@@ -140,6 +135,7 @@ export const schema: JSONSchemaType<Omit<PuppeteerRendererOptions, 'inject'>> = 
           nullable: true,
         },
         waitUntil: {
+          type: 'null',
           nullable: true,
           anyOf: [
             {

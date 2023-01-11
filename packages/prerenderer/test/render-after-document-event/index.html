@@ -9,12 +9,12 @@
       setTimeout(() => {
         document.body.innerHTML += '<p>Render Output</p>'
         document.dispatchEvent(new Event('please-render'))
-      }, 2000)
+      }, 500)
 
       setTimeout(() => {
         document.body.innerHTML += `<p>Oh no, it's too late!</p>`
         document.dispatchEvent(new Event('should-already-be-rendered'))
-      }, 3000)
+      }, 1000)
     })
   </script>
 </body>

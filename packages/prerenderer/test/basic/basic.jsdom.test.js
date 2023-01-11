@@ -2,7 +2,10 @@ const path = require('path')
 const Prerenderer = require('@prerenderer/prerenderer')
 const Renderer = require('@prerenderer/renderer-jsdom')
 const Chance = require('chance')
+const fs = require('fs')
 const chance = new Chance()
+
+const snap = fs.readFileSync(path.join(__dirname, 'index.snap.html')).toString().trim()
 
 function generateRandomRoute () {
   // Builds a "route" out of 1 - 100 path segments made of random strings.
@@ -11,6 +14,23 @@ function generateRandomRoute () {
     .map(() => encodeURIComponent(chance.string()))
     .join('/')
 }
+
+test('renders 1 route', async () => {
+  const prerenderer = new Prerenderer({
+    staticDir: path.resolve(__dirname),
+    renderer: new Renderer(),
+  })
+
+  await prerenderer.initialize()
+  const renderedRoutes = await prerenderer.renderRoutes(['/'])
+  await prerenderer.destroy()
+
+  expect(renderedRoutes).toEqual([{
+    route: '/',
+    originalRoute: '/',
+    html: snap,
+  }])
+})
 
 test('renders 50 routes', async () => {
   const routes = new Array(50).fill('').map(() => generateRandomRoute())
@@ -27,6 +47,6 @@ test('renders 50 routes', async () => {
   renderedRoutes.forEach((renderedRoute, i) => {
     expect(renderedRoute.route).toEqual(decodeURIComponent(routes[i]))
     expect(renderedRoute.originalRoute).toEqual(routes[i])
-    expect(renderedRoute.html).toMatchSnapshot('expected_html')
+    expect(renderedRoute.html).toEqual(snap)
   })
-}, 10000)
+})

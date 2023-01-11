@@ -12,8 +12,8 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "jest ./test/**/*.puppeteer.test.js --silent --runInBand",
-    "test:logs": "jest ./test/**/*.puppeteer.test.js --runInBand"
+    "test": "jest ./test --silent --runInBand",
+    "test:logs": "jest ./test --runInBand"
   },
   "files": [
     "dist",

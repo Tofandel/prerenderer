@@ -23,6 +23,6 @@ test('renders 2 routes with index at subfolder/something-else.html', async () =>
 
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/', '/route'])
-  prerenderer.destroy()
+  await prerenderer.destroy()
   expect(renderedRoutes).toEqual(expectedResult)
 })
