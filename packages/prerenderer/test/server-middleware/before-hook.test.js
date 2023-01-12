@@ -6,7 +6,6 @@ test('adds custom middleware to server using before hook', async () => {
   function customMiddleware (req, res) {
     res.send('FOO')
   }
-  const CUSTOM_MIDDLEWARE_RESPONSE = '<html><head></head><body>FOO</body></html>'
   const prerenderer = new Prerenderer({
     staticDir: path.resolve(__dirname),
     renderer: new Renderer(),
@@ -17,5 +16,5 @@ test('adds custom middleware to server using before hook', async () => {
   await prerenderer.initialize()
   const renderedRoutes = await prerenderer.renderRoutes(['/'])
   await prerenderer.destroy()
-  expect(renderedRoutes[0].html).toEqual(CUSTOM_MIDDLEWARE_RESPONSE)
-})
+  expect(renderedRoutes[0].html).toMatchInlineSnapshot('"<html><head></head><body>FOO</body></html>"')
+}, 7000)

@@ -26,25 +26,25 @@ export default class PuppeteerRenderer implements IRenderer {
   }
 
   async initialize () {
-    try {
-      // Workaround for Linux SUID Sandbox issues.
-      if (process.platform === 'linux') {
-        if (!this.options.args) this.options.args = []
+    // Workaround for Linux SUID Sandbox issues.
+    if (process.platform === 'linux') {
+      if (!this.options.args) this.options.args = []
 
-        if (this.options.args.indexOf('--no-sandbox') === -1) {
-          this.options.args.push('--no-sandbox')
-          this.options.args.push('--disable-setuid-sandbox')
-        }
+      if (this.options.args.indexOf('--no-sandbox') === -1) {
+        this.options.args.push('--no-sandbox')
+        this.options.args.push('--disable-setuid-sandbox')
       }
-
-      // Is it a good idea to pass the whole option list there?
-      this.puppeteer = await puppeteer.launch(this.options)
-    } catch (e) {
-      console.error(e)
-      console.error('[Prerenderer - PuppeteerRenderer] Unable to start Puppeteer')
-      // Re-throw the error so it can be handled further up the chain. Good idea or not?
-      throw e
     }
+
+    // Puppeteer tends to stay alive if the program exits unexpectedly, try to handle this and cleanup
+    const cleanup = () => void this.destroy()
+    process.on('SIGTERM', cleanup)
+    process.on('SIGINT', cleanup)
+
+    process.on('uncaughtException', cleanup)
+
+    // Is it a good idea to pass the whole option list there?
+    this.puppeteer = await puppeteer.launch(this.options)
   }
 
   async handleRequestInterception (page: Page, baseURL: string) {
@@ -63,7 +63,7 @@ export default class PuppeteerRenderer implements IRenderer {
     })
   }
 
-  async renderRoutes (routes: Array<string>, prerenderer: Prerenderer) {
+  renderRoutes (routes: Array<string>, prerenderer: Prerenderer) {
     const rootOptions = prerenderer.getOptions()
 
     const baseURL = `http://${rootOptions.server.host}:${rootOptions.server.port}`
@@ -81,82 +81,64 @@ export default class PuppeteerRenderer implements IRenderer {
     const options = this.options
 
     const page = await this.puppeteer.newPage()
+    try {
+      if (options.consoleHandler) {
+        const handler = options.consoleHandler
+        page.on('console', message => handler(route, message))
+      }
 
-    if (options.consoleHandler) {
-      const handler = options.consoleHandler
-      page.on('console', message => handler(route, message))
-    }
+      if (options.inject) {
+        await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
+      }
 
-    if (options.inject) {
-      await page.evaluateOnNewDocument(`(function () { window['${options.injectProperty}'] = ${JSON.stringify(options.inject)}; })();`)
-    }
+      // Allow setting viewport widths and such.
+      if (options.viewport) await page.setViewport(options.viewport)
 
-    // Allow setting viewport widths and such.
-    if (options.viewport) await page.setViewport(options.viewport)
+      await this.handleRequestInterception(page, baseURL)
 
-    await this.handleRequestInterception(page, baseURL)
+      // Hack just in-case the document event fires before our main listener is added.
+      if (options.renderAfterDocumentEvent) {
+        await page.evaluateOnNewDocument(listenForRender, options)
+      }
 
-    const timeout = options.timeout
-    let tim: NodeJS.Timeout | null = null
-    if (timeout && !options.renderAfterTime) {
-      tim = setTimeout(() => {
-        if (options.renderAfterDocumentEvent) {
-          throw new Error(
-                `Could not prerender: event '${options.renderAfterDocumentEvent}' did not occur within ${Math.round(timeout / 1000)}s`)
+      const navigationOptions = {
+        waituntil: 'networkidle0',
+        timeout: options.timeout,
+        ...options.navigationOptions,
+      }
+      await page.goto(`${baseURL}${route}`, navigationOptions)
+
+      // Wait for some specific element exists
+      if (options.renderAfterElementExists) {
+        try {
+          await page.waitForSelector(options.renderAfterElementExists, { timeout: options.timeout })
+        } catch (e) {
+          await page.close()
+          const timeS = Math.round(options.timeout / 100) / 10
+          throw new Error(`Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${timeS}s`)
         }
-        if (options.renderAfterElementExists) {
-          throw new Error(
-                `Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${Math.round(timeout / 1000)}s`)
-        }
-        throw new Error(
-              `Could not prerender: timed-out after ${Math.round(timeout / 1000)}s`)
-      }, timeout)
+      }
+
+      // Once this completes, it's safe to capture the page contents.
+      const res = await page.evaluate(waitForRender, options)
+      if (res) {
+        throw new Error(res)
+      }
+
+      const result: RenderedRoute = {
+        originalRoute: route,
+        route: await page.evaluate('window.location.pathname') as string,
+        html: await page.content(),
+      }
+      return result
+    } finally {
+      await page.close()
     }
-
-    // Hack just in-case the document event fires before our main listener is added.
-    if (options.renderAfterDocumentEvent) {
-      await page.evaluateOnNewDocument(listenForRender, options)
-    }
-
-    const navigationOptions = {
-      waituntil: 'networkidle0',
-      timeout: options.timeout,
-      ...options.navigationOptions,
-    }
-    await page.goto(`${baseURL}${route}`, navigationOptions)
-
-    // Wait for some specific element exists
-    if (options.renderAfterElementExists) {
-      await page.waitForSelector(options.renderAfterElementExists, { timeout: options.timeout })
-    }
-
-    // Once this completes, it's safe to capture the page contents.
-    await page.evaluate(waitForRender, this.options)
-
-    if (tim) {
-      clearTimeout(tim)
-    }
-
-    const result: RenderedRoute = {
-      originalRoute: route,
-      route: await page.evaluate('window.location.pathname') as string,
-      html: await page.content(),
-    }
-
-    await page.close()
-    return result
   }
 
   async destroy () {
     if (this.puppeteer) {
-      try {
-        await this.puppeteer.close()
-      } catch (e) {
-        console.error(e)
-        console.error('[Prerenderer - PuppeteerRenderer] Unable to close Puppeteer')
-
-        throw e
-      }
+      await this.puppeteer.close()
     }
   }
 }

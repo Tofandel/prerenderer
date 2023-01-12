@@ -8,14 +8,22 @@ import { validate } from 'schema-utils'
 import { Schema } from 'schema-utils/declarations/validate'
 import deepMerge from 'ts-deepmerge'
 
+// Fetch polyfill for jsdom
+import { fetch, Headers, Request, Response } from 'whatwg-fetch'
+
 const shim = function (window: DOMWindow) {
-  /* eslint-disable @typescript-eslint/ban-ts-comment */
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/ban-ts-comment */
   // @ts-ignore
   window.SVGElement = window.HTMLElement
   // @ts-ignore
   window.localStorage = new Storage()
   // @ts-ignore
   window.sessionStorage = new Storage()
+  global.XMLHttpRequest = window.XMLHttpRequest
+  window.fetch = fetch
+  window.Headers = Headers
+  window.Request = Request
+  window.Response = Response
   /* eslint-enable */
 }
 
@@ -38,7 +46,7 @@ export default class JSDOMRenderer implements IRenderer {
     // NOOP
   }
 
-  async renderRoutes (routes: Array<string>, prerenderer: Prerenderer) {
+  renderRoutes (routes: Array<string>, prerenderer: Prerenderer) {
     const rootOptions = prerenderer.getOptions()
 
     const limiter = promiseLimit<RenderedRoute>(this.options.maxConcurrentRoutes)
@@ -48,13 +56,11 @@ export default class JSDOMRenderer implements IRenderer {
       routes.map(
         route => limiter(() => this.getPageContent(host, route)),
       ),
-    ).catch(e => {
-      console.error(e)
-      return Promise.reject(e)
-    })
+    )
   }
 
   private getPageContent (host: string, originalRoute: string) {
+    const options = this.options
     return new Promise<RenderedRoute>((resolve, reject) => {
       let int: NodeJS.Timer | null = null
       let tim: NodeJS.Timeout | null = null
@@ -86,54 +92,50 @@ export default class JSDOMRenderer implements IRenderer {
         beforeParse: (window) => {
           // Injection / shimming must happen before we resolve with the window,
           // otherwise the page will finish loading before the injection happens.
-          if (this.options.inject) {
-            window[this.options.injectProperty] = this.options.inject
+          if (options.inject) {
+            window[options.injectProperty] = options.inject
           }
 
           window.addEventListener('error', function (event) {
             console.error(event.error)
           })
 
-          const timeout = this.options.timeout
+          const timeout = options.timeout
 
           const doc = window.document
 
-          // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
-          if (this.options.renderAfterDocumentEvent) {
-            const event = this.options.renderAfterDocumentEvent
-            doc.addEventListener(event, captureDocument)
+          if (timeout && !options.renderAfterTime) {
+            const timeS = Math.round(timeout / 100) / 10
+            tim = setTimeout(() => {
+              int && clearInterval(int)
 
-            if (timeout) {
-              tim = setTimeout(() => reject(new Error(
-                `Could not prerender: event '${event}' did not occur within ${Math.round(timeout / 1000)}s`),
-              ), timeout)
-            }
-            // CAPTURE ONCE A SPECIFC ELEMENT EXISTS
-          } else if (this.options.renderAfterElementExists) {
-            const selector = this.options.renderAfterElementExists
+              if (options.renderAfterDocumentEvent) {
+                reject(new Error(`Could not prerender: event '${options.renderAfterDocumentEvent}' did not occur within ${timeS}s`))
+              } else if (options.renderAfterElementExists) {
+                reject(new Error(`Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${timeS}s`))
+              } else {
+                reject(new Error(`Could not prerender: timed-out after ${timeS}s`))
+              }
+            }, timeout)
+          }
+
+          if (options.renderAfterDocumentEvent) {
+            // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
+            const event = options.renderAfterDocumentEvent
+            doc.addEventListener(event, captureDocument)
+          } else if (options.renderAfterElementExists) {
+            // CAPTURE ONCE A SPECIFIC ELEMENT EXISTS
+            const selector = options.renderAfterElementExists
             int = setInterval(() => {
               if (doc.querySelector(selector)) {
                 captureDocument()
               }
             }, 50)
-
-            if (timeout) {
-              tim = setTimeout(() => reject(new Error(
-                `Could not prerender: element '${selector}' not found after ${Math.round(timeout / 1000)}s`),
-              ), timeout)
-            }
-          } else if (this.options.renderAfterTime) {
+          } else if (options.renderAfterTime) {
             // CAPTURE AFTER A NUMBER OF MILLISECONDS
-            setTimeout(captureDocument, this.options.renderAfterTime)
+            setTimeout(captureDocument, options.renderAfterTime)
           } else {
             // DEFAULT: RUN IMMEDIATELY
-
-            if (timeout) {
-              tim = setTimeout(() => reject(new Error(
-                `Could not prerender: timed-out after ${Math.round(timeout / 1000)}s`),
-              ), timeout)
-            }
-
             captureDocument()
           }
           shim(window)

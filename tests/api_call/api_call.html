@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prerenderer Test: API Call</title>
+</head>
+<body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/api')
+        .then(res => res.text())
+        .then(res => {
+          document.body.innerHTML = res
+          document.dispatchEvent(new Event('please-render'))
+        })
+    })
+  </script>
+</body>
+</html>

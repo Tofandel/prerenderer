@@ -32,6 +32,16 @@ export default class Server {
 
     this.prerenderer.modifyServer('pre-static')
 
+    if (this.options.server && this.options.server.proxy) {
+      const proxy = this.options.server.proxy // Avoid possible external mutation to undefined
+      await import('http-proxy-middleware').then(({ createProxyMiddleware }) => {
+        Object.keys(proxy).forEach((proxyPath) =>
+          server.use(proxyPath, createProxyMiddleware({ logLevel: 'warn', ...proxy[proxyPath] })))
+      }).catch(() => {
+        throw new Error('The http-proxy-middleware module could not be loaded, did you install it?')
+      })
+    }
+
     server.get('*', express.static(this.options.staticDir, {
       dotfiles: 'allow',
     }))
@@ -39,16 +49,6 @@ export default class Server {
     this.prerenderer.modifyServer('post-static')
 
     this.prerenderer.modifyServer('pre-fallback')
-
-    if (this.options.server && this.options.server.proxy) {
-      const proxy = this.options.server.proxy // Avoid possible external mutation to undefined
-      await import('http-proxy-middleware').then(({ createProxyMiddleware }) => {
-        Object.keys(proxy).forEach((proxyPath) =>
-          server.use(proxyPath, createProxyMiddleware(proxy[proxyPath])))
-      }).catch(() => {
-        throw new Error('The http-proxy-middleware module could not be loaded, did you install it?')
-      })
-    }
 
     server.get('*', (req, res) => {
       res.sendFile(this.options.indexPath ? path.resolve(this.options.staticDir, this.options.indexPath) : path.join(this.options.staticDir, 'index.html'))

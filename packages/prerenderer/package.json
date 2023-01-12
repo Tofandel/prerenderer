@@ -11,12 +11,9 @@
   "types": "types/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest ./test --silent --runInBand",
-    "test:logs": "jest ./test --runInBand",
+    "test": "jest ./test --silent",
+    "test:logs": "jest ./test",
     "prepublishOnly": "npm run build"
-  },
-  "jest": {
-    "testTimeout": 10000
   },
   "files": [
     "dist",

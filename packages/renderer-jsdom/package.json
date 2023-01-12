@@ -50,7 +50,11 @@
   "dependencies": {
     "@types/jsdom": "^20.0.1",
     "jsdom": "^20.0.3",
-    "promise-limit": "^2.7.0"
+    "promise-limit": "^2.7.0",
+    "whatwg-fetch": "^3.6.2"
+  },
+  "jest": {
+    "testTimeout": 10000
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "file:../prerenderer"
