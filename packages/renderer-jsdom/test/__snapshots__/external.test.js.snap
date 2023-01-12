@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders routes with externally loaded script and encoding 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: External script</title>
+  <script src="assets/script.js"></script>
+</head>
+<body>
+
+
+</body></html>",
+    "originalRoute": "/external_script.html",
+    "route": "/external_script.html",
+  },
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: External script with unicode</title>
+  <script src="assets/scripté.js"></script>
+</head>
+<body>
+
+
+</body></html>",
+    "originalRoute": "/external_scripté.html",
+    "route": "/external_scripté.html",
+  },
+]
+`;

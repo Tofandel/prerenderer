@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`time's-out if event doesn't fire after 1500ms 1`] = `"Could not prerender: event 'non-existing' did not occur within 1.5s"`;

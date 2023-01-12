@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`proxies a request to an alternative server 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: API Call</title>
+</head>
+<body><p>Proxied</p></body></html>",
+    "originalRoute": "/api_call.html",
+    "route": "/api_call.html",
+  },
+]
+`;
+
+exports[`uses the result of a fetch call 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: API Call</title>
+</head>
+<body>This is the result of the api call
+</body></html>",
+    "originalRoute": "/api_call.html",
+    "route": "/api_call.html",
+  },
+]
+`;

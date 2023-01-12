@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders after 600ms, before should-already-be-rendered is dispatched 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: Dynamic page</title>
+</head>
+<body><p id="test-element">Render Output</p></body></html>",
+    "originalRoute": "/",
+    "route": "/",
+  },
+]
+`;
+
+exports[`renders after 1200ms, after should-already-be-rendered is dispatched 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: Dynamic page</title>
+</head>
+<body><p id="late-element">Oh no, it's too late!</p></body></html>",
+    "originalRoute": "/dynamic.html",
+    "route": "/dynamic.html",
+  },
+]
+`;
