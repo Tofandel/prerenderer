@@ -5,7 +5,6 @@ import puppeteer, { Browser, Page } from 'puppeteer'
 import { PuppeteerRendererFinalOptions, PuppeteerRendererOptions, schema, defaultOptions } from './Options'
 import { waitForRender, listenForRender } from './waitForRender'
 import { validate } from 'schema-utils'
-import { Schema } from 'schema-utils/declarations/validate'
 import deepMerge from 'ts-deepmerge'
 
 export default class PuppeteerRenderer implements IRenderer {
@@ -13,7 +12,7 @@ export default class PuppeteerRenderer implements IRenderer {
   private readonly options: PuppeteerRendererFinalOptions
 
   constructor (options: PuppeteerRendererOptions = {}) {
-    validate(schema as Schema, options, {
+    validate(schema, options, {
       name: 'Renderer Puppeteer',
       baseDataPath: 'options',
     })
@@ -43,8 +42,29 @@ export default class PuppeteerRenderer implements IRenderer {
 
     process.on('uncaughtException', cleanup)
 
-    // Is it a good idea to pass the whole option list there?
-    this.puppeteer = await puppeteer.launch(this.options)
+    // Previously the whole option object was passed to `launch` which was not the best idea
+    // We do a bit of backward compatibility here
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const {
+      maxConcurrentRoutes,
+      inject,
+      injectProperty,
+      timeout,
+      args,
+      headless,
+      pageSetup,
+      pageHandler,
+      consoleHandler,
+      viewport,
+      navigationOptions,
+      launchOptions,
+      ...legacyOptions
+    } = this.options
+    /* eslint-enable */
+    if (Object.keys(legacyOptions).length > 1) {
+      console.warn('You are passing options to puppeteer launch using root options, which has been deprecated put them in "launchOptions" instead [Affected: ' + Object.keys(legacyOptions).join(',') + ']')
+    }
+    this.puppeteer = await puppeteer.launch({ headless: this.options.headless || true, ...this.options.launchOptions, ...legacyOptions })
   }
 
   async handleRequestInterception (page: Page, baseURL: string) {
@@ -96,6 +116,8 @@ export default class PuppeteerRenderer implements IRenderer {
 
       await this.handleRequestInterception(page, baseURL)
 
+      options.pageSetup && await options.pageSetup(page, route)
+
       // Hack just in-case the document event fires before our main listener is added.
       if (options.renderAfterDocumentEvent) {
         await page.evaluateOnNewDocument(listenForRender, options)
@@ -107,6 +129,8 @@ export default class PuppeteerRenderer implements IRenderer {
         ...options.navigationOptions,
       }
       await page.goto(`${baseURL}${route}`, navigationOptions)
+
+      options.pageHandler && await options.pageHandler(page, route)
 
       // Wait for some specific element exists
       if (options.renderAfterElementExists) {

@@ -10,7 +10,7 @@
 [![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)]()
 [![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)]()
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
-[![license](https://img.shields.io/github/license/tribex/prerenderer.svg)]()
+[![license](https://img.shields.io/github/license/JoshTheDerf/prerenderer.svg)]()
 
 </div>
 
@@ -18,7 +18,7 @@
 
 <div align="center">
 
-[![NPM](https://nodei.co/npm/@prerenderer/prerenderer.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/@prerenderer/prerenderer/)
+[![NPM](https://nodei.co/npm/@prerenderer/prerenderer.png?mini=true)](https://nodei.co/npm/@prerenderer/prerenderer/)
 
 </div>
 
@@ -26,10 +26,6 @@
 
 The goal of this package is to provide a simple, framework-agnostic prerendering solution that is easily extensible and
 usable for any site or single-page-app.
-
-[prerenderer-webpack-plugin](https://github.com/tribex/prerenderer-webpack-plugin) is now deprecated, but still
-functional. It will be replaced by [prerender-spa-plugin](https://github.com/chrisvfritz/prerender-spa-plugin) v3 in the
-near future.
 
 Now, if you're not familiar with the concept of *prerendering*, you might predictably ask...
 
@@ -55,12 +51,11 @@ In the interest of transparency, there are some use-cases where prerendering mig
   just in-case...
 - **Dynamic Content** - If your render routes that have content that's specific to the user viewing it or other dynamic
   sources, you should make sure you have placeholder components that can display until the dynamic content loads on the
-  client-side. Otherwise it might be a tad weird.
+  client-side. Otherwise, it might be a tad weird.
 
 ## Example `prerenderer` Usage
 
-(It's much simpler if you use `prerenderer` with [webpack](https://github.com/tribex/prerenderer-webpack-plugin) or
-another build system.)
+(It's much simpler if you use `prerenderer` with webpack or another build system.)
 
 **Input**
 
@@ -127,28 +122,21 @@ prerenderer.initialize()
     })
 
     // Shut down the file server and renderer.
-    prerenderer.destroy()
+    return prerenderer.destroy()
   })
   .catch(err => {
     // Shut down the server and renderer.
-    prerenderer.destroy()
+    return prerenderer.destroy()
     // Handle errors.
   })
 ```
 
 ## Available Renderers
 
-- `@prerenderer/renderer-jsdom` - Uses [jsdom](https://npmjs.com/package/jsdom). Extremely fast, but unreliable and
+- `@prerenderer/renderer-jsdom` - Uses [jsdom](https://npmjs.com/package/jsdom). ~~Extremely fast~~, but unreliable and
   cannot handle advanced usages. May not work with all front-end frameworks and apps.
-- `@prerenderer/renderer-puppeteer` - Uses [puppeteer](https://github.com/GoogleChrome/puppeteer) to render pages in
+- `@prerenderer/renderer-puppeteer` - Uses [puppeteer](https://github.com/puppeteer/puppeteer) to render pages in
   headless Chrome. Simpler and more reliable than the previous `ChromeRenderer`.
-
-## Removed in `prerenderer 0.6.0`:
-
-- `prerenderer.BrowserRenderer` - Opens the system default browser to render the page. (
-  Use `@prerenderer/renderer-jsdom` or `@prerenderer/renderer-puppeteer` instead.)
-- `prerenderer.ChromeRenderer` - Uses Google Chrome in headless mode over RDP.  (Use `@prerenderer/renderer-puppeteer`
-  instead.)
 
 ### Which renderer should I use?
 
@@ -157,7 +145,13 @@ prerenderer.initialize()
 **Use `@prerenderer/renderer-jsdom` if:** You need to prerender thousands upon thousands of pages, but quality isn't all
 that important, and you're willing to work around issues for more advanced cases. (Programmatic SVG support, etc.)
 
+> **_NOTE:_** From our tests, the JSDOM renderer is now much slower than puppeteer, so there is little reason to use it.
+>
+> An alternative faster dom renderer using [linkedom](https://github.com/WebReflection/linkedom#readme) is planned
+
 ## Documentation
+
+All of the packages are strongly typed using typescript, if some documentation is missing or when in doubt, we recommend referring to the types which are self documenting
 
 ### Prerenderer Options
 
@@ -174,28 +168,27 @@ that important, and you're willing to work around issues for more advanced cases
 |--------|----------|-----------|----------------------------|----------------------------------------|
 | port   | Integer  | No        | First free port after 8000 | The port for the app server to run on. |
 | proxy  | Object   | No        | No proxying                | Proxy configuration. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-proxy) |
-| before | Function | No        | No operation               | Function for adding custom server middleware. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-before) |
+| ~~before~~ | Function | No        | No operation           | Deprecated: Use `hookServer()` instead. Function for adding custom server middleware. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-before) |
 
 ### Prerenderer Methods
 
 - `constructor(options: Object)` - Creates a Prerenderer instance and sets up the renderer and server objects.
-- `initialize(): Promise<>` - Starts the static file server and renderer instance (where appropriate).
-- `getOptions(): Object` - Returns the options used to configure `prerenderer`
-- `getServer(): (Internal Server Class)` - Gets the instanced server class. **INTERNAL**
-- `getRenderer(): (Instanced IRenderer Class)` - Gets the instanced renderer class. **INTERNAL**
-- `modifyServer(Server: Server Instance, stage: string)` - **DANGEROUS** Called by the server to allow renderers to
-  modify the server at various stages. Avoid if at all possible. **INTERNAL**
-- `destroy()` - Destroys the static file server and renderer, freeing the resources.
+- `hookServer(cb: (server: Express) => void, stage: Stage = 'post-fallback')` - Use this method to hook into the express server to add middlewares, routes etc
+- `initialize(): Promise<void>` - Starts the static file server and renderer instance (where appropriate).
+- `getOptions(): PrerenderFinalOptions` - Returns the options used to configure `prerenderer`
+- `getServer(): Server` - Returns the Server class holding the express server
+- `destroy(): Promise<void>` - Destroys the static file server and renderer, freeing the resources.
 - `renderRoutes(routes: Array<String>): Promise<Array<RenderedRoute>>` - Renders set of routes. Returns a promise
   resolving to an array of rendered routes in the form of:
 
 ```js
 [
   {
-    route: '/route/path', // The route path.
+    originalRoute: '/route/path', // The requested route path.
+    route: '/route/redirected-path', // The final route path after redirection or history change.
     html: '<!DOCTYPE html><html>...</html>' // The prerendered HTML for the route
   },
-  ...
+  // ...
 ]
 ```
 
@@ -203,29 +196,38 @@ that important, and you're willing to work around issues for more advanced cases
 
 ### `@prerenderer/renderer-jsdom` Options
 
-| Option                   | Type                   | Required? | Default                  | Description                                                                                                                                                                                         |
-|--------------------------|------------------------|-----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| maxConcurrentRoutes      | Number                 | No        | 0 (No limit)             | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
-| inject                   | Object                 | No        | None                     | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
-| injectProperty           | String                 | No        | `__PRERENDER_INJECTED`   | The property to mount `inject` to during rendering. Does nothing if `inject` isn't set.                                                                                                             |
-| renderAfterDocumentEvent | String                 | No        | None                     | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
-| renderAfterElementExists | String (Selector)      | No        | None                     | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
-| renderAfterTime          | Integer (Milliseconds) | No        | None                     | Wait to render until a certain amount of time has passed.                                                                                                                                           |
+None of the options are required, by default the page will render on DOMContentLoaded
+
+| Option                   | Type                   | Default                  | Description                                                                                                                                                                                         |
+|--------------------------|------------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| maxConcurrentRoutes      | Number                 | 0 (No limit)             | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                               |
+| inject                   | Object                 | None                     | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default. |
+| injectProperty           | String                 | `__PRERENDER_INJECTED`   | The property to mount `inject` to during rendering. Does nothing if `inject` isn't set.                                                                                                             |
+| renderAfterDocumentEvent | String                 | DOMContentLoaded                     | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                     |
+| renderAfterElementExists | String (Selector)      | None                     | Wait to render until the specified element is detected using `document.querySelector`                                                                                                               |
+| renderAfterTime          | Integer (Milliseconds) | None                     | Wait to render until a certain amount of time has passed.                                                                                                                                           |
+| timeout                  | Integer (Milliseconds) | 30000                    | If this timeout triggers while waiting for an event or an element, the rendering will abort with an error.                                                                                                                                                                                                             |
+| JSDOMOptions             | [BaseOptions](https://github.com/jsdom/jsdom#simple-options) | `{ runScripts: 'dangerously', resources: 'usable', pretendToBeVisual: true }`| Additional options for [`JSDOM.fromUrl`](https://github.com/jsdom/jsdom#fromurl)                                                                                                                                                                                                            |
 
 ### `@prerenderer/renderer-puppeteer` Options
 
-| Option                                                                                                                 | Type                                                                                                                                       | Required? | Default                | Description                                                                                                                                                                                                                                                           |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|-----------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| maxConcurrentRoutes                                                                                                    | Number                                                                                                                                     | No        | 0 (No limit)           | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                                                                                                 |
-| inject                                                                                                                 | Object                                                                                                                                     | No        | None                   | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default.                                                                   |
-| injectProperty                                                                                                         | String                                                                                                                                     | No        | `__PRERENDER_INJECTED` | The property to mount `inject` to during rendering. Does nothing if `inject` isn't set.                                                                                                                                                                                  |
-| renderAfterDocumentEvent                                                                                               | String                                                                                                                                     | No        | None                   | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                                                                                       |
-| renderAfterElementExists                                                                                               | String (Selector)                                                                                                                          | No        | None                   | Wait to render until the specified element is detected using `document.querySelector`                                                                                                                                                                                 |
-| renderAfterTime                                                                                                        | Integer (Milliseconds)                                                                                                                     | No        | None                   | Wait to render until a certain amount of time has passed.                                                                                                                                                                                                             |
-| skipThirdPartyRequests                                                                                                 | Boolean                                                                                                                                    | No        | `false`                | Automatically block any third-party requests. (This can make your pages load faster by not loading non-essential scripts, styles, or fonts.)                                                                                                                          |
-| consoleHandler                                                                                                         | function(route: String, message: [ConsoleMessage](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-consolemessage)) | No        | None                   | Allows you to provide a custom console.* handler for pages. Argument one to your function is the route being rendered, argument two is the [Puppeteer ConsoleMessage](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-consolemessage) object. |
-| [[Puppeteer Launch Options]](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#puppeteerlaunchoptions) | ?                                                                                                                                          | No        | None                   | Any additional options will be passed to `puppeteer.launch()`, such as `headless: false`.                                                                                                                                                                             |
-| [[Puppeteer Navigation Options]](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagegotourl-options) | ?                                                                                                                                         | No        | None                   | Any additional options will be passed to `page.goto()`, such as `timeout: 30000ms`.                                                                                                                                                                             |
+None of the options are required, by default the page will render when puppeteer is ready which is when DOMContentLoaded fires
+
+| Option                   | Type                                                                                                                                       | Default                | Description                                                                                                                                                                                                                                                          |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| maxConcurrentRoutes      | Number                                                                                                                                     | 0 (No limit)           | The number of routes allowed to be rendered at the same time. Useful for breaking down massive batches of routes into smaller chunks.                                                                                                                                |
+| inject                   | Object                                                                                                                                     | None                   | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default.                                                                  |
+| injectProperty           | String                                                                                                                                     | `__PRERENDER_INJECTED` | The property to mount `inject` to during rendering. Does nothing if `inject` isn't set.                                                                                                                                                                              |
+| renderAfterDocumentEvent | String                                                                                                                                     | DOMContentLoaded       | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                                                                                      |
+| renderAfterElementExists | String (Selector)                                                                                                                          | None                   | Wait to render until the specified element is detected using `document.querySelector`                                                                                                                                                                                |
+| renderAfterTime          | Integer (Milliseconds)                                                                                                                     | None                   | Wait to render until a certain amount of time has passed.                                                                                                                                                                                                            |
+| timeout                  | Integer (Milliseconds)                                                                                                                     | 30000                  | If this timeout triggers while waiting for an event or an element, the rendering will abort with an error.                                                                                                                                                           |
+| skipThirdPartyRequests   | Boolean                                                                                                                                    | `false`                | Automatically block any third-party requests. (This can make your pages load faster by not loading non-essential scripts, styles, or fonts.)                                                                                                                         |
+| headless                 | Boolean                                                                                                                                    | `true`                 | Whether to run the browser in headless mode                                                                                                                                                                                                                          |
+| consoleHandler           | function(route: String, message: [ConsoleMessage](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-consolemessage)) | None                   | Allows you to provide a custom console.* handler for pages. Argument one to your function is the route being rendered, argument two is the [Puppeteer ConsoleMessage](https://github.com/puppeteer/puppeteer/blob/main/docs/api/puppeteer.consolemessage.md) object. |
+| viewport                 | [Viewport](https://github.com/puppeteer/puppeteer/blob/main/docs/api/puppeteer.viewport.md)                                                | None                   | Those options will be passed to `puppeteer.launch()`.                                                                                                                                                                                                                |
+| launchOptions            | [LaunchOptions](https://github.com/puppeteer/puppeteer/blob/main/docs/api/puppeteer.launchoptions.md)                                      | None                   | Those options will be passed to `puppeteer.launch()`.                                                                                                                                                                                                                |
+| navigationOptions        | [WaitForOptions](https://github.com/puppeteer/puppeteer/blob/main/docs/api/puppeteer.waitforoptions.md)                                    | None                   | Those options will be passed to `page.goto()`, such as `timeout: 30000ms`.                                                                                                                                                                                           |
 
 ---
 
@@ -238,6 +240,11 @@ that important, and you're willing to work around issues for more advanced cases
   - For **Vue.js 1** use [`replace: false`](http://vuejs.org/api/#replace) on root components.
   - For **Vue.js 2**  Ensure your root component has the same id as the prerendered element it's replacing. Otherwise
     you'll end up with duplicated content.
+
+## Contributing
+
+This is a monorepo, so you'll need to clone the repository, then run `npm install` inside
+Run `npm run build && npm run test` to make sure that everything is working correctly
 
 ## License (MIT)
 

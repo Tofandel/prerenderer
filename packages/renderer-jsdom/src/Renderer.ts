@@ -1,11 +1,10 @@
 import { IRenderer, RenderedRoute, Prerenderer } from '@prerenderer/prerenderer'
 import Storage from './Storage'
 
-import { DOMWindow, JSDOM } from 'jsdom'
+import { DOMWindow } from 'jsdom'
 import promiseLimit from 'promise-limit'
 import { defaultOptions, JSDOMRendererFinalOptions, JSDOMRendererOptions, schema } from './Options'
 import { validate } from 'schema-utils'
-import { Schema } from 'schema-utils/declarations/validate'
 import deepMerge from 'ts-deepmerge'
 
 // Fetch polyfill for jsdom
@@ -28,10 +27,10 @@ const shim = function (window: DOMWindow) {
 }
 
 export default class JSDOMRenderer implements IRenderer {
-  private options: JSDOMRendererFinalOptions
+  private readonly options: JSDOMRendererFinalOptions
 
   constructor (options: JSDOMRendererOptions = {}) {
-    validate(schema as Schema, options, {
+    validate(schema, options, {
       name: 'Renderer JSDOM',
       baseDataPath: 'options',
     })
@@ -64,84 +63,89 @@ export default class JSDOMRenderer implements IRenderer {
     return new Promise<RenderedRoute>((resolve, reject) => {
       let int: NodeJS.Timer | null = null
       let tim: NodeJS.Timeout | null = null
-
-      const captureDocument = () => {
-        if (int !== null) {
-          clearInterval(int)
-        }
-        void pr.then((dom) => {
-          if (tim !== null) {
-            clearTimeout(tim)
+      import('jsdom').then(({ JSDOM }) => {
+        const captureDocument = () => {
+          if (int !== null) {
+            clearInterval(int)
           }
+          void pr.then((dom) => {
+            if (tim !== null) {
+              clearTimeout(tim)
+            }
 
-          const result: RenderedRoute = {
-            originalRoute,
-            route: originalRoute,
-            html: dom.serialize(),
-          }
+            const result: RenderedRoute = {
+              originalRoute,
+              route: originalRoute,
+              html: dom.serialize(),
+            }
 
-          dom.window.close()
-          resolve(result)
-        })
-      }
-
-      const pr = JSDOM.fromURL(`${host}${originalRoute}`, {
-        runScripts: 'dangerously',
-        resources: 'usable',
-        pretendToBeVisual: true,
-        beforeParse: (window) => {
-          // Injection / shimming must happen before we resolve with the window,
-          // otherwise the page will finish loading before the injection happens.
-          if (options.inject) {
-            window[options.injectProperty] = options.inject
-          }
-
-          window.addEventListener('error', function (event) {
-            console.error(event.error)
+            dom.window.close()
+            resolve(result)
           })
+        }
 
-          const timeout = options.timeout
+        const pr = JSDOM.fromURL(`${host}${originalRoute}`, {
+          runScripts: 'dangerously',
+          resources: 'usable',
+          pretendToBeVisual: true,
+          ...options.JSDOMOptions,
+          beforeParse: (window) => {
+            if (options.JSDOMOptions?.beforeParse) {
+              options.JSDOMOptions.beforeParse(window)
+            }
+            // Injection / shimming must happen before we resolve with the window,
+            // otherwise the page will finish loading before the injection happens.
+            if (options.inject) {
+              window[options.injectProperty] = options.inject
+            }
 
-          const doc = window.document
+            window.addEventListener('error', function (event) {
+              console.error(event.error)
+            })
 
-          if (timeout && !options.renderAfterTime) {
-            const timeS = Math.round(timeout / 100) / 10
-            tim = setTimeout(() => {
-              int && clearInterval(int)
+            const timeout = options.timeout
 
-              if (options.renderAfterDocumentEvent) {
-                reject(new Error(`Could not prerender: event '${options.renderAfterDocumentEvent}' did not occur within ${timeS}s`))
-              } else if (options.renderAfterElementExists) {
-                reject(new Error(`Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${timeS}s`))
-              } else {
-                reject(new Error(`Could not prerender: timed-out after ${timeS}s`))
-              }
-            }, timeout)
-          }
+            const doc = window.document
 
-          if (options.renderAfterDocumentEvent) {
+            if (timeout && !options.renderAfterTime) {
+              const timeS = Math.round(timeout / 100) / 10
+              tim = setTimeout(() => {
+                int && clearInterval(int)
+
+                if (options.renderAfterDocumentEvent) {
+                  reject(new Error(`Could not prerender: event '${options.renderAfterDocumentEvent}' did not occur within ${timeS}s`))
+                } else if (options.renderAfterElementExists) {
+                  reject(new Error(`Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${timeS}s`))
+                } else {
+                  reject(new Error(`Could not prerender: timed-out after ${timeS}s`))
+                }
+              }, timeout)
+            }
+
+            if (options.renderAfterDocumentEvent) {
             // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
-            const event = options.renderAfterDocumentEvent
-            doc.addEventListener(event, captureDocument)
-          } else if (options.renderAfterElementExists) {
+              const event = options.renderAfterDocumentEvent
+              doc.addEventListener(event, captureDocument)
+            } else if (options.renderAfterElementExists) {
             // CAPTURE ONCE A SPECIFIC ELEMENT EXISTS
-            const selector = options.renderAfterElementExists
-            int = setInterval(() => {
-              if (doc.querySelector(selector)) {
-                captureDocument()
-              }
-            }, 50)
-          } else if (options.renderAfterTime) {
+              const selector = options.renderAfterElementExists
+              int = setInterval(() => {
+                if (doc.querySelector(selector)) {
+                  captureDocument()
+                }
+              }, 50)
+            } else if (options.renderAfterTime) {
             // CAPTURE AFTER A NUMBER OF MILLISECONDS
-            setTimeout(captureDocument, options.renderAfterTime)
-          } else {
+              setTimeout(captureDocument, options.renderAfterTime)
+            } else {
             // DEFAULT: RUN IMMEDIATELY
-            captureDocument()
-          }
-          shim(window)
-        },
-      })
-      pr.catch(reject)
+              doc.addEventListener('DOMContentLoaded', captureDocument)
+            }
+            shim(window)
+          },
+        })
+        pr.catch(reject)
+      }).catch(reject)
     })
   }
 

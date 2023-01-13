@@ -7,7 +7,8 @@ const testDir = path.resolve(__dirname, '../../../tests/external')
 test('renders routes with externally loaded script and encoding', async () => {
   const prerenderer = new Prerenderer({
     staticDir: testDir,
-    renderer: new Renderer(),
+    renderer: new Renderer({
+    }),
   })
 
   await prerenderer.initialize()
@@ -15,4 +16,6 @@ test('renders routes with externally loaded script and encoding', async () => {
   await prerenderer.destroy()
 
   expect(renderedRoutes).toMatchSnapshot()
+  expect(renderedRoutes[0].html).toContain('Render Output')
+  expect(renderedRoutes[1].html).toContain('Renderé the Outputé')
 })

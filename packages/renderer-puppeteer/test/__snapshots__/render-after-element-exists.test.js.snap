@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders after #test-element is created, before should-already-be-rendered is dispatched 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: Dynamic page</title>
+</head>
+<body><p id="test-element">Render Output</p></body></html>",
+    "originalRoute": "/dynamic.html",
+    "route": "/dynamic.html",
+  },
+]
+`;
+
+exports[`renders after after #late-element exists 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: Dynamic page</title>
+</head>
+<body><p id="late-element">Oh no, it's too late!</p></body></html>",
+    "originalRoute": "/dynamic.html",
+    "route": "/dynamic.html",
+  },
+]
+`;
+
+exports[`time's-out if element doesn't exists after 2000ms 1`] = `"Protocol error: Connection closed. Most likely the page has been closed."`;

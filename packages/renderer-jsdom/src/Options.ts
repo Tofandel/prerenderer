@@ -1,4 +1,6 @@
 import { JSONSchemaType } from 'ajv'
+import { BaseOptions } from 'jsdom'
+import { Schema } from 'schema-utils/declarations/validate'
 
 export interface JSDOMRendererOptions {
   maxConcurrentRoutes?: number
@@ -8,7 +10,7 @@ export interface JSDOMRendererOptions {
   inject?: unknown
   injectProperty?: string
   timeout?: number
-  skipThirdPartyRequests?: boolean
+  JSDOMOptions?: BaseOptions
 }
 
 export const defaultOptions = {
@@ -20,7 +22,7 @@ export const defaultOptions = {
 
 export type JSDOMRendererFinalOptions = JSDOMRendererOptions & typeof defaultOptions
 
-export const schema: JSONSchemaType<Omit<JSDOMRendererOptions, 'inject'>> = {
+export const schema: JSONSchemaType<Omit<JSDOMRendererOptions, 'inject'>> & Schema = {
   type: 'object',
   additionalProperties: true,
   properties: {
@@ -53,9 +55,10 @@ export const schema: JSONSchemaType<Omit<JSDOMRendererOptions, 'inject'>> = {
       description: 'The key of the injected value into window',
       nullable: true,
     },
-    skipThirdPartyRequests: {
-      type: 'boolean',
-      description: 'Automatically block any third-party requests. (This can make your pages load faster by not loading non-essential scripts, styles, or fonts.)',
+    JSDOMOptions: {
+      type: 'object',
+      description: 'Additional options for JSDOM',
+      additionalProperties: true,
       nullable: true,
     },
   },

@@ -1,3 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`renders after after should-already-be-rendered is dispatched 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: Dynamic page</title>
+</head>
+<body><p id="late-element">Oh no, it's too late!</p></body></html>",
+    "originalRoute": "/dynamic.html",
+    "route": "/dynamic.html",
+  },
+]
+`;
+
+exports[`renders after please-render is dispatched, before should-already-be-rendered is dispatched 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: Dynamic page</title>
+</head>
+<body><p id="test-element">Render Output</p></body></html>",
+    "originalRoute": "/dynamic.html",
+    "route": "/dynamic.html",
+  },
+]
+`;
+
 exports[`time's-out if event doesn't fire after 1500ms 1`] = `"Could not prerender: event 'non-existing' did not occur within 1.5s"`;

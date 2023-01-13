@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Monorepo migration
 - Typescript migration
 
+### Deprecated
+- `server.before` option, use `new Prerenderer(...).hookServer(cb, stage?)` instead
+
 ### Security
 - Updated all dependencies
 

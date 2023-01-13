@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Monorepo migration
 - Typescript migration
+- Use the newer JSDOM api
+
+### Added
+- Fetch implementation
 
 ### Security
 - Updated all dependencies

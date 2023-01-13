@@ -31,7 +31,7 @@ export default class WebpackPrerenderSPAPlugin {
       staticDir: compiler.options.output.path || '/',
       ...this.options,
     })
-    PrerendererInstance.hookServer('post-fallback', (server) => {
+    PrerendererInstance.hookServer((server) => {
       const express = server.getExpressServer()
       // Express doesn't have complete typings yet
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -40,7 +40,7 @@ export default class WebpackPrerenderSPAPlugin {
         if (route.route && route.route.path === '*') {
           routes.splice(i, 1)
         }
-      })
+      }, 'post-fallback')
 
       express.get('*', (req, res) => {
         let url = req.path.slice(1, req.path.endsWith('/') ? -1 : undefined)

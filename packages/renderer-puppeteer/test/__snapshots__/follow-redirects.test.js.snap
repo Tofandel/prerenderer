@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`changes the route property when history.pushState is used to change the page URL 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: History pushState</title>
+</head>
+<body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      history.pushState({}, '', '/nested/test')
+      document.body.innerHTML += '<p>Render Output</p>'
+    })
+  </script>
+
+
+<p>Render Output</p></body></html>",
+    "originalRoute": "/",
+    "route": "/nested/test",
+  },
+]
+`;
+
+exports[`changes the route property when history.replaceState is used to change the page URL 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: History replaceState</title>
+</head>
+<body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      history.replaceState({}, '', '/nested/test')
+      document.body.innerHTML += '<p>Render Output</p>'
+    })
+  </script>
+
+
+<p>Render Output</p></body></html>",
+    "originalRoute": "/",
+    "route": "/nested/test",
+  },
+]
+`;
+
+exports[`maintains the correct route value when history.pushState is followed by history.back 1`] = `
+[
+  {
+    "html": "<!DOCTYPE html><html><head>
+  <title>Prerenderer Test: History back</title>
+</head>
+<body>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      history.pushState({}, '', '/nested/test')
+      history.back()
+      document.body.innerHTML += '<p>Render Output</p>'
+    })
+  </script>
+
+
+<p>Render Output</p></body></html>",
+    "originalRoute": "/",
+    "route": "/",
+  },
+]
+`;
