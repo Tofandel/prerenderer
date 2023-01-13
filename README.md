@@ -7,7 +7,7 @@
 
 <div align="center">
 
-[![test](https://github.com/JoshTheDerf/prerenderer/actions/workflows/test.yml/badge.svg)]()
+[![test](https://github.com/JoshTheDerf/prerenderer/actions/workflows/tests.yml/badge.svg)]()
 [![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)]()
 [![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)]()
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
