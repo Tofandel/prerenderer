@@ -140,12 +140,12 @@ prerenderer.initialize()
 
 ### Which renderer should I use?
 
-**Use `@prerenderer/renderer-puppeteer` if:** You're prerendering up to a couple hundred pages (bye-bye RAM!).
+**Use `@prerenderer/renderer-puppeteer` if:** You're prerendering up to a couple hundred pages.
 
 **Use `@prerenderer/renderer-jsdom` if:** You need to prerender thousands upon thousands of pages, but quality isn't all
 that important, and you're willing to work around issues for more advanced cases. (Programmatic SVG support, etc.)
 
-> **_NOTE:_** From our tests, the JSDOM renderer is now much slower than puppeteer, so there is little reason to use it.
+> **_NOTE:_** From our tests, the JSDOM renderer is now much slower than puppeteer (8 times slower) and uses similar amount of memory, so there is no reason to use it anymore.
 >
 > An alternative faster dom renderer using [linkedom](https://github.com/WebReflection/linkedom#readme) is planned
 
