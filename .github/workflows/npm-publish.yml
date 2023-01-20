@@ -28,6 +28,7 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+      - run: git fetch --tags origin
       - run: npm ci
       - run: lerna publish from-git
         env:
