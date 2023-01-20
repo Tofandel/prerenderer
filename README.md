@@ -7,11 +7,11 @@
 
 <div align="center">
 
-[![test](https://github.com/JoshTheDerf/prerenderer/actions/workflows/tests.yml/badge.svg)]()
-[![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)]()
-[![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)]()
+[![test](https://img.shields.io/github/actions/workflow/status/JoshTheDerf/prerenderer/tests.yml?label=Tests)](https://github.com/JoshTheDerf/prerenderer/actions/workflows/tests.yml)
+[![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)](https://www.npmjs.com/package/@prerenderer/prerenderer)
+[![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)](https://www.npmjs.com/package/@prerenderer/prerenderer)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
-[![license](https://img.shields.io/github/license/JoshTheDerf/prerenderer.svg)]()
+[![license](https://img.shields.io/github/license/JoshTheDerf/prerenderer.svg)](https://github.com/JoshTheDerf/prerenderer/blob/master/LICENSE.md)
 
 </div>
 
