@@ -29,6 +29,6 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: git fetch --tags origin
       - run: npm ci
-      - run: lerna publish from-git
+      - run: lerna publish from-package
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
