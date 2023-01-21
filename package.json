@@ -1,7 +1,6 @@
 {
   "name": "@prerenderer/monorepo",
   "description": "Monorepo for prerendering packages.",
-  "type": "module",
   "workspaces": [
     "packages/*"
   ],

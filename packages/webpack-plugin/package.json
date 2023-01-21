@@ -3,7 +3,6 @@
   "version": "5.0.2",
   "description": "Flexible, framework-agnostic static site generation for sites and SPAs built with webpack.",
   "license": "MIT",
-  "type": "module",
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/cjs.js"

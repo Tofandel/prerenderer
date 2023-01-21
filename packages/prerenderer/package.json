@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Fast, flexible, framework-agnostic prerendering for sites and SPAs.",
   "license": "MIT",
-  "type": "module",
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/cjs.js"

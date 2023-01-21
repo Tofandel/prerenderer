@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
-  "type": "module",
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/cjs.js"
