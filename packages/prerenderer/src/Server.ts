@@ -4,8 +4,9 @@ import path from 'path'
 import Prerenderer from './Prerenderer'
 import { PrerendererFinalOptions } from './PrerendererOptions'
 import { Server as HttpServer } from 'http'
+import { getPortPromise } from 'portfinder'
 
-export type Stage = 'pre-static' | 'post-static' | 'pre-fallback' | 'post-fallback'
+export type Stage = 'pre-static' | 'post-static' | 'pre-fallback' | 'post-fallback' | 'post-listen'
 
 export default class Server {
   private prerenderer: Prerenderer
@@ -23,8 +24,15 @@ export default class Server {
     return this.expressServer
   }
 
+  public getPrerenderer () {
+    return this.prerenderer
+  }
+
   async initialize () {
     const server = this.expressServer
+
+    const originalPort = this.options.server.port
+    this.options.server.port = this.options.server.port || await getPortPromise() || 13010
 
     if (this.options.server && this.options.server.before) {
       this.options.server.before(server)
@@ -56,11 +64,45 @@ export default class Server {
 
     this.prerenderer.modifyServer('post-fallback')
 
-    await new Promise<void>((resolve) => {
+    // This is a workaround for a bug in jsdom that hangs the server
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    server.keepAliveTimeout = 10
+    const serverPromise = () => new Promise<void>((resolve, reject) => {
       this.nativeServer = server.listen(this.options.server.port, this.options.server.listenHost, () => {
         resolve()
       })
+      this.nativeServer.on('error', (err: Error) => {
+        reject(err)
+      })
     })
+
+    let i = 0
+    let success = false
+    let error: Error | null = null
+    while (!error && !success && i++ < 10) {
+      await serverPromise().then(() => {
+        if (originalPort && originalPort !== this.options.server.port) {
+          console.warn(`The provided port (${originalPort}) is already in use, so port ${this.options.server.port} was used instead`)
+        }
+        success = true
+      }).catch((e: Error) => {
+        if (/EADDRINUSE/.test(e.message)) {
+          return getPortPromise().then((port) => {
+            this.options.server.port = port
+          })
+        } else {
+          error = e
+        }
+      })
+    }
+    if (error) {
+      throw error
+    } else if (!success) {
+      throw new Error('The server could not initialize for unknown reasons')
+    }
+
+    this.prerenderer.modifyServer('post-listen')
   }
 
   destroy () {

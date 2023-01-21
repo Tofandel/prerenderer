@@ -61,7 +61,6 @@
     "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
-    "@prerenderer/renderer-jsdom": "file:../renderer-jsdom",
     "@types/express": "^4.17.15",
     "http-proxy-middleware": "^2.0.6",
     "chance": "^1.0.13",

@@ -53,7 +53,7 @@
   "repository": {
     "type": "git",
     "url": "git@github.com/JoshTheDerf/prerenderer.git",
-    "directory": "packages/webpacky-plugin"
+    "directory": "packages/webpack-plugin"
   },
   "bugs": {
     "url": "https://github.com/JoshTheDerf/prerenderer/issues"
@@ -63,7 +63,7 @@
     "schema-utils": "^4.0.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "*"
+    "@prerenderer/renderer-puppeteer": "^1.0.0"
   },
   "peerDependencies": {
     "html-webpack-plugin": "^5",

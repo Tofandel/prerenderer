@@ -134,7 +134,7 @@ prerenderer.initialize()
 
 ## Available Renderers
 
-- `@prerenderer/renderer-jsdom` - Uses [jsdom](https://npmjs.com/package/jsdom). ~~Extremely fast~~, but unreliable and
+- `@prerenderer/renderer-jsdom` - Uses [jsdom](https://npmjs.com/package/jsdom). Fast, but unreliable and
   cannot handle advanced usages. May not work with all front-end frameworks and apps.
 - `@prerenderer/renderer-puppeteer` - Uses [puppeteer](https://github.com/puppeteer/puppeteer) to render pages in
   headless Chrome. Simpler and more reliable than the previous `ChromeRenderer`.
@@ -146,9 +146,7 @@ prerenderer.initialize()
 **Use `@prerenderer/renderer-jsdom` if:** You need to prerender thousands upon thousands of pages, but quality isn't all
 that important, and you're willing to work around issues for more advanced cases. (Programmatic SVG support, etc.)
 
-> **_NOTE:_** From our tests, the JSDOM renderer is now much slower than puppeteer (8 times slower) and uses similar amount of memory, so there is no reason to use it anymore.
->
-> An alternative faster dom renderer using [linkedom](https://github.com/WebReflection/linkedom#readme) is planned
+> An alternative faster dom renderer using [linkedom](https://github.com/WebReflection/linkedom#readme) is being considered
 
 ## Documentation
 
