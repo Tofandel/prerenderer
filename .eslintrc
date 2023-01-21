@@ -17,7 +17,7 @@
     "no-console": "off",
     "comma-dangle": ["error", "always-multiline"]
   },
-  "ignorePatterns": ["packages/*/dist/*", "packages/*/types/*", "*.html"],
+  "ignorePatterns": ["packages/*/dist/*", "packages/*/types/*", "*.html", "*.vue"],
   "overrides": [
     {
       "files": [

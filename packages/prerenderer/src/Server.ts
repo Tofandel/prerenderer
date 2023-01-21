@@ -3,8 +3,8 @@ import express from 'express'
 import path from 'path'
 import Prerenderer from './Prerenderer'
 import { PrerendererFinalOptions } from './PrerendererOptions'
-import { Server as HttpServer } from 'http'
 import { getPortPromise } from 'portfinder'
+import stoppable, { StoppableServer } from 'stoppable'
 
 export type Stage = 'pre-static' | 'post-static' | 'pre-fallback' | 'post-fallback' | 'post-listen'
 
@@ -12,7 +12,7 @@ export default class Server {
   private prerenderer: Prerenderer
   private options: PrerendererFinalOptions
   private readonly expressServer: ReturnType<typeof express>
-  private nativeServer: HttpServer | null = null
+  private nativeServer: StoppableServer | null = null
 
   constructor (prerenderer: Prerenderer) {
     this.prerenderer = prerenderer
@@ -64,14 +64,10 @@ export default class Server {
 
     this.prerenderer.modifyServer('post-fallback')
 
-    // This is a workaround for a bug in jsdom that hangs the server
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    server.keepAliveTimeout = 10
     const serverPromise = () => new Promise<void>((resolve, reject) => {
-      this.nativeServer = server.listen(this.options.server.port, this.options.server.listenHost, () => {
+      this.nativeServer = stoppable(server.listen(this.options.server.port, this.options.server.listenHost, () => {
         resolve()
-      })
+      }))
       this.nativeServer.on('error', (err: Error) => {
         reject(err)
       })
@@ -107,7 +103,7 @@ export default class Server {
 
   destroy () {
     return new Promise<void>(resolve => {
-      this.nativeServer?.close(() => resolve())
+      this.nativeServer?.stop(() => resolve())
     })
   }
 }

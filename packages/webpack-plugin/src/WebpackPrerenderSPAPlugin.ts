@@ -6,11 +6,12 @@ import path from 'path'
 
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import { Schema } from 'schema-utils/declarations/validate'
+import { IRenderer } from '@prerenderer/prerenderer'
 
 export default class WebpackPrerenderSPAPlugin {
   private readonly options: WebpackPrerenderSPAFinalOptions
 
-  constructor (options: WebpackPrerenderSPAOptions) {
+  constructor (options: WebpackPrerenderSPAOptions = {}) {
     validate(schema as Schema, options, {
       name: 'Prerender SPA Plugin',
       baseDataPath: 'options',
@@ -27,9 +28,21 @@ export default class WebpackPrerenderSPAPlugin {
       return false
     }
     const { default: Prerenderer } = await import('@prerenderer/prerenderer')
+
+    let renderer: IRenderer
+    if (typeof this.options.renderer === 'string') {
+      const { default: RendererClass } = ((await import(this.options.renderer)) as {default: IRenderer})
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      renderer = new RendererClass(this.options.rendererOptions) as IRenderer
+    } else {
+      renderer = this.options.renderer
+    }
+
     const PrerendererInstance = new Prerenderer({
       staticDir: compiler.options.output.path || '/',
       ...this.options,
+      renderer,
     })
     PrerendererInstance.hookServer((server) => {
       const express = server.getExpressServer()

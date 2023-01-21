@@ -1,14 +1,15 @@
-import { RenderedRoute, PrerendererOptions } from '@prerenderer/prerenderer'
+import { RenderedRoute, PrerendererOptions, IRenderer } from '@prerenderer/prerenderer'
 import { JSONSchemaType } from 'ajv'
 import { JSDOMRendererOptions } from '@prerenderer/renderer-jsdom'
 import { PuppeteerRendererOptions } from '@prerenderer/renderer-puppeteer'
 
-export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir'> {
+export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
   entryPath?: string
   routes?: Array<string>
   postProcess?: (renderedRoutes: RenderedRoute) => Promise<void> | void
   urlModifier?(url: string): string
   rendererOptions?: JSDOMRendererOptions | PuppeteerRendererOptions | Record<string, unknown>
+  renderer?: string | IRenderer
 }
 
 export const defaultOptions = {
@@ -16,6 +17,7 @@ export const defaultOptions = {
   rendererOptions: {
     headless: true,
   },
+  renderer: '@prerenderer/renderer-puppeteer',
   routes: ['/'],
 }
 

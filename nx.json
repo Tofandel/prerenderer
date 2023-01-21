@@ -11,19 +11,31 @@
       }
     }
   },
+  "namedInputs": {
+    "sources": [
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/package-lock.json",
+      "{projectRoot}/packages/prerenderer/src/*",
+      "{workspaceRoot}/src/*.ts",
+      "{workspaceRoot}/tsconfig.json"
+    ]
+  },
   "targetDefaults": {
-    "test": {
-      "dependsOn": [
-        "^build"
-      ]
-    },
     "build": {
+      "inputs": [
+        "sources"
+      ],
       "dependsOn": [
         "^build"
       ],
       "outputs": [
         "{projectRoot}/dist",
         "{projectRoot}/types"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "build"
       ]
     },
     "prepublishOnly": {
