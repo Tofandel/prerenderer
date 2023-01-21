@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/webpack-plugin",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "Flexible, framework-agnostic static site generation for sites and SPAs built with webpack.",
   "license": "MIT",
   "exports": {
@@ -59,11 +59,11 @@
     "url": "https://github.com/JoshTheDerf/prerenderer/issues"
   },
   "dependencies": {
-    "@prerenderer/prerenderer": "^1.0.1",
+    "@prerenderer/prerenderer": "^1.0.2",
     "schema-utils": "^4.0.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "^1.0.1"
+    "@prerenderer/renderer-puppeteer": "^1.0.2"
   },
   "peerDependencies": {
     "html-webpack-plugin": "^5",
