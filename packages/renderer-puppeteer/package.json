@@ -12,8 +12,8 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "jest ./test --silent --runInBand",
-    "test:logs": "jest ./test --runInBand"
+    "test": "jest ./test --silent",
+    "test:logs": "jest ./test"
   },
   "files": [
     "dist",

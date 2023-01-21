@@ -7,12 +7,12 @@
   ],
   "scripts": {
     "prebuild": "rimraf ./packages/*/dist ./packages/*/types",
-    "build": "npm run build -w packages",
-    "test": "npm run test -w packages",
+    "build": "npx lerna run build",
+    "test": "npx lerna run test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettify": "npx prettier . --write",
-    "prepublishOnly": "npm run build -w packages"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "schema-utils": "4.0.0"

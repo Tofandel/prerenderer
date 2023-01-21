@@ -11,7 +11,8 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "echo 'no test'"
+    "test": "jest ./test --silent",
+    "test:logs": "jest ./test"
   },
   "files": [
     "dist"
@@ -53,7 +54,7 @@
   "repository": {
     "type": "git",
     "url": "git@github.com/JoshTheDerf/prerenderer.git",
-    "directory": "packages/webpacky-plugin"
+    "directory": "packages/webpack-plugin"
   },
   "bugs": {
     "url": "https://github.com/JoshTheDerf/prerenderer/issues"
@@ -63,7 +64,7 @@
     "schema-utils": "^4.0.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "*"
+    "@prerenderer/renderer-puppeteer": "^1.0.0"
   },
   "peerDependencies": {
     "html-webpack-plugin": "^5",
@@ -72,6 +73,8 @@
   "devDependencies": {
     "express": "^4.18.2",
     "webpack": "^5.75.0",
+    "vue": "^3.2.45",
+    "vue-loader": "^17.0.1",
     "@prerenderer/prerenderer": "file:../prerenderer",
     "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer"
   },

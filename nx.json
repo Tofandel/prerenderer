@@ -1,0 +1,47 @@
+{
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "test",
+          "test:logs"
+        ]
+      }
+    }
+  },
+  "namedInputs": {
+    "sources": [
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/package-lock.json",
+      "{projectRoot}/packages/prerenderer/src/*",
+      "{workspaceRoot}/src/*.ts",
+      "{workspaceRoot}/tsconfig.json"
+    ]
+  },
+  "targetDefaults": {
+    "build": {
+      "inputs": [
+        "sources"
+      ],
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{projectRoot}/dist",
+        "{projectRoot}/types"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "prepublishOnly": {
+      "dependsOn": [
+        "^prepublishOnly"
+      ]
+    }
+  }
+}

@@ -1,5 +1,4 @@
 import Server, { Stage } from './Server'
-import { getPortPromise } from 'portfinder'
 import { schema, PrerendererOptions, defaultOptions, PrerendererFinalOptions } from './PrerendererOptions'
 import IRenderer from './IRenderer'
 import PackageName from './PackageName'
@@ -32,7 +31,6 @@ export default class Prerenderer {
 
   public async initialize () {
     // Initialization is separate from construction because science? (Ideally to initialize the server and renderer separately.)
-    this.options.server.port = this.options.server.port || await getPortPromise() || 13010
     await this.server.initialize()
     await this.renderer.initialize()
 
@@ -55,7 +53,7 @@ export default class Prerenderer {
     return this.options
   }
 
-  public hookServer (callback: HookCallback, stage: Stage = 'post-fallback') {
+  public hookServer (callback: HookCallback, stage: Stage = 'pre-fallback') {
     const hooks = this.hooks[stage] || []
     hooks.push(callback)
     this.hooks[stage] = hooks

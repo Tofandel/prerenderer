@@ -12,8 +12,8 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "jest ./test --silent --runInBand",
-    "test:logs": "jest ./test --runInBand"
+    "test": "jest ./test --silent",
+    "test:logs": "jest ./test"
   },
   "files": [
     "dist",
@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@types/jsdom": "^20.0.1",
-    "jsdom": "^20.0.3",
+    "jsdom": ">= 11",
     "promise-limit": "^2.7.0",
     "whatwg-fetch": "^3.6.2"
   },
