@@ -2,6 +2,7 @@ import { RenderedRoute, PrerendererOptions, IRenderer } from '@prerenderer/prere
 import { JSONSchemaType } from 'ajv'
 import { JSDOMRendererOptions } from '@prerenderer/renderer-jsdom'
 import { PuppeteerRendererOptions } from '@prerenderer/renderer-puppeteer'
+import { Schema } from 'schema-utils/declarations/validate'
 
 export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
   entryPath?: string
@@ -23,7 +24,7 @@ export const defaultOptions = {
 
 export type WebpackPrerenderSPAFinalOptions = WebpackPrerenderSPAOptions & typeof defaultOptions
 
-export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof PrerendererOptions>> = {
+export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof PrerendererOptions>> | Schema = {
   type: 'object',
   properties: {
     entryPath: {
@@ -42,12 +43,10 @@ export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof Prere
     },
     postProcess: {
       description: 'Allows you to customize the HTML and output path before writing the rendered contents to a file.',
-      type: 'object',
       instanceof: 'Function',
       nullable: true,
     },
     urlModifier: {
-      type: 'object',
       instanceof: 'Function',
       description: 'Hook to be able to modify the url to retrieve the compiled asset',
       nullable: true,
