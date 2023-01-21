@@ -50,7 +50,8 @@
   },
   "dependencies": {
     "deepmerge": "4.2.2",
-    "promise-limit": "2.7.0"
+    "promise-limit": "2.7.0",
+    "schema-utils": "4.0.0"
   },
   "peerDependencies": {
     "puppeteer": ">= 2"

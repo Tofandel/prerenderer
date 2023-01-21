@@ -55,7 +55,8 @@
     "express": "^4.18.2",
     "portfinder": "^1.0.32",
     "stoppable": "^1.1.0",
-    "ts-deepmerge": "^5.0.0"
+    "ts-deepmerge": "^5.0.0",
+    "schema-utils": "4.0.0"
   },
   "optionalDependencies": {
     "http-proxy-middleware": "^2.0.6"

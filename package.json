@@ -13,9 +13,6 @@
     "prettify": "npx prettier . --write",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {
-    "schema-utils": "4.0.0"
-  },
   "devDependencies": {
     "ajv": "^8.11.2",
     "lerna": "^6.1.0",

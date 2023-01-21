@@ -17,7 +17,8 @@
       "{projectRoot}/package-lock.json",
       "{projectRoot}/packages/prerenderer/src/*",
       "{workspaceRoot}/src/*.ts",
-      "{workspaceRoot}/tsconfig.json"
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/package.json"
     ]
   },
   "targetDefaults": {
