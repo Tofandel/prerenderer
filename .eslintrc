@@ -12,12 +12,27 @@
     "ecmaVersion": 2021
   },
   "rules": {
-    "quotes": ["error", "single", { "avoidEscape": true }],
+    "quotes": [
+      "error",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
     "no-void": "off",
     "no-console": "off",
-    "comma-dangle": ["error", "always-multiline"]
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ]
   },
-  "ignorePatterns": ["packages/*/dist/*", "packages/*/types/*", "*.html", "*.vue"],
+  "ignorePatterns": [
+    "packages/*/dist/*",
+    "packages/*/types/*",
+    "*.html",
+    "*.vue",
+    "packages/*/test/output"
+  ],
   "overrides": [
     {
       "files": [
@@ -50,7 +65,10 @@
       ],
       "rules": {
         "comma-dangle": "off",
-        "@typescript-eslint/comma-dangle": ["error", "always-multiline"],
+        "@typescript-eslint/comma-dangle": [
+          "error",
+          "always-multiline"
+        ],
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-unused-vars": [
           "error",

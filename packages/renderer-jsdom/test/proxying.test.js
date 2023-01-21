@@ -2,7 +2,6 @@ const path = require('path')
 const express = require('express')
 const Prerenderer = require('@prerenderer/prerenderer')
 const Renderer = require('@prerenderer/renderer-jsdom')
-const { getPortPromise } = require('portfinder')
 
 const testDir = path.resolve(__dirname, '../../../tests/api_call')
 
