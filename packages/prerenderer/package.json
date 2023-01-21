@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/prerenderer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fast, flexible, framework-agnostic prerendering for sites and SPAs.",
   "license": "MIT",
   "exports": {
