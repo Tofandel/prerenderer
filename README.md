@@ -172,7 +172,7 @@ All of the packages are strongly typed using typescript, if some documentation i
 ### Prerenderer Methods
 
 - `constructor(options: Object)` - Creates a Prerenderer instance and sets up the renderer and server objects.
-- `hookServer(cb: (server: Express) => void, stage: Stage = 'post-fallback')` - Use this method to hook into the express server to add middlewares, routes etc
+- `hookServer(cb: (server: Express) => void, stage: Stage = 'pre-fallback')` - Use this method to hook into the express server to add middlewares, routes etc
 - `initialize(): Promise<void>` - Starts the static file server and renderer instance (where appropriate).
 - `getOptions(): PrerenderFinalOptions` - Returns the options used to configure `prerenderer`
 - `getServer(): Server` - Returns the Server class holding the express server
