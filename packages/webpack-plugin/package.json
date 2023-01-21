@@ -1,9 +1,6 @@
 {
   "name": "@prerenderer/webpack-plugin",
-  "version": "5.0.1",
-  "publishConfig": {
-    "access": "public"
-  },
+  "version": "5.0.2",
   "description": "Flexible, framework-agnostic static site generation for sites and SPAs built with webpack.",
   "license": "MIT",
   "type": "module",

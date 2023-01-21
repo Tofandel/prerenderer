@@ -44,12 +44,10 @@ export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof Prere
     postProcess: {
       description: 'Allows you to customize the HTML and output path before writing the rendered contents to a file.',
       instanceof: 'Function',
-      nullable: true,
     },
     urlModifier: {
       instanceof: 'Function',
       description: 'Hook to be able to modify the url to retrieve the compiled asset',
-      nullable: true,
     },
     rendererOptions: {
       type: 'object',
