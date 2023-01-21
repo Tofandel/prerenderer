@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/prerenderer",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Fast, flexible, framework-agnostic prerendering for sites and SPAs.",
   "license": "MIT",
   "type": "module",
@@ -55,17 +55,17 @@
   "dependencies": {
     "express": "^4.18.2",
     "portfinder": "^1.0.32",
-    "ts-deepmerge": "^5.0.0",
-    "stoppable": "^1.1.0"
+    "stoppable": "^1.1.0",
+    "ts-deepmerge": "^5.0.0"
   },
   "optionalDependencies": {
     "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
-    "@types/stoppable": "^1.1.1",
     "@types/express": "^4.17.15",
-    "http-proxy-middleware": "^2.0.6",
+    "@types/stoppable": "^1.1.1",
     "chance": "^1.0.13",
+    "http-proxy-middleware": "^2.0.6",
     "jest": "^29.3.1"
   },
   "engines": {

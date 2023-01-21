@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-puppeteer",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "type": "module",
@@ -50,15 +50,15 @@
     "url": "https://github.com/JoshTheDerf/prerenderer/issues"
   },
   "dependencies": {
-    "promise-limit": "2.7.0",
-    "deepmerge": "4.2.2"
+    "deepmerge": "4.2.2",
+    "promise-limit": "2.7.0"
   },
   "peerDependencies": {
     "puppeteer": ">= 2"
   },
   "devDependencies": {
-    "puppeteer": "^19.4.1",
-    "@prerenderer/prerenderer": "file:../prerenderer"
+    "@prerenderer/prerenderer": "file:../prerenderer",
+    "puppeteer": "^19.4.1"
   },
   "engines": {
     "node": ">=8.0.0"
