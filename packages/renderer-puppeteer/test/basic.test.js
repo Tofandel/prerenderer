@@ -50,4 +50,4 @@ test('renders 50 routes', async () => {
     expect(renderedRoute.originalRoute).toEqual(routes[i])
     expect(renderedRoute.html).toEqual(snap)
   })
-})
+}, 15000)

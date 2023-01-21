@@ -57,7 +57,7 @@
     "puppeteer": ">= 2"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "file:../prerenderer",
+    "@prerenderer/prerenderer": "^1.0.0",
     "puppeteer": "^19.4.1"
   },
   "engines": {
@@ -66,5 +66,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "gitHead": "876a3521b2460cdcc183de9d57e7ae12eacd45d4"
 }
