@@ -8,7 +8,6 @@
 <div align="center">
 
 [![test](https://img.shields.io/github/actions/workflow/status/JoshTheDerf/prerenderer/tests.yml?label=Tests)](https://github.com/JoshTheDerf/prerenderer/actions/workflows/tests.yml)
-[![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg)](https://www.npmjs.com/package/@prerenderer/prerenderer)
 [![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)](https://www.npmjs.com/package/@prerenderer/prerenderer)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
 [![license](https://img.shields.io/github/license/JoshTheDerf/prerenderer.svg)](https://github.com/JoshTheDerf/prerenderer/blob/master/LICENSE.md)
@@ -17,9 +16,14 @@
 
 ---
 
-<div align="center">
+<div align="left">
 
-[![NPM](https://nodei.co/npm/@prerenderer/prerenderer.png?mini=true)](https://nodei.co/npm/@prerenderer/prerenderer/)
+# Monorepo for the following NPM packages
+
+- [![npm version](https://img.shields.io/npm/v/@prerenderer/prerenderer.svg?label=@prerenderer/prerenderer)](https://www.npmjs.com/package/@prerenderer/prerenderer)
+- [![npm version](https://img.shields.io/npm/v/@prerenderer/renderer-jsdom.svg?label=@prerenderer/renderer-jsdom)](https://www.npmjs.com/package/@prerenderer/renderer-jsdom)
+- [![npm version](https://img.shields.io/npm/v/@prerenderer/renderer-puppeteer.svg?label=@prerenderer/renderer-puppeteer)](https://www.npmjs.com/package/@prerenderer/renderer-puppeteer)
+- [![npm version](https://img.shields.io/npm/v/@prerenderer/webpack-plugin.svg?label=@prerenderer/webpack-plugin)](https://www.npmjs.com/package/@prerenderer/webpack-plugin)
 
 </div>
 
