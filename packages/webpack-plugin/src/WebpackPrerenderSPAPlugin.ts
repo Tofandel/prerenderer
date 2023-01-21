@@ -6,7 +6,7 @@ import path from 'path'
 
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import { Schema } from 'schema-utils/declarations/validate'
-import { IRenderer } from '@prerenderer/prerenderer'
+import { IRenderer, RendererConstructor } from '@prerenderer/prerenderer'
 
 export default class WebpackPrerenderSPAPlugin {
   private readonly options: WebpackPrerenderSPAFinalOptions
@@ -31,10 +31,11 @@ export default class WebpackPrerenderSPAPlugin {
 
     let renderer: IRenderer
     if (typeof this.options.renderer === 'string') {
-      const { default: RendererClass } = ((await import(this.options.renderer)) as {default: IRenderer})
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      renderer = new RendererClass(this.options.rendererOptions) as IRenderer
+      const { default: RendererClass } = ((await import(this.options.renderer)) as {default: RendererConstructor})
+      renderer = new RendererClass(this.options.rendererOptions)
+    } else if (typeof this.options.renderer === 'function') {
+      const RC = this.options.renderer as RendererConstructor
+      renderer = new RC(this.options.rendererOptions)
     } else {
       renderer = this.options.renderer
     }

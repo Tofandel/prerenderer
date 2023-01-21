@@ -234,6 +234,20 @@ None of the options are required, by default the page will render when puppeteer
 
 ---
 
+### `@prerenderer/webpack-plugin` Options
+
+None of the options are required, by default the renderer-puppeteer will be used and render only the entry file
+| Option                   | Type                                   | Default                           | Description                                                                                                                                                                                                                                                          |
+|--------------------------|----------------------------------------|-----------------------------------|---------------------------------------------------------------------------------------------------------|
+| routes                   | Array<string>                          | ['/']                             | The list of routes to prerender                                                                         |
+| renderer                 | string or instance of a renderer       | '@prerenderer/renderer-puppeteer' | The instance of the renderer or the name of the renderer to require                                     |
+| rendererOptions          | Object                                 | None                              | The options to pass to the renderer if it was not given as an instance, see above for a list of options |
+| postProcess              | (renderedRoute: Route) => void         | None                              | Allows you to customize the HTML and output path before writing the rendered contents to a file         |
+| urlModifier              | (url: string) => string                | None                              | Hook to be able to modify the url to retrieve the compiled asset                                        |
+| entryPath                | string                                 | indexPath option                  | The entry html file to use                                        |
+| ...
+---
+
 ## Caveats
 
 - For obvious reasons, `prerenderer` only works for SPAs that route using the HTML5 history
@@ -246,32 +260,9 @@ None of the options are required, by default the page will render when puppeteer
 
 ## Contributing
 
-This is a monorepo, so you'll need to clone the repository, then run `npm install` inside
-Run `npm run build && npm run test` to make sure that everything is working correctly
+This is a monorepo, using `lerna`, so you'll need to clone the repository, then run `npm install` inside the directory
 
-## License (MIT)
-
-```
-Copyright (c) 2017 Joshua Michael Bemenderfer
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+Run `npm run test` to make sure that everything is working correctly
 
 ## Maintainers
 

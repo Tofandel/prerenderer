@@ -1,7 +1,6 @@
 import Prerenderer from './Prerenderer'
-import IRenderer, { RenderedRoute } from './IRenderer'
+import IRenderer, { RenderedRoute, RendererConstructor } from './IRenderer'
 import { PrerendererOptions, PrerendererFinalOptions } from './PrerendererOptions'
 
-export type { Prerenderer, RenderedRoute, PrerendererOptions, PrerendererFinalOptions }
-export { IRenderer }
+export type { RendererConstructor, IRenderer, Prerenderer, RenderedRoute, PrerendererOptions, PrerendererFinalOptions }
 export default Prerenderer

@@ -4,7 +4,8 @@ export default {
   // and will be exposed on `this`.
   data() {
     return {
-      count: 0
+      count: 0,
+      interval: null,
     }
   },
 
@@ -16,11 +17,23 @@ export default {
     }
   },
 
+  watch: {
+    count(c) {
+      if (c === 3) {
+        document.dispatchEvent(new CustomEvent('render'))
+      }
+    }
+  },
+
   // Lifecycle hooks are called at different stages
   // of a component's lifecycle.
   // This function will be called when the component is mounted.
   mounted() {
-    setInterval(() => this.increment(), 1000)
+    this.interval = setInterval(() => this.increment(), 1000)
+  },
+
+  unmounted() {
+    clearInterval(this.interval)
   }
 }
 </script>

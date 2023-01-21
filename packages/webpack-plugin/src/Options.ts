@@ -4,13 +4,16 @@ import { JSDOMRendererOptions } from '@prerenderer/renderer-jsdom'
 import { PuppeteerRendererOptions } from '@prerenderer/renderer-puppeteer'
 import { Schema } from 'schema-utils/declarations/validate'
 
+type rendererOptions = JSDOMRendererOptions | PuppeteerRendererOptions | Record<string, unknown>
+export type RendererClass = { new(options?: rendererOptions): IRenderer }
+
 export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
   entryPath?: string
   routes?: Array<string>
   postProcess?: (renderedRoutes: RenderedRoute) => Promise<void> | void
   urlModifier?(url: string): string
-  rendererOptions?: JSDOMRendererOptions | PuppeteerRendererOptions | Record<string, unknown>
-  renderer?: string | IRenderer
+  rendererOptions?: rendererOptions
+  renderer?: string | IRenderer | { new(options?: rendererOptions): IRenderer }
 }
 
 export const defaultOptions = {
@@ -48,6 +51,20 @@ export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof Prere
     urlModifier: {
       instanceof: 'Function',
       description: 'Hook to be able to modify the url to retrieve the compiled asset',
+    },
+    renderer: {
+      anyOf: [
+        {
+          type: 'string',
+        },
+        {
+          instanceof: 'Function',
+        },
+        {
+          type: 'object',
+          additionalProperties: true,
+        },
+      ],
     },
     rendererOptions: {
       type: 'object',
