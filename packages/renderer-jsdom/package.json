@@ -53,9 +53,6 @@
     "schema-utils": "4.0.0",
     "whatwg-fetch": "^3.6.2"
   },
-  "jest": {
-    "testTimeout": 10000
-  },
   "devDependencies": {
     "@prerenderer/prerenderer": "^1.0.3"
   },

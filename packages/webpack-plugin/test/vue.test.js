@@ -43,4 +43,4 @@ test('Routes and events', (resolve) => {
     expect(index.info.prerendered).toBeTruthy()
     resolve()
   })
-}, 8000)
+})

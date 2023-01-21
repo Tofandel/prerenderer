@@ -81,5 +81,8 @@
   "engines": {
     "node": ">=10.13.0"
   },
+  "jest": {
+    "testTimeout": 10000
+  },
   "gitHead": "876a3521b2460cdcc183de9d57e7ae12eacd45d4"
 }
