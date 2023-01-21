@@ -171,7 +171,7 @@ All of the packages are strongly typed using typescript, if some documentation i
 |--------|----------|-----------|----------------------------|----------------------------------------|
 | port   | Integer  | No        | First free port after 8000 | The port for the app server to run on. |
 | proxy  | Object   | No        | No proxying                | Proxy configuration. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-proxy) |
-| ~~before~~ | Function | No        | No operation           | Deprecated: Use `hookServer()` instead. Function for adding custom server middleware. Has the same signature as [webpack-dev-server](https://webpack.js.org/configuration/dev-server/#devserver-before) |
+| ~~before~~ | Function | No        | No operation           | Deprecated: Use `hookServer()` instead. Function for adding custom server middleware. |
 
 ### Prerenderer Methods
 
