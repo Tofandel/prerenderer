@@ -237,15 +237,16 @@ None of the options are required, by default the page will render when puppeteer
 ### `@prerenderer/webpack-plugin` Options
 
 None of the options are required, by default the renderer-puppeteer will be used and render only the entry file
-| Option                   | Type                                   | Default                           | Description                                                                                                                                                                                                                                                          |
-|--------------------------|----------------------------------------|-----------------------------------|---------------------------------------------------------------------------------------------------------|
-| routes                   | Array<string>                          | ['/']                             | The list of routes to prerender                                                                         |
-| renderer                 | string or instance of a renderer       | '@prerenderer/renderer-puppeteer' | The instance of the renderer or the name of the renderer to require                                     |
-| rendererOptions          | Object                                 | None                              | The options to pass to the renderer if it was not given as an instance, see above for a list of options |
-| postProcess              | (renderedRoute: Route) => void         | None                              | Allows you to customize the HTML and output path before writing the rendered contents to a file         |
-| urlModifier              | (url: string) => string                | None                              | Hook to be able to modify the url to retrieve the compiled asset                                        |
-| entryPath                | string                                 | indexPath option                  | The entry html file to use                                        |
-| ...
+| Option          | Type                             | Default                             | Description                                                                                             |
+|-----------------|----------------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------|
+| routes          | Array<string>                    | `['/']`                             | The list of routes to prerender                                                                         |
+| renderer        | string or instance of a renderer | `'@prerenderer/renderer-puppeteer'` | The instance of the renderer or the name of the renderer to require                                     |
+| rendererOptions | Object                           | None                                | The options to pass to the renderer if it was not given as an instance, see above for a list of options |
+| postProcess     | (renderedRoute: Route) => void   | None                                | Allows you to customize the HTML and output path before writing the rendered contents to a file         |
+| urlModifier     | (url: string) => string          | None                                | Hook to be able to modify the url to retrieve the compiled asset                                        |
+| entryPath       | string                           | indexPath option                    | The entry html file to use                                                                              |
+| ...             |                                  |                                     | [Additional Prerenderer Options](#prerenderer-options)                                                  |
+
 ---
 
 ## Caveats
@@ -255,7 +256,7 @@ None of the options are required, by default the renderer-puppeteer will be used
 - Whatever client-side rendering library you're using should be able to at least replace any server-rendered content or
   diff with it.
   - For **Vue.js 1** use [`replace: false`](http://vuejs.org/api/#replace) on root components.
-  - For **Vue.js 2**  Ensure your root component has the same id as the prerendered element it's replacing. Otherwise
+  - For **Vue.js 2 and 3**  Ensure your root component has the same id as the prerendered element it's replacing. Otherwise
     you'll end up with duplicated content.
 
 ## Contributing
