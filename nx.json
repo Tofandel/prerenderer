@@ -22,6 +22,22 @@
     ]
   },
   "targetDefaults": {
+    "lint:fix": {
+      "inputs": [
+        "sources"
+      ],
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "lint": {
+      "inputs": [
+        "sources"
+      ],
+      "dependsOn": [
+        "^build"
+      ]
+    },
     "build": {
       "inputs": [
         "sources"
