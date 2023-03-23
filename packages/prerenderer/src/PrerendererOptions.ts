@@ -24,19 +24,26 @@ export const defaultOptions = {
     listenHost: '127.0.0.1',
     port: 0,
   },
+  renderer: '@prerenderer/renderer-puppeteer',
+  rendererOptions: {
+    headless: true,
+  },
 }
+
+export type rendererOptions = Record<string, unknown>
 
 export interface PrerendererOptions {
   staticDir: string
   indexPath?: string
   server?: ServerOptions
-  renderer: IRenderer
+  renderer?: string | IRenderer | { new(options?: rendererOptions): IRenderer }
+  rendererOptions?: rendererOptions
 }
 
 export type PrerendererFinalOptions = PrerendererOptions & typeof defaultOptions
 
 // AVJ's typing is very buggy, so use a looser type for what doesn't work
-export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server'>>
+export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server' | 'renderer'>>
   & Schema = {
     type: 'object',
     required: ['staticDir'],
@@ -87,10 +94,25 @@ export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server'>>
         },
       },
       renderer: {
+        description: 'The renderer to use (eg: @prerenderer/renderer-puppeteer or @prerenderer/renderer-jsdom)',
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            instanceof: 'Function',
+          },
+          {
+            type: 'object',
+            additionalProperties: true,
+          },
+        ],
+      },
+      rendererOptions: {
         type: 'object',
-        description: 'The renderer instance to use',
-        nullable: false,
-        required: [],
+        description: 'The options to pass to the renderer if you didn\'t pass an instance of a renderer to the `renderer` option',
+        additionalProperties: true,
+        nullable: true,
       },
     },
   }

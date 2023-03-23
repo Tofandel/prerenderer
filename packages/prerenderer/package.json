@@ -1,17 +1,17 @@
 {
   "name": "@prerenderer/prerenderer",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Fast, flexible, framework-agnostic prerendering for sites and SPAs.",
   "license": "MIT",
   "exports": {
-    "import": "./dist/index.js",
+    "import": "./index.mjs",
     "require": "./dist/cjs.js"
   },
   "types": "types/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest ./test --silent",
-    "test:logs": "jest ./test",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest ./test --silent",
+    "test:logs": "NODE_OPTIONS=--experimental-vm-modules jest ./test",
     "prepublishOnly": "npm run build"
   },
   "files": [
@@ -27,9 +27,8 @@
     "chrome-rdp"
   ],
   "author": {
-    "name": "Joshua Bemenderfer",
-    "email": "tribex10@gmail.com",
-    "url": "https://joshderf.com/"
+    "name": "Adrien Foulon",
+    "email": "adrien.foulon@tukan.hu"
   },
   "contributors": [
     {
@@ -45,18 +44,18 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com/JoshTheDerf/prerenderer.git",
+    "url": "git@github.com/Tofandel/prerenderer.git",
     "directory": "packages/prerenderer"
   },
   "bugs": {
-    "url": "https://github.com/JoshTheDerf/prerenderer/issues"
+    "url": "https://github.com/Tofandel/prerenderer/issues"
   },
   "dependencies": {
     "express": "^4.18.2",
     "portfinder": "^1.0.32",
     "schema-utils": "4.0.0",
     "stoppable": "^1.1.0",
-    "ts-deepmerge": "^5.0.0"
+    "ts-deepmerge": "^6.0.2"
   },
   "optionalDependencies": {
     "http-proxy-middleware": "^2.0.6"

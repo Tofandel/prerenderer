@@ -6,7 +6,6 @@ import path from 'path'
 
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import { Schema } from 'schema-utils/declarations/validate'
-import { IRenderer, RendererConstructor } from '@prerenderer/prerenderer'
 
 export default class WebpackPrerenderSPAPlugin {
   private readonly options: WebpackPrerenderSPAFinalOptions
@@ -29,21 +28,9 @@ export default class WebpackPrerenderSPAPlugin {
     }
     const { default: Prerenderer } = await import('@prerenderer/prerenderer')
 
-    let renderer: IRenderer
-    if (typeof this.options.renderer === 'string') {
-      const { default: RendererClass } = ((await import(this.options.renderer)) as {default: RendererConstructor})
-      renderer = new RendererClass(this.options.rendererOptions)
-    } else if (typeof this.options.renderer === 'function') {
-      const RC = this.options.renderer as RendererConstructor
-      renderer = new RC(this.options.rendererOptions)
-    } else {
-      renderer = this.options.renderer
-    }
-
     const PrerendererInstance = new Prerenderer({
       staticDir: compiler.options.output.path || '/',
       ...this.options,
-      renderer,
     })
     PrerendererInstance.hookServer((server) => {
       const express = server.getExpressServer()
@@ -123,7 +110,9 @@ export default class WebpackPrerenderSPAPlugin {
     } catch (err: unknown) {
       const msg = '[prerender-spa-plugin] Unable to prerender all routes!'
       compilation.errors.push(new WebpackError(msg))
-      if (typeof err === 'object' && err && err.toString) {
+      if (err instanceof Error) {
+        compilation.errors.push(new WebpackError(err.message))
+      } else if (typeof err === 'object' && err) {
         compilation.errors.push(new WebpackError(err.toString()))
       }
     }

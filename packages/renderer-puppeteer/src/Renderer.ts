@@ -58,13 +58,18 @@ export default class PuppeteerRenderer implements IRenderer {
       viewport,
       navigationOptions,
       launchOptions,
+      renderAfterTime,
+      renderAfterElementExists,
+      renderAfterDocumentEvent,
       ...legacyOptions
     } = this.options
     /* eslint-enable */
-    if (Object.keys(legacyOptions).length > 1) {
-      console.warn('You are passing options to puppeteer launch using root options, which has been deprecated put them in "launchOptions" instead [Affected: ' + Object.keys(legacyOptions).join(',') + ']')
+    if (!launchOptions) {
+      if (Object.keys(legacyOptions).length > 1) {
+        console.warn('You are passing options to puppeteer launch using root options, which has been deprecated put them in "launchOptions" instead [Affected: ' + Object.keys(legacyOptions).join(',') + ']')
+      }
     }
-    this.puppeteer = await puppeteer.launch({ headless: typeof headless === 'undefined' ? true : headless, args, ...this.options.launchOptions, ...legacyOptions })
+    this.puppeteer = await puppeteer.launch({ headless: typeof headless === 'undefined' ? true : headless, args, ...(launchOptions || legacyOptions) })
   }
 
   async handleRequestInterception (page: Page, baseURL: string) {
@@ -132,19 +137,28 @@ export default class PuppeteerRenderer implements IRenderer {
 
       options.pageHandler && await options.pageHandler(page, route)
 
+      const prs: Array<Promise<void | string>> = []
       // Wait for some specific element exists
       if (options.renderAfterElementExists) {
-        try {
-          await page.waitForSelector(options.renderAfterElementExists, { timeout: options.timeout })
-        } catch (e) {
-          await page.close()
-          const timeS = Math.round(options.timeout / 100) / 10
-          throw new Error(`Could not prerender: element '${options.renderAfterElementExists}' did not appear within ${timeS}s`)
-        }
+        const elem = options.renderAfterElementExists
+        prs.push((async () => {
+          try {
+            await page.waitForSelector(elem, {
+              timeout: options.timeout,
+              hidden: options.elementHidden,
+              visible: options.elementVisible,
+            })
+          } catch (e) {
+            await page.close()
+            const timeS = Math.round(options.timeout / 100) / 10
+            throw new Error(`Could not prerender: element '${elem}' did not appear within ${timeS}s`)
+          }
+        })())
       }
 
-      // Once this completes, it's safe to capture the page contents.
-      const res = await page.evaluate(waitForRender, options)
+      prs.push(page.evaluate(waitForRender, options))
+
+      const res = await Promise.race(prs)
       if (res) {
         throw new Error(res)
       }

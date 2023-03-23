@@ -7,10 +7,10 @@
 
 <div align="center">
 
-[![test](https://img.shields.io/github/actions/workflow/status/JoshTheDerf/prerenderer/tests.yml?label=Tests)](https://github.com/JoshTheDerf/prerenderer/actions/workflows/tests.yml)
+[![test](https://img.shields.io/github/actions/workflow/status/Tofandel/prerenderer/tests.yml?label=Tests)](https://github.com/Tofandel/prerenderer/actions/workflows/tests.yml)
 [![npm downloads](https://img.shields.io/npm/dt/@prerenderer/prerenderer.svg)](https://www.npmjs.com/package/@prerenderer/prerenderer)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com/)
-[![license](https://img.shields.io/github/license/JoshTheDerf/prerenderer.svg)](https://github.com/JoshTheDerf/prerenderer/blob/master/LICENSE.md)
+[![license](https://img.shields.io/github/license/Tofandel/prerenderer.svg)](https://github.com/Tofandel/prerenderer/blob/master/LICENSE.md)
 
 </div>
 
@@ -24,6 +24,7 @@
 - [![npm version](https://img.shields.io/npm/v/@prerenderer/renderer-jsdom.svg?label=@prerenderer/renderer-jsdom)](https://www.npmjs.com/package/@prerenderer/renderer-jsdom)
 - [![npm version](https://img.shields.io/npm/v/@prerenderer/renderer-puppeteer.svg?label=@prerenderer/renderer-puppeteer)](https://www.npmjs.com/package/@prerenderer/renderer-puppeteer)
 - [![npm version](https://img.shields.io/npm/v/@prerenderer/webpack-plugin.svg?label=@prerenderer/webpack-plugin)](https://www.npmjs.com/package/@prerenderer/webpack-plugin)
+- [![npm version](https://img.shields.io/npm/v/@prerenderer/rollup-plugin.svg?label=@prerenderer/rollup-plugin)](https://www.npmjs.com/package/@prerenderer/rollup-plugin)
 
 </div>
 
@@ -67,7 +68,7 @@ In the interest of transparency, there are some use-cases where prerendering mig
 ```
 app/
 ├── index.html
-└── index.ts // Whatever JS controls the SPA, loaded by index.html
+└── index.js // Whatever JS controls the SPA, loaded by index.html
 ```
 
 **Output**
@@ -77,7 +78,7 @@ app/
 ├── about
 │   └── index.html // Static rendered /about route.
 ├── index.html // Static rendered / route.
-├── index.ts // Whatever JS controls the SPA, loaded by index.html
+├── index.js // Whatever JS controls the SPA, loaded by index.html
 └── some
     └── deep
         └── nested
@@ -222,8 +223,10 @@ None of the options are required, by default the page will render when puppeteer
 | inject                   | Object                                                                                                                                     | None                   | An object to inject into the global scope of the rendered page before it finishes loading. Must be `JSON.stringifiy`-able. The property injected to is `window['__PRERENDER_INJECTED']` by default.                                                                  |
 | injectProperty           | String                                                                                                                                     | `__PRERENDER_INJECTED` | The property to mount `inject` to during rendering. Does nothing if `inject` isn't set.                                                                                                                                                                              |
 | renderAfterDocumentEvent | String                                                                                                                                     | DOMContentLoaded       | Wait to render until the specified event is fired on the document. (You can fire an event like so: `document.dispatchEvent(new Event('custom-render-trigger'))`                                                                                                      |
-| renderAfterElementExists | String (Selector)                                                                                                                          | None                   | Wait to render until the specified element is detected using `document.querySelector`                                                                                                                                                                                |
 | renderAfterTime          | Integer (Milliseconds)                                                                                                                     | None                   | Wait to render until a certain amount of time has passed.                                                                                                                                                                                                            |
+| renderAfterElementExists | String (Selector)                                                                                                                          | None                   | Wait to render until the specified element is detected using `document.querySelector`                                                                                                                                                                                |
+| elementVisible           | Boolean                                                                                                                                    | None                   | If we should wait until the renderAfterElementExists is visible                                                                                                                                                                                                      |
+| elementHidden            | Boolean                                                                                                                                    | None                   | If we should wait until the renderAfterElementExists is hidden                                                                                                                                                                                                      |
 | timeout                  | Integer (Milliseconds)                                                                                                                     | 30000                  | If this timeout triggers while waiting for an event or an element, the rendering will abort with an error.                                                                                                                                                           |
 | skipThirdPartyRequests   | Boolean                                                                                                                                    | `false`                | Automatically block any third-party requests. (This can make your pages load faster by not loading non-essential scripts, styles, or fonts.)                                                                                                                         |
 | headless                 | Boolean                                                                                                                                    | `true`                 | Whether to run the browser in headless mode                                                                                                                                                                                                                          |
@@ -249,6 +252,13 @@ None of the options are required, by default the renderer-puppeteer will be used
 
 ---
 
+### `@prerenderer/rollup-plugin` Options
+
+The `@prerenderer/rollup-plugin` and `@prerenderer/webpack-plugin` aims to have the same feature set and api for an easy migration
+
+As such the [options are the same as the webpack-plugin](#prerendererwebpack-plugin-options)
+
+
 ## Caveats
 
 - For obvious reasons, `prerenderer` only works for SPAs that route using the HTML5 history
@@ -272,16 +282,16 @@ Run `npm run test` to make sure that everything is working correctly
     <tr>
       <td align="center">
         <a href="https://github.com/tribex">
-          <img width="150" height="150" src="https://github.com/JoshTheDerf.png?v=3&s=150">
+          <img width="150" height="150" src="https://github.com/tofandel.png?v=3&s=150">
           </br>
-          Joshua Bemenderfer
+          Adrien Foulon
         </a>
       </td>
       <td align="center">
         <a href="https://github.com/tribex">
-          <img width="150" height="150" src="https://github.com/tofandel.png?v=3&s=150">
+          <img width="150" height="150" src="https://github.com/JoshTheDerf.png?v=3&s=150">
           </br>
-          Adrien Foulon
+          Joshua Bemenderfer
         </a>
       </td>
     </tr>

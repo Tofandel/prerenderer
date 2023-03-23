@@ -122,22 +122,30 @@ export default class JSDOMRenderer implements IRenderer {
               }, timeout)
             }
 
+            let fallback = true
+            // Make all options `or`, the fastest to happen will trigger the rendering
             if (options.renderAfterDocumentEvent) {
-            // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
+              fallback = false
+              // CAPTURE WHEN AN EVENT FIRES ON THE DOCUMENT
               const event = options.renderAfterDocumentEvent
               doc.addEventListener(event, captureDocument)
-            } else if (options.renderAfterElementExists) {
-            // CAPTURE ONCE A SPECIFIC ELEMENT EXISTS
+            }
+            if (options.renderAfterElementExists) {
+              fallback = false
+              // CAPTURE ONCE A SPECIFIC ELEMENT EXISTS
               const selector = options.renderAfterElementExists
               int = setInterval(() => {
                 if (doc.querySelector(selector)) {
                   captureDocument()
                 }
               }, 50)
-            } else if (options.renderAfterTime) {
-            // CAPTURE AFTER A NUMBER OF MILLISECONDS
+            }
+            if (options.renderAfterTime) {
+              fallback = false
+              // CAPTURE AFTER A NUMBER OF MILLISECONDS
               setTimeout(captureDocument, options.renderAfterTime)
-            } else {
+            }
+            if (fallback) {
             // DEFAULT: RUN IMMEDIATELY
               doc.addEventListener('DOMContentLoaded', captureDocument)
             }

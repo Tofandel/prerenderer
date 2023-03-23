@@ -15,6 +15,10 @@
         document.body.innerHTML = `<p id="late-element">Oh no, it's too late!</p>`
         document.dispatchEvent(new Event('should-already-be-rendered'))
       }, 1000)
+
+      setTimeout(() => {
+        document.body.innerHTML = `Now that's really late`
+      }, 1400)
     })
   </script>
 </body>

@@ -1,6 +1,6 @@
 import Server, { Stage } from './Server'
 import { schema, PrerendererOptions, defaultOptions, PrerendererFinalOptions } from './PrerendererOptions'
-import IRenderer from './IRenderer'
+import IRenderer, { RendererConstructor } from './IRenderer'
 import PackageName from './PackageName'
 import { validate } from 'schema-utils'
 import deepMerge from 'ts-deepmerge'
@@ -10,7 +10,7 @@ type HookCallback = (server: Server) => void
 export default class Prerenderer {
   private readonly options: PrerendererFinalOptions
   private readonly server: Server
-  private readonly renderer: IRenderer
+  private renderer: IRenderer
   private hooks: Record<Stage | string, Array<HookCallback>> = {}
 
   constructor (options: PrerendererOptions) {
@@ -22,15 +22,26 @@ export default class Prerenderer {
     this.options = deepMerge(defaultOptions, options) as PrerendererFinalOptions
 
     this.server = new Server(this)
-    this.renderer = options.renderer
-
-    if (this.renderer && this.renderer.preServer) this.renderer.preServer(this)
 
     if (!this.options) throw new Error(`${PackageName} Options must be defined!`)
   }
 
   public async initialize () {
     // Initialization is separate from construction because science? (Ideally to initialize the server and renderer separately.)
+
+    let renderer: IRenderer
+    if (typeof this.options.renderer === 'string') {
+      const { default: RendererClass } = ((await import(this.options.renderer)) as {default: RendererConstructor})
+      renderer = new RendererClass(this.options.rendererOptions)
+    } else if (typeof this.options.renderer === 'function') {
+      const RC = this.options.renderer as RendererConstructor
+      renderer = new RC(this.options.rendererOptions)
+    } else {
+      renderer = this.options.renderer
+    }
+    this.renderer = renderer
+
+    if (this.renderer && this.renderer.preServer) this.renderer.preServer(this)
     await this.server.initialize()
     await this.renderer.initialize()
 

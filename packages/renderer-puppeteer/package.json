@@ -1,10 +1,10 @@
 {
   "name": "@prerenderer/renderer-puppeteer",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "exports": {
-    "import": "./dist/index.js",
+    "import": "./index.mjs",
     "require": "./dist/cjs.js"
   },
   "types": "types/index.d.ts",
@@ -29,9 +29,8 @@
     "headless-chrome"
   ],
   "author": {
-    "name": "Joshua Bemenderfer",
-    "email": "tribex10@gmail.com",
-    "url": "https://joshderf.com/"
+    "name": "Adrien Foulon",
+    "email": "adrien.foulon@tukan.hu"
   },
   "contributors": [
     {
@@ -42,23 +41,23 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com/JoshTheDerf/prerenderer.git",
+    "url": "git@github.com/Tofandel/prerenderer.git",
     "directory": "packages/renderer-puppeteer"
   },
   "bugs": {
-    "url": "https://github.com/JoshTheDerf/prerenderer/issues"
+    "url": "https://github.com/Tofandel/prerenderer/issues"
   },
   "dependencies": {
-    "deepmerge": "4.2.2",
-    "promise-limit": "2.7.0",
-    "schema-utils": "4.0.0"
+    "deepmerge": "^4.3.1",
+    "promise-limit": "^2.7.0",
+    "schema-utils": "^4.0.0"
   },
   "peerDependencies": {
     "puppeteer": ">= 2"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "^1.0.3",
-    "puppeteer": "^19.4.1"
+    "@prerenderer/prerenderer": "file:../prerenderer",
+    "puppeteer": "^19.7.5"
   },
   "engines": {
     "node": ">=8.0.0"

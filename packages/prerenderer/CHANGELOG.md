@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.1.0 - 2023-03-23
+
+### Changed
+- Upgrade typescript to v5
+- Bump dependencies
+- Allow renderer option to be a string or a constructor
+- Add rendererOptions option for the later case
+- fix broken mjs support (`.default` was needed when importing)
+
+### Fixes
+- Fix warning about `renderAfter*` options being `deprecated` options, which is not the case
+
+## 1.0.3 - 2023-01-21
+
 ### Changed
 - Monorepo migration
 - Typescript migration

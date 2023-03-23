@@ -22,6 +22,9 @@ export interface PuppeteerRendererOptions {
   viewport?: Viewport
   launchOptions?: PuppeteerLaunchOptions
   navigationOptions?: WaitForOptions
+
+  elementVisible?: boolean
+  elementHidden?: boolean
 }
 
 export const defaultOptions = {
@@ -60,6 +63,16 @@ export const schema: JSONSchemaType<Omit<PuppeteerRendererOptions, 'inject' | 'p
         type: 'string',
         description: 'Wait until this selector is found on the page',
         nullable: true,
+      },
+      elementVisible: {
+        type: 'boolean',
+        nullable: true,
+        description: 'If this is true, the renderAfterElementExists must be visible on the page to trigger the render',
+      },
+      elementHidden: {
+        type: 'boolean',
+        nullable: true,
+        description: 'If this is false, the renderAfterElementExists must be hidden on the page to trigger the render',
       },
       renderAfterTime: {
         type: 'number',

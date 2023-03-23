@@ -9,7 +9,7 @@ test('uses the result of a fetch call', async () => {
   const prerenderer = new Prerenderer({
     staticDir: testDir,
     renderer: new Renderer({
-      renderAfterDocumentEvent: 'please-render',
+      renderAfterDocumentEvent: 'please-render', // use the magic word!
       timeout: 5000,
     }),
   })

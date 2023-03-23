@@ -1,27 +1,16 @@
-import { RenderedRoute, PrerendererOptions, IRenderer } from '@prerenderer/prerenderer'
+import { RenderedRoute, PrerendererOptions } from '@prerenderer/prerenderer'
 import { JSONSchemaType } from 'ajv'
-import { JSDOMRendererOptions } from '@prerenderer/renderer-jsdom'
-import { PuppeteerRendererOptions } from '@prerenderer/renderer-puppeteer'
 import { Schema } from 'schema-utils/declarations/validate'
 
-type rendererOptions = JSDOMRendererOptions | PuppeteerRendererOptions | Record<string, unknown>
-export type RendererClass = { new(options?: rendererOptions): IRenderer }
-
-export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
+export interface WebpackPrerenderSPAOptions extends Omit<PrerendererOptions, 'staticDir'> {
   entryPath?: string
   routes?: Array<string>
   postProcess?: (renderedRoutes: RenderedRoute) => Promise<void> | void
   urlModifier?(url: string): string
-  rendererOptions?: rendererOptions
-  renderer?: string | IRenderer | { new(options?: rendererOptions): IRenderer }
 }
 
 export const defaultOptions = {
   indexPath: 'index.html',
-  rendererOptions: {
-    headless: true,
-  },
-  renderer: '@prerenderer/renderer-puppeteer',
   routes: ['/'],
 }
 
@@ -51,26 +40,6 @@ export const schema: JSONSchemaType<Omit<WebpackPrerenderSPAOptions, keyof Prere
     urlModifier: {
       instanceof: 'Function',
       description: 'Hook to be able to modify the url to retrieve the compiled asset',
-    },
-    renderer: {
-      anyOf: [
-        {
-          type: 'string',
-        },
-        {
-          instanceof: 'Function',
-        },
-        {
-          type: 'object',
-          additionalProperties: true,
-        },
-      ],
-    },
-    rendererOptions: {
-      type: 'object',
-      description: 'The options to pass to the renderer',
-      additionalProperties: true,
-      nullable: true,
     },
   },
 }

@@ -1,6 +1,6 @@
 # @prerenderer/webpack-plugin
 
-This package is part of the `@prerenderer` monorepo, for the rest of the documentation head over to https://github.com/JoshTheDerf/prerenderer#prerendererwebpack-plugin-options
+This package is part of the `@prerenderer` monorepo, for the rest of the documentation head over to https://github.com/Tofandel/prerenderer#prerendererwebpack-plugin-options
 
 ### Requirements
 This plugin is for webpack 5 and requires the html-webpack-plugin to be setup
@@ -74,7 +74,7 @@ module.exports = {
       },
       renderer: '@prerenderer/renderer-puppeteer',
       // The actual renderer to use. (Feel free to write your own)
-      // Available renderers: https://github.com/JoshTheDerf/prerenderer#available-renderers
+      // Available renderers: https://github.com/Tofandel/prerenderer#available-renderers
 
       //The options to pass to the renderer class's constructor
       rendererOptions: {
