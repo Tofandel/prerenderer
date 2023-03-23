@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/webpack-plugin",
-  "version": "5.0.5",
+  "version": "5.1.0",
   "description": "Flexible, framework-agnostic static site generation for apps built with webpack.",
   "license": "MIT",
   "exports": {
@@ -64,7 +64,7 @@
     "schema-utils": "^4.0.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "^1.0.3"
+    "@prerenderer/renderer-puppeteer": "^1.1.0"
   },
   "peerDependencies": {
     "html-webpack-plugin": "^5",
