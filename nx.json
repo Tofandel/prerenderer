@@ -12,13 +12,18 @@
     }
   },
   "namedInputs": {
-    "sources": [
-      "{projectRoot}/tsconfig.json",
-      "{projectRoot}/package-lock.json",
+    "deps": [
       "{projectRoot}/packages/prerenderer/src/*",
-      "{workspaceRoot}/src/*.ts",
+      "{workspaceRoot}/package-lock.json"
+    ],
+    "sources": [
       "{workspaceRoot}/tsconfig.json",
-      "{workspaceRoot}/package.json"
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/package.json"
+    ],
+    "tests": [
+      "{workspaceRoot}/test/**/*"
     ]
   },
   "targetDefaults": {
@@ -40,6 +45,7 @@
     },
     "build": {
       "inputs": [
+        "deps",
         "sources"
       ],
       "dependsOn": [
@@ -51,6 +57,9 @@
       ]
     },
     "test": {
+      "inputs": [
+        "tests"
+      ],
       "dependsOn": [
         "build"
       ]

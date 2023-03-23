@@ -36,7 +36,8 @@
   "overrides": [
     {
       "files": [
-        "*.test.js"
+        "*.test.js",
+        "*.test.mjs"
       ],
       "plugins": [
         "jest"
