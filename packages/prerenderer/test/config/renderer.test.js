@@ -35,4 +35,5 @@ test('renderer option as string', async () => {
   })
   await prerenderer.initialize()
   expect(Renderer).toHaveBeenNthCalledWith(1, { headless: false, foo: 'baz' })
+  await prerenderer.destroy()
 })
