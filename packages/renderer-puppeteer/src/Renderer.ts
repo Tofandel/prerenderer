@@ -44,6 +44,7 @@ export default class PuppeteerRenderer implements IRenderer {
 
     // Previously the whole option object was passed to `launch` which was not the best idea
     // We do a bit of backward compatibility here
+    // TODO use an explicit list of legacyOptions rather than excluding the list of existing options
     /* eslint-disable @typescript-eslint/no-unused-vars */
     const {
       maxConcurrentRoutes,
@@ -60,6 +61,9 @@ export default class PuppeteerRenderer implements IRenderer {
       launchOptions,
       renderAfterTime,
       renderAfterElementExists,
+      elementHidden,
+      elementVisible,
+      skipThirdPartyRequests,
       renderAfterDocumentEvent,
       ...legacyOptions
     } = this.options
