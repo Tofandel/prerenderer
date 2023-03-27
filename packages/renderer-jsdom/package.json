@@ -54,7 +54,7 @@
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "^1.1.1"
+    "@prerenderer/prerenderer": "file:../prerenderer"
   },
   "engines": {
     "node": ">=8.0.0"
