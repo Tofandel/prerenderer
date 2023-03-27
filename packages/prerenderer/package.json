@@ -16,7 +16,8 @@
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "index.mjs"
   ],
   "keywords": [
     "prerender",

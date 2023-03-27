@@ -7,6 +7,7 @@
     "import": "./index.mjs",
     "require": "./dist/cjs.js"
   },
+  "types": "types/index.d.ts",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
@@ -14,7 +15,9 @@
     "test:logs": "NODE_OPTIONS=--experimental-vm-modules jest ./test"
   },
   "files": [
-    "dist"
+    "dist",
+    "types",
+    "index.mjs"
   ],
   "keywords": [
     "prerender",
