@@ -98,7 +98,17 @@ const prerenderer = new Prerenderer({
   // Required - The path to the app to prerender. Should have an index.html and any other needed assets.
   staticDir: path.join(__dirname, 'app'),
   // The plugin that actually renders the page.
-  renderer: new JSDOMRenderer()
+  renderer: new JSDOMRenderer(),
+  postProcess (renderedRoute) {
+    // Replace all http with https urls and localhost to your site url
+    renderedRoute.html = renderedRoute.html.replace(
+      /http:/i,
+      'https:',
+    ).replace(
+      /(https:\/\/)?(localhost|127\.0\.0\.1):\d*/i,
+      (process.env.CI_ENVIRONMENT_URL || ''),
+    );
+  },
 })
 
 // Initialize is separate from the constructor for flexibility of integration with build systems.
@@ -166,6 +176,7 @@ All of the packages are strongly typed using typescript, if some documentation i
 | server      | Object                                    | No        | None                      | App server configuration options (See below)                                                                                                                                                                                                                                                                                                                                                                                                         |
 | renderer    | IRenderer Instance, constructor or String to require | No        | `new PuppeteerRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to `@prerenderer/renderer-puppeteer`.                                                                                                                                                                                                                                                                                        |
 | rendererOptions | Object                           | No | None                                | The options to pass to the renderer if it was not given as an instance, see below for a list of options |
+| postProcess     | (renderedRoute: Route) => void   | None                                | Allows you to customize the HTML and output path before writing the rendered contents to a file         |
 
 #### Server Options
 
@@ -176,7 +187,7 @@ All of the packages are strongly typed using typescript, if some documentation i
 | host  | String   | No        | 127.0.0.1                | The host to send requests to. Use with caution, as changing this could result in external urls being rendered instead of your local server, use `postProcess` if you just want to change urls in the resulting `.html` |
 | listenHost | String | No | 127.0.0.1 | The ip address the server will listen to. (0.0.0.0 would allow external access, use with caution)
 | ~~before~~ | Function | No        | No operation           | Deprecated: Use `hookServer()` instead. Function for adding custom server middleware. |
- 
+
 
 ### Prerenderer Methods
 

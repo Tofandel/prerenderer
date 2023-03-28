@@ -1,4 +1,4 @@
-import IRenderer from './IRenderer'
+import IRenderer, { RenderedRoute } from './IRenderer'
 import { Options as ProxyOptions } from 'http-proxy-middleware'
 import { Express } from 'express'
 // import { JSONSchemaType } from 'ajv'
@@ -38,12 +38,13 @@ export interface PrerendererOptions {
   server?: ServerOptions
   renderer?: string | IRenderer | { new(options?: rendererOptions): IRenderer }
   rendererOptions?: rendererOptions
+  postProcess?(route: RenderedRoute): Promise<void> | void
 }
 
 export type PrerendererFinalOptions = PrerendererOptions & typeof defaultOptions
 
 // AVJ's typing is very buggy, so use a looser type for what doesn't work
-export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server' | 'renderer'>>
+export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server' | 'renderer' | 'postProcess'>>
   & Schema = {
     type: 'object',
     required: ['staticDir'],
@@ -113,6 +114,10 @@ export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server' | 'rendere
         description: 'The options to pass to the renderer if you didn\'t pass an instance of a renderer to the `renderer` option',
         additionalProperties: true,
         nullable: true,
+      },
+      postProcess: {
+        description: 'If you want to modify the resulting html (like changing the url), you can do so in this hook',
+        instanceOf: 'Function',
       },
     },
   }

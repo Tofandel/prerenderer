@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [0.2.0] - 2023-03-28
+- Move the postProcess option from the plugin to the `Prerenderer`
+
+## [0.1.1] - 2023-03-27
+- Fix missing `index.mjs` and `types` in the package.json `file` field
+
 ## [0.1.0] - 2023-03-23
 
 ### Initial release within the monorepo repository

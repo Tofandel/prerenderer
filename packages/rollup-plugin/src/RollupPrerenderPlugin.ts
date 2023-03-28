@@ -76,18 +76,6 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
           await PrerendererInstance.initialize()
           const renderedRoutes = await PrerendererInstance.renderRoutes(opts.routes || [])
 
-          // Run postProcess hooks.
-          if (typeof opts.postProcess === 'function') {
-            const postProcess = opts.postProcess
-            await Promise.all(renderedRoutes.map(renderedRoute => postProcess(renderedRoute)))
-
-            // Check to ensure postProcess hooks returned the renderedRoute object properly.
-            const isValid = renderedRoutes.every(r => typeof r === 'object')
-            if (!isValid) {
-              throw new Error('Rendered routes are not object, did you do something weird in postProcess?')
-            }
-          }
-
           // Calculate outputPath if it hasn't been set already.
           renderedRoutes.forEach(processedRoute => {
             // Create dirs and write prerendered files.

@@ -91,6 +91,13 @@ export default class Prerenderer {
         renderedRoutes.forEach(rendered => {
           rendered.route = decodeURIComponent(rendered.route)
         })
+        if (this.options.postProcess) {
+          const postProcess = this.options.postProcess.bind(this)
+
+          return Promise.all(renderedRoutes.map(renderedRoute => postProcess(renderedRoute))).then(() => {
+            return renderedRoutes.filter((route) => typeof route === 'object' && route && typeof route.html === 'string' && route.html.length > 0)
+          })
+        }
 
         return renderedRoutes
       })

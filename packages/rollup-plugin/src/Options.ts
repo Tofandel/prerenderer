@@ -1,11 +1,10 @@
-import { RenderedRoute, PrerendererOptions } from '@prerenderer/prerenderer'
+import { PrerendererOptions } from '@prerenderer/prerenderer'
 import { JSONSchemaType } from 'ajv'
 import { Schema } from 'schema-utils/declarations/validate'
 
 export interface RollupPrerenderOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
   entryPath?: string
   routes?: Array<string>
-  postProcess?: (renderedRoutes: RenderedRoute) => Promise<void> | void
   urlModifier?(url: string): string
 }
 
@@ -32,10 +31,6 @@ export const schema: JSONSchemaType<Omit<RollupPrerenderOptions, keyof Prerender
         description: 'The path of the route',
         type: 'string',
       },
-    },
-    postProcess: {
-      description: 'Allows you to customize the HTML and output path before writing the rendered contents to a file.',
-      instanceof: 'Function',
     },
     urlModifier: {
       instanceof: 'Function',

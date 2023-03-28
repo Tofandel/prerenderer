@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## 1.1.0 - 2023-03-23
+### [1.2.0] - 2023-03-28
+- Move the postProcess option from the plugins to the `Prerenderer`
+
+## [1.1.1] - 2023-03-27
+- Fix missing `index.mjs` in the package.json `file` field
+-
+## [1.1.0] - 2023-03-23
 
 ### Changed
 - Upgrade typescript to v5
@@ -19,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 - Fix warning about `renderAfter*` options being `deprecated` options, which is not the case
 
-## 1.0.3 - 2023-01-21
+## [1.0.3] - 2023-01-21
 
 ### Changed
 - Monorepo migration

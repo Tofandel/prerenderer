@@ -78,18 +78,6 @@ export default class WebpackPrerenderSPAPlugin {
       await PrerendererInstance.initialize()
       const renderedRoutes = await PrerendererInstance.renderRoutes(this.options.routes || [])
 
-      // Run postProcess hooks.
-      if (typeof this.options.postProcess === 'function') {
-        const postProcess = this.options.postProcess
-        await Promise.all(renderedRoutes.map(renderedRoute => postProcess(renderedRoute)))
-
-        // Check to ensure postProcess hooks returned the renderedRoute object properly.
-        const isValid = renderedRoutes.every(r => typeof r === 'object')
-        if (!isValid) {
-          throw new Error('[prerender-spa-plugin] Rendered routes are not object, did you do something weird in postProcess?')
-        }
-      }
-
       // Calculate outputPath if it hasn't been set already.
       renderedRoutes.forEach(processedRoute => {
         // Create dirs and write prerendered files.
