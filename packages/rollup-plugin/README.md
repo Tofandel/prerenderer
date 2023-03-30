@@ -43,3 +43,9 @@ export default defineConfig({
 })
 
 ```
+
+Don't forget to trigger the custom event you set in `renderAfterDocumentEvent` in your app when the page is ready to be renderer (Eg: onMounted for vue) 
+
+```js
+document.dispatchEvent(new Event('custom-render-trigger'))
+```
