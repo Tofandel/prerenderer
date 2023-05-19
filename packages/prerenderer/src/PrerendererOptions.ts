@@ -38,7 +38,7 @@ export interface PrerendererOptions {
   server?: ServerOptions
   renderer?: string | IRenderer | { new(options?: rendererOptions): IRenderer }
   rendererOptions?: rendererOptions
-  postProcess?(route: RenderedRoute): Promise<void> | void
+  postProcess?(route: RenderedRoute, routes: RenderedRoute[]): Promise<void> | void
 }
 
 export type PrerendererFinalOptions = PrerendererOptions & typeof defaultOptions
@@ -116,7 +116,7 @@ export const schema: JSONSchemaType<Omit<PrerendererOptions, 'server' | 'rendere
         nullable: true,
       },
       postProcess: {
-        description: 'If you want to modify the resulting html (like changing the url), you can do so in this hook',
+        description: 'If you want to modify the resulting html (like changing the url), you can do so in this hook, you can also add rendered routes using the second parameter',
         instanceOf: 'Function',
       },
     },

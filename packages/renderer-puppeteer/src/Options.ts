@@ -28,6 +28,7 @@ export interface PuppeteerRendererOptions {
 }
 
 export const defaultOptions = {
+  headless: true,
   injectProperty: '__PRERENDER_INJECTED',
   maxConcurrentRoutes: 0,
   timeout: 1000 * 30, // 30 sec timeout by default

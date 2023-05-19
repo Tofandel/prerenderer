@@ -56,6 +56,14 @@
         "{projectRoot}/types"
       ]
     },
+    "test:logs": {
+      "inputs": [
+        "tests"
+      ],
+      "dependsOn": [
+        "build"
+      ]
+    },
     "test": {
       "inputs": [
         "tests"

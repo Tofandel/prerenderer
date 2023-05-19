@@ -32,6 +32,7 @@ export default class WebpackPrerenderSPAPlugin {
       staticDir: compiler.options.output.path || '/',
       ...this.options,
     })
+    // Modify the express server to serve the files from the webpack compiler because they are not written on disk yet
     PrerendererInstance.hookServer((server) => {
       const express = server.getExpressServer()
       // Express doesn't have complete typings yet
@@ -87,6 +88,12 @@ export default class WebpackPrerenderSPAPlugin {
           if (processedRoute.outputPath.startsWith('/') || processedRoute.outputPath.startsWith('\\')) {
             processedRoute.outputPath = processedRoute.outputPath.slice(1)
           }
+        }
+        if (processedRoute.outputPath in compilation.assets && this.options.fallback) {
+          const fallback = typeof this.options.fallback === 'string' ? this.options.fallback : '_fallback'
+          const ext = path.extname(processedRoute.outputPath)
+          const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
+          compilation.emitAsset(fileName, compilation.assets[processedRoute.outputPath])
         }
         // false positive as calling call(compilation) right after
         // eslint-disable-next-line @typescript-eslint/unbound-method

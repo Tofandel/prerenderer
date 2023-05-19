@@ -88,6 +88,12 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
             }
 
             if (bundle[processedRoute.outputPath]) {
+              if (options.fallback) {
+                const fallback = typeof options.fallback === 'string' ? options.fallback : '_fallback'
+                const ext = path.extname(processedRoute.outputPath)
+                const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
+                this.emitFile({ ...bundle[processedRoute.outputPath] as EmittedAsset, fileName })
+              }
               delete bundle[processedRoute.outputPath]
             }
             const htmlFile: EmittedAsset = {

@@ -42,3 +42,24 @@ test('Routes and events', async () => {
   expect(error.name).toBe('Prerendered route /404')
   expect(error.source).toContain('Error 404: the page you\'re looking for doesn\'t exist')
 }, 10000)
+
+
+test('Fallback', async () => {
+  const config = (await import('./vite.config.mjs')).default
+
+  const rollupOutput = await build(config(path.resolve(__dirname, '../examples/vue3'), {
+    routes: ['/', '/about', '/404'],
+    fallback: 'Backup',
+    renderer: '@prerenderer/renderer-puppeteer',
+    rendererOptions: { renderAfterDocumentEvent: 'render', renderAfterTime: 1000 },
+  }))
+
+  const index = rollupOutput.output.find((out) => out.fileName === 'index.html')
+  expect(index).toBeTruthy()
+  expect(index.name).toBe('Prerendered route /')
+
+  const indexFallback = rollupOutput.output.find((out) => out.fileName === 'indexBackup.html')
+  expect(indexFallback).toBeTruthy()
+  expect(indexFallback.source).not.toContain('provides you with all information you need to get started')
+  expect(indexFallback.source).toContain('<div id="app"></div>')
+})

@@ -4,7 +4,9 @@ import { Schema } from 'schema-utils/declarations/validate'
 
 export interface RollupPrerenderOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
   entryPath?: string
+  fallback?: boolean | string
   routes?: Array<string>
+
   urlModifier?(url: string): string
 }
 
@@ -22,6 +24,13 @@ export const schema: JSONSchemaType<Omit<RollupPrerenderOptions, keyof Prerender
       description: 'The entry index.html file to use',
       type: 'string',
       nullable: true,
+    },
+    fallback: {
+      oneOf: [
+        { type: 'string' },
+        { type: 'boolean' },
+      ],
+      description: 'Generate a fallback file if the asset already exists',
     },
     routes: {
       description: 'A list of routes to pre-render',

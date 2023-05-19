@@ -175,8 +175,8 @@ All of the packages are strongly typed using typescript, if some documentation i
 | indexPath   | String                                    | No        | `staticDir/index.html`    | The index file to fall back on for SPAs.                                                                                                                                                                                                                                                                                                                                                                                                             |
 | server      | Object                                    | No        | None                      | App server configuration options (See below)                                                                                                                                                                                                                                                                                                                                                                                                         |
 | renderer    | IRenderer Instance, constructor or String to require | No        | `new PuppeteerRenderer()` | The renderer you'd like to use to prerender the app. It's recommended that you specify this, but if not it will default to `@prerenderer/renderer-puppeteer`.                                                                                                                                                                                                                                                                                        |
-| rendererOptions | Object                           | No | None                                | The options to pass to the renderer if it was not given as an instance, see below for a list of options |
-| postProcess     | (renderedRoute: Route) => void   | No  | None                                | Allows you to customize the HTML and output path before writing the rendered contents to a file         |
+| rendererOptions | Object                                | No | None                                | The options to pass to the renderer if it was not given as an instance, see below for a list of options |
+| postProcess     | (renderedRoute: Route, routes: Route[]) => void | No | None                                | Allows you to customize the HTML and output path before writing the rendered contents to a file, you can also add your own routes by pushing to the routes parameter         |
 
 #### Server Options
 
@@ -257,13 +257,14 @@ None of the options are required, by default the page will render when puppeteer
 None of the options are required, by default the renderer-puppeteer will be used and render only the entry file
 | Option          | Type                             | Default                             | Description                                                                                             |
 |-----------------|----------------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------|
-| routes          | Array<string>                    | `['/']`                             | The list of routes to prerender                                                                         |
-| renderer        | string or instance of a renderer | `'@prerenderer/renderer-puppeteer'` | The instance of the renderer or the name of the renderer to require                                     |
-| rendererOptions | Object                           | None                                | The options to pass to the renderer if it was not given as an instance, see above for a list of options |
-| postProcess     | (renderedRoute: Route) => void   | None                                | Allows you to customize the HTML and output path before writing the rendered contents to a file         |
-| urlModifier     | (url: string) => string          | None                                | Hook to be able to modify the url to retrieve the compiled asset                                        |
-| entryPath       | string                           | indexPath option                    | The entry html file to use                                                                              |
-| ...             |                                  |                                     | [Additional Prerenderer Options](#prerenderer-options)                                             |
+| routes          | Array<string>                    | `['/']`                             | The list of routes to prerender                                                                           |
+| fallback        | Boolean | String                          | false                               | When setting this to true, if the output html file already exists, it will be re-emitted as {original_name}_fallback.html |
+| renderer        | string or instance of a renderer | `'@prerenderer/renderer-puppeteer'` | The instance of the renderer or the name of the renderer to require                                       |
+| rendererOptions | Object                           | None                                | The options to pass to the renderer if it was not given as an instance, see above for a list of options   |
+| postProcess     | (renderedRoute: Route) => void   | None                                | Allows you to customize the HTML and output path before writing the rendered contents to a file           |
+| urlModifier     | (url: string) => string          | None                                | Hook to be able to modify the url to retrieve the compiled asset                                          |
+| entryPath       | String                           | indexPath option                    | The entry html file to use                                                                                |
+| ...             |                                  |                                     | [Additional Prerenderer Options](#prerenderer-options)                                                    |
 
 ---
 

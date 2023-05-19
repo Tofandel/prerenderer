@@ -30,12 +30,13 @@ test('postProcess', async () => {
     originalRoute: '/exclude',
     html: 'exclude',
   }
-  jest.spyOn(prerenderer.getRenderer(), 'renderRoutes').mockImplementation(() => Promise.resolve([expectedRoute1, expectedRoute2]))
+  const routes = [expectedRoute1, expectedRoute2]
+  jest.spyOn(prerenderer.getRenderer(), 'renderRoutes').mockImplementation(() => Promise.resolve(routes))
   const res = await prerenderer.renderRoutes(['/foo', '/exclude'])
   await prerenderer.destroy()
   expect(postProcess).toHaveBeenCalledTimes(2)
-  expect(postProcess).toHaveBeenNthCalledWith(1, expectedRoute1)
-  expect(postProcess).toHaveBeenNthCalledWith(2, expectedRoute2)
+  expect(postProcess).toHaveBeenNthCalledWith(1, expectedRoute1, routes)
+  expect(postProcess).toHaveBeenNthCalledWith(2, expectedRoute2, routes)
   expect(res).toStrictEqual([{
     route: '/foo',
     originalRoute: '/foo',

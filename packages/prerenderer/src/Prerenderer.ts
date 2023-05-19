@@ -94,7 +94,7 @@ export default class Prerenderer {
         if (this.options.postProcess) {
           const postProcess = this.options.postProcess.bind(this)
 
-          return Promise.all(renderedRoutes.map(renderedRoute => postProcess(renderedRoute))).then(() => {
+          return Promise.all(renderedRoutes.map(renderedRoute => postProcess(renderedRoute, renderedRoutes))).then(() => {
             return renderedRoutes.filter((route) => typeof route === 'object' && route && typeof route.html === 'string' && route.html.length > 0)
           })
         }
