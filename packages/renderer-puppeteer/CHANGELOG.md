@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.5] - 2023-03-27
-- Rollback to old puppeteer headless because it's still quirky
+## [1.2.0] - 2023-05-34
+- Switch to new puppeteer headless mode
+
+## [1.1.5] - 2023-05-24
+~~- Rollback to old puppeteer headless because it's still quirky~~
 
 ## [1.1.1] - 2023-03-27
 - Fix missing `index.mjs` in the package.json `file` field
