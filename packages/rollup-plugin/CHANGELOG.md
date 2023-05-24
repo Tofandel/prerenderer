@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [0.3.0] - 2023-05-19
+- Added `fallback` option to generate a non prerendered `index_fallback.html`
+
 ### [0.2.0] - 2023-03-28
 - Move the postProcess option from the plugin to the `Prerenderer`
 
