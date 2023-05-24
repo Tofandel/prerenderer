@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/webpack-plugin",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "Flexible, framework-agnostic static site generation for apps built with webpack.",
   "license": "MIT",
   "exports": {
@@ -67,7 +67,7 @@
     "schema-utils": "^4.0.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "^1.1.4"
+    "@prerenderer/renderer-puppeteer": "^1.1.6"
   },
   "peerDependencies": {
     "html-webpack-plugin": "^5",
@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "file:../prerenderer",
-    "@prerenderer/renderer-jsdom": "file:../renderer-jsdom",
+    "@prerenderer/renderer-jsdom": "^1.1.3",
     "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer",
     "express": "^4.18.2",
     "vue": "^3.2.45",
@@ -88,5 +88,5 @@
   "jest": {
     "testTimeout": 15000
   },
-  "gitHead": "197a8979e6b8b3a8f2d990e92d01b4d82e422f07"
+  "gitHead": "d91559ea7813674347ede0bff06f899f403abcda"
 }

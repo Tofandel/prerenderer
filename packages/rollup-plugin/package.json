@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/rollup-plugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Flexible, framework-agnostic static site generation for apps built with rollup or vite.",
   "license": "MIT",
   "exports": {
@@ -49,7 +49,7 @@
     "schema-utils": "^4.0.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "^1.1.4"
+    "@prerenderer/renderer-puppeteer": "^1.1.5"
   },
   "peerDependencies": {
     "rollup": "^3"
@@ -76,5 +76,5 @@
       "**/?(*.)+(spec|test).?(m)[tj]s?(x)"
     ]
   },
-  "gitHead": "197a8979e6b8b3a8f2d990e92d01b4d82e422f07"
+  "gitHead": "d91559ea7813674347ede0bff06f899f403abcda"
 }

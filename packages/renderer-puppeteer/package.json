@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-puppeteer",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "exports": {
@@ -67,5 +67,5 @@
     "access": "public"
   },
   "sideEffects": false,
-  "gitHead": "197a8979e6b8b3a8f2d990e92d01b4d82e422f07"
+  "gitHead": "d91559ea7813674347ede0bff06f899f403abcda"
 }

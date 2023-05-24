@@ -73,7 +73,7 @@ export default class PuppeteerRenderer implements IRenderer {
         console.warn('You are passing options to puppeteer launch using root options, which has been deprecated put them in "launchOptions" instead [Affected: ' + Object.keys(legacyOptions).join(',') + ']')
       }
     }
-    this.puppeteer = await puppeteer.launch({ headless: headless ? 'old' : false, args, ...(launchOptions || legacyOptions) })
+    this.puppeteer = await puppeteer.launch({ headless, args, ...(launchOptions || legacyOptions) })
   }
 
   async handleRequestInterception (page: Page, baseURL: string) {
