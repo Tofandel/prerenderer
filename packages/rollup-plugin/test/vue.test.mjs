@@ -43,7 +43,6 @@ test('Routes and events', async () => {
   expect(error.source).toContain('Error 404: the page you\'re looking for doesn\'t exist')
 }, 10000)
 
-
 test('Fallback', async () => {
   const config = (await import('./vite.config.mjs')).default
 
