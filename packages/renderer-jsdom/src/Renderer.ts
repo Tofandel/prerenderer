@@ -13,11 +13,11 @@ import { fetch, Headers, Request, Response } from 'whatwg-fetch'
 const shim = function (window: DOMWindow) {
   /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/ban-ts-comment */
   // @ts-ignore
-  window.SVGElement = window.HTMLElement
+  !window.SVGElement && (window.SVGElement = window.HTMLElement)
   // @ts-ignore
-  window.localStorage = new Storage()
+  !window.localStorage && (window.localStorage = new Storage())
   // @ts-ignore
-  window.sessionStorage = new Storage()
+  !window.sessionStorage && (window.sessionStorage = new Storage())
   global.XMLHttpRequest = window.XMLHttpRequest
   window.fetch = fetch
   window.Headers = Headers
