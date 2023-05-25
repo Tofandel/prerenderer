@@ -73,3 +73,29 @@ test('Fallback', (resolve) => {
     resolve()
   })
 })
+
+test('Public path', (resolve) => {
+  const conf = config(path.resolve(__dirname, '../examples/vue3'), {
+    routes: ['/', '/foo', '/bar'],
+    renderer: require('@prerenderer/renderer-jsdom'),
+    rendererOptions: { renderAfterDocumentEvent: 'render' },
+  })
+  conf.output.publicPath = '/my-custom/path/'
+  webpack(conf, (err, stats) => {
+    if (err) {
+      throw err
+    } else if (stats.hasErrors()) {
+      throw stats.toString()
+    }
+
+    const assets = stats.toJson().assets
+    const files = assets.map(x => x.name)
+    const index = assets.find((a) => a.name === 'index.html')
+
+    expect(files).toContain('index.html')
+    expect(files).toContain('main.js')
+    expect(index.info.prerendered).toBeTruthy()
+    expect(index.size).toBeGreaterThan(500)
+    resolve()
+  })
+})

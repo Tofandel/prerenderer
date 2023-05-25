@@ -45,7 +45,15 @@ export default class WebpackPrerenderSPAPlugin {
       }, 'post-fallback')
 
       express.get('*', (req, res) => {
-        let url = req.path.slice(1, req.path.endsWith('/') ? -1 : undefined)
+        let url = req.path.slice(0, req.path.endsWith('/') ? -1 : undefined)
+
+        const publicPath = typeof compilation.outputOptions.publicPath === 'string' && compilation.outputOptions.publicPath !== 'auto'
+          ? compilation.outputOptions.publicPath || '/'
+          : '/'
+
+        if (url.startsWith(publicPath)) {
+          url = url.slice(publicPath.length)
+        }
         url = url in compilation.assets || url.includes('.') ? url : url + '/' + indexPath
         if (url.startsWith('/')) {
           url = url.slice(1)

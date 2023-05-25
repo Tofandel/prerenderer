@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [5.3.3] - 2023-05-19
+- Fix handling of a custom webpack `publicPath` in the express server
+
 ### [5.3.0] - 2023-05-19
 - Added `fallback` option to generate a non prerendered `index_fallback.html`
 
