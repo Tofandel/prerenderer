@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.1.5] - 2023-05-25
-- Fix shim localStorage and sessionStorage if necessary
+- Fix shim localStorage and sessionStorage only if necessary
 
 ## [1.1.1] - 2023-03-27
 - Fix missing `index.mjs` and `types` in the package.json `file` field
