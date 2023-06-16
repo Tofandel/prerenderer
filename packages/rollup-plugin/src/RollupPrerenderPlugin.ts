@@ -74,7 +74,7 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
 
         try {
           await PrerendererInstance.initialize()
-          const renderedRoutes = await PrerendererInstance.renderRoutes(opts.routes || [])
+          const renderedRoutes = await PrerendererInstance.renderRoutes([...new Set(opts.routes || [])])
 
           // Calculate outputPath if it hasn't been set already.
           renderedRoutes.forEach(processedRoute => {
@@ -92,7 +92,9 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
                 const fallback = typeof options.fallback === 'string' ? options.fallback : '_fallback'
                 const ext = path.extname(processedRoute.outputPath)
                 const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
-                this.emitFile({ ...bundle[processedRoute.outputPath] as EmittedAsset, fileName })
+                if (!fileName in bundle[processedRoute.outputPath]) {
+                  this.emitFile({ ...bundle[processedRoute.outputPath] as EmittedAsset, fileName })
+                }
               }
               delete bundle[processedRoute.outputPath]
             }

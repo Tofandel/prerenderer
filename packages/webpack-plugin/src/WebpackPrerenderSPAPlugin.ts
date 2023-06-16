@@ -9,6 +9,7 @@ import { Schema } from 'schema-utils/declarations/validate'
 
 export default class WebpackPrerenderSPAPlugin {
   private readonly options: WebpackPrerenderSPAFinalOptions
+  private renderedRoutes: Array<string> = []
 
   constructor (options: WebpackPrerenderSPAOptions = {}) {
     validate(schema as Schema, options, {
@@ -85,7 +86,12 @@ export default class WebpackPrerenderSPAPlugin {
 
     try {
       await PrerendererInstance.initialize()
-      const renderedRoutes = await PrerendererInstance.renderRoutes(this.options.routes || [])
+      const routes = [...new Set(
+        (this.options.routes || [])
+          .filter(r => this.renderedRoutes.includes(r)),
+      )]
+      const renderedRoutes = await PrerendererInstance.renderRoutes(routes)
+      this.renderedRoutes.concat(routes)
 
       // Calculate outputPath if it hasn't been set already.
       renderedRoutes.forEach(processedRoute => {
@@ -101,7 +107,9 @@ export default class WebpackPrerenderSPAPlugin {
           const fallback = typeof this.options.fallback === 'string' ? this.options.fallback : '_fallback'
           const ext = path.extname(processedRoute.outputPath)
           const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
-          compilation.emitAsset(fileName, compilation.assets[processedRoute.outputPath])
+          if (!fileName in compilation.assets) {
+            compilation.emitAsset(fileName, compilation.assets[processedRoute.outputPath])
+          }
         }
         // false positive as calling call(compilation) right after
         // eslint-disable-next-line @typescript-eslint/unbound-method
