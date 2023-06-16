@@ -49,7 +49,9 @@ export default class Prerenderer {
   }
 
   public async destroy () {
-    await Promise.all([this.renderer.destroy(), this.server.destroy()])
+    if (this.renderer) {
+      await Promise.all([this.renderer.destroy(), this.server.destroy()])
+    }
   }
 
   public getServer () {

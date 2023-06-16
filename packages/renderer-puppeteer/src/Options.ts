@@ -36,7 +36,7 @@ export const defaultOptions = {
 
 export type PuppeteerRendererFinalOptions = PuppeteerRendererOptions & typeof defaultOptions
 
-export const schema: JSONSchemaType<Omit<PuppeteerRendererOptions, 'inject' | 'pageHandler' | 'pageSetup' | 'consoleHandler'>>
+export const schema: JSONSchemaType<Omit<PuppeteerRendererOptions, 'inject' | 'pageHandler' | 'pageSetup' | 'consoleHandler' | 'navigationOptions'>>
   & Schema = {
     type: 'object',
     additionalProperties: true,

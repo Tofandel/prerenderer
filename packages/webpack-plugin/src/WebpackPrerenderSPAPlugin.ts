@@ -9,7 +9,6 @@ import { Schema } from 'schema-utils/declarations/validate'
 
 export default class WebpackPrerenderSPAPlugin {
   private readonly options: WebpackPrerenderSPAFinalOptions
-  private renderedRoutes: Array<string> = []
 
   constructor (options: WebpackPrerenderSPAOptions = {}) {
     validate(schema as Schema, options, {
@@ -20,7 +19,7 @@ export default class WebpackPrerenderSPAPlugin {
     this.options = deepMerge.withOptions({ mergeArrays: false }, defaultOptions, options) as WebpackPrerenderSPAFinalOptions
   }
 
-  async prerender (compiler: Compiler, compilation: Compilation) {
+  async prerender (compiler: Compiler, compilation: Compilation, alreadyRenderedRoutes: Array<string> = []) {
     const indexPath = this.options.indexPath
     const entryPath = this.options.entryPath || indexPath
 
@@ -85,39 +84,38 @@ export default class WebpackPrerenderSPAPlugin {
     })
 
     try {
-      await PrerendererInstance.initialize()
-      const routes = [...new Set(
-        (this.options.routes || [])
-          .filter(r => this.renderedRoutes.includes(r)),
-      )]
-      const renderedRoutes = await PrerendererInstance.renderRoutes(routes)
-      this.renderedRoutes.concat(routes)
+      const routes = [...new Set(this.options.routes || [])]
+      if (routes.length) {
+        await PrerendererInstance.initialize()
+        const renderedRoutes = await PrerendererInstance.renderRoutes(routes)
+        alreadyRenderedRoutes.concat(routes)
 
-      // Calculate outputPath if it hasn't been set already.
-      renderedRoutes.forEach(processedRoute => {
-        // Create dirs and write prerendered files.
-        if (!processedRoute.outputPath) {
-          processedRoute.outputPath = path.join(processedRoute.route, indexPath)
+        // Calculate outputPath if it hasn't been set already.
+        renderedRoutes.forEach(processedRoute => {
+          // Create dirs and write prerendered files.
+          if (!processedRoute.outputPath) {
+            processedRoute.outputPath = path.join(processedRoute.route, indexPath)
 
-          if (processedRoute.outputPath.startsWith('/') || processedRoute.outputPath.startsWith('\\')) {
-            processedRoute.outputPath = processedRoute.outputPath.slice(1)
+            if (processedRoute.outputPath.startsWith('/') || processedRoute.outputPath.startsWith('\\')) {
+              processedRoute.outputPath = processedRoute.outputPath.slice(1)
+            }
           }
-        }
-        if (processedRoute.outputPath in compilation.assets && this.options.fallback) {
-          const fallback = typeof this.options.fallback === 'string' ? this.options.fallback : '_fallback'
-          const ext = path.extname(processedRoute.outputPath)
-          const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
-          if (!fileName in compilation.assets) {
-            compilation.emitAsset(fileName, compilation.assets[processedRoute.outputPath])
+          if (processedRoute.outputPath in compilation.assets && this.options.fallback) {
+            const fallback = typeof this.options.fallback === 'string' ? this.options.fallback : '_fallback'
+            const ext = path.extname(processedRoute.outputPath)
+            const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
+            if (!(fileName in compilation.assets)) {
+              compilation.emitAsset(fileName, compilation.assets[processedRoute.outputPath])
+            }
           }
-        }
-        // false positive as calling call(compilation) right after
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        const fn = processedRoute.outputPath in compilation.assets ? compilation.updateAsset : compilation.emitAsset
-        fn.call(compilation, processedRoute.outputPath, new compiler.webpack.sources.RawSource(processedRoute.html.trim(), false), {
-          prerendered: true,
+          // false positive as calling call(compilation) right after
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          const fn = processedRoute.outputPath in compilation.assets ? compilation.updateAsset : compilation.emitAsset
+          fn.call(compilation, processedRoute.outputPath, new compiler.webpack.sources.RawSource(processedRoute.html.trim(), false), {
+            prerendered: true,
+          })
         })
-      })
+      }
     } catch (err: unknown) {
       const msg = '[prerender-spa-plugin] Unable to prerender all routes!'
       compilation.errors.push(new WebpackError(msg))

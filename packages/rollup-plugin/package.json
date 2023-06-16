@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "file:../prerenderer",
-    "@prerenderer/renderer-jsdom": "file:../renderer-jsdom",
+    "@prerenderer/renderer-jsdom": "^1.1.5",
     "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer",
     "@vitejs/plugin-vue": "^4.1.0",
     "express": "^4.18.2",
@@ -76,5 +76,5 @@
       "**/?(*.)+(spec|test).?(m)[tj]s?(x)"
     ]
   },
-  "gitHead": "d91559ea7813674347ede0bff06f899f403abcda"
+  "gitHead": "f961a5ea6750bf7f5f0d334cd5674a04bcd2f7bf"
 }

@@ -92,7 +92,7 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
                 const fallback = typeof options.fallback === 'string' ? options.fallback : '_fallback'
                 const ext = path.extname(processedRoute.outputPath)
                 const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext
-                if (!fileName in bundle[processedRoute.outputPath]) {
+                if (!(fileName in bundle[processedRoute.outputPath])) {
                   this.emitFile({ ...bundle[processedRoute.outputPath] as EmittedAsset, fileName })
                 }
               }

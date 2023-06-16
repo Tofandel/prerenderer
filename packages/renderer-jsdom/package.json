@@ -54,7 +54,7 @@
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "file:../prerenderer"
+    "@prerenderer/prerenderer": "^1.2.2"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -63,5 +63,5 @@
     "access": "public"
   },
   "sideEffects": false,
-  "gitHead": "197a8979e6b8b3a8f2d990e92d01b4d82e422f07"
+  "gitHead": "f961a5ea6750bf7f5f0d334cd5674a04bcd2f7bf"
 }

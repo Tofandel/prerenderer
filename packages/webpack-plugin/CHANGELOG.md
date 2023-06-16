@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### [5.3.5] - 2023-06-16
-- Fix fallback and route double rendering if multiple html-webpack-plugin
+- Fix fallback double rendering if multiple html-webpack-plugin
 
 ### [5.3.3] - 2023-05-19
 - Fix handling of a custom webpack `publicPath` in the express server
