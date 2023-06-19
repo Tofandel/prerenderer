@@ -24,6 +24,7 @@ export default class WebpackPrerenderSPAPlugin {
     const entryPath = this.options.entryPath || indexPath
 
     if (!(entryPath in compilation.assets)) {
+      compilation.errors.push(new WebpackError('[prerender-spa-plugin] Could not find the entryPath! Doing nothing.'))
       return false
     }
     const { default: Prerenderer } = await import('@prerenderer/prerenderer')
@@ -132,12 +133,20 @@ export default class WebpackPrerenderSPAPlugin {
   apply (compiler: Compiler) {
     const pluginName = this.constructor.name
     compiler.hooks.compilation.tap(pluginName, (compilation) => {
-      const hooks = HtmlWebpackPlugin.getHooks(compilation)
+      // Check if HtmlWebpackPlugin was used in the compilation
+      const isHtmlWebpackPluginUsed = compiler.options.plugins.some(
+        (plugin) => plugin instanceof HtmlWebpackPlugin,
+      )
+      if (!isHtmlWebpackPluginUsed) {
+        compilation.warnings.push(new WebpackError('[prerender-spa-plugin] The HtmlWebpackPlugin is missing from webpack, the prerender plugin will do nothing.'))
+      } else {
+        const hooks = HtmlWebpackPlugin.getHooks(compilation)
 
-      hooks.afterEmit.tapPromise(pluginName, async (out) => {
-        await this.prerender(compiler, compilation)
-        return out
-      })
+        hooks.afterEmit.tapPromise(pluginName, async (out) => {
+          await this.prerender(compiler, compilation)
+          return out
+        })
+      }
     })
   }
 }

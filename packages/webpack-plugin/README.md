@@ -3,7 +3,7 @@
 This package is part of the `@prerenderer` monorepo, for the rest of the documentation head over to https://github.com/Tofandel/prerenderer#prerendererwebpack-plugin-options
 
 ### Requirements
-This plugin is for webpack 5 and requires the html-webpack-plugin to be setup
+This plugin is for webpack 5 and requires that you use [HtmlWebpackPlugin](https://github.com/jantimon/html-webpack-plugin) as this plugin is hooked into it.
 
 ### Installation
 `npm i -D @prerenderer/webpack-plugin @prerenderer/renderer-puppeteer`
