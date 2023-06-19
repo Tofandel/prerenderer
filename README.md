@@ -254,6 +254,8 @@ None of the options are required, by default the page will render when puppeteer
 
 ### `@prerenderer/webpack-plugin` Options
 
+You _MUST_ use [HtmlWebpackPlugin](https://github.com/jantimon/html-webpack-plugin) as this plugin is triggered after.
+
 None of the options are required, by default the renderer-puppeteer will be used and render only the entry file
 | Option          | Type                             | Default                             | Description                                                                                             |
 |-----------------|----------------------------------|-------------------------------------|---------------------------------------------------------------------------------------------------------|
