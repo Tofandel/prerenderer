@@ -1,4 +1,3 @@
-
 export default class Storage {
   private data: Record<string, string> = {}
 
