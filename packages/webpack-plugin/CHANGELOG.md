@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [5.3.6] - 2023-06-20
+- Add warning if html-webpack-plugin is not configured properly
+
 ### [5.3.5] - 2023-06-16
 - Fix fallback double rendering if multiple html-webpack-plugin
 
