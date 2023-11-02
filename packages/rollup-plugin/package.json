@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/rollup-plugin",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Flexible, framework-agnostic static site generation for apps built with rollup or vite.",
   "license": "MIT",
   "exports": {
