@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/webpack-plugin",
-  "version": "5.3.7",
+  "version": "5.3.8",
   "description": "Flexible, framework-agnostic static site generation for apps built with webpack.",
   "license": "MIT",
   "exports": {
@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "file:../prerenderer",
-    "@prerenderer/renderer-jsdom": "^1.1.6",
+    "@prerenderer/renderer-jsdom": "^1.1.7",
     "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer",
     "express": "^4.18.2",
     "vue": "^3.2.45",
