@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [0.3.5] - 2023-11-02
+- Fix: fallback only for the entrypoint
+
 ### [0.3.5] - 2023-06-16
 - Make route a set to avoid double rendering
 

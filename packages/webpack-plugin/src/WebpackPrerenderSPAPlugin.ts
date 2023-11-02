@@ -24,7 +24,7 @@ export default class WebpackPrerenderSPAPlugin {
     const entryPath = this.options.entryPath || indexPath
 
     if (!(entryPath in compilation.assets)) {
-      compilation.errors.push(new WebpackError('[prerender-spa-plugin] Could not find the entryPath! Doing nothing.'))
+      compilation.warnings.push(new WebpackError('[prerender-spa-plugin] Could not find the entryPath! Doing nothing.'))
       return false
     }
     const { default: Prerenderer } = await import('@prerenderer/prerenderer')
@@ -101,7 +101,7 @@ export default class WebpackPrerenderSPAPlugin {
               processedRoute.outputPath = processedRoute.outputPath.slice(1)
             }
           }
-          if (processedRoute.outputPath in compilation.assets && this.options.fallback) {
+          if (processedRoute.outputPath === entryPath && this.options.fallback) {
             const fallback = typeof this.options.fallback === 'string' ? this.options.fallback : '_fallback'
             const ext = path.extname(processedRoute.outputPath)
             const fileName = processedRoute.outputPath.slice(0, -ext.length) + fallback + ext

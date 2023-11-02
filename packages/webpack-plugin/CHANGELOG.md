@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [5.3.7] - 2023-11-02
+- Fix: fallback only for the entrypoint
+- Fix: don't abort build if the entrypoint is not found but warn
+
 ### [5.3.6] - 2023-06-20
 - Add warning if html-webpack-plugin is not configured properly
 

@@ -87,7 +87,7 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
               }
             }
 
-            if (bundle[processedRoute.outputPath]) {
+            if (processedRoute.outputPath === entryPath) {
               if (options.fallback) {
                 const fallback = typeof options.fallback === 'string' ? options.fallback : '_fallback'
                 const ext = path.extname(processedRoute.outputPath)
