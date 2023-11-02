@@ -61,7 +61,7 @@ export default class JSDOMRenderer implements IRenderer {
   private getPageContent (host: string, originalRoute: string) {
     const options = this.options
     return new Promise<RenderedRoute>((resolve, reject) => {
-      let int: NodeJS.Timer | null = null
+      let int: NodeJS.Timeout | null = null
       let tim: NodeJS.Timeout | null = null
       import('jsdom').then(({ JSDOM }) => {
         const captureDocument = () => {
