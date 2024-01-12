@@ -167,6 +167,22 @@ that important, and you're willing to work around issues for more advanced cases
 
 All of the packages are strongly typed using typescript, if some documentation is missing or when in doubt, we recommend referring to the types which are self documenting
 
+### Installation
+
+You need to install `puppeteer` manually, there is different methods of installation, in the documentation we only cover the simple package installation, which will also install the necessary browsers binary
+```bash
+npm install --save-dev puppeteer
+```
+
+Install your selected assortment of packages with your package manager
+
+Example for Rollup or vite and the Puppeteer renderer:
+```bash
+npm install --save-dev @prerenderer/renderer-puppeteer @prerenderer/rollup-plugin
+```
+
+Then follow the installation instruction of your package of choice, that you can find in the README of that specific package
+
 ### Prerenderer Options
 
 | Option      | Type                                      | Required? | Default                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -254,6 +270,8 @@ None of the options are required, by default the page will render when puppeteer
 
 ### `@prerenderer/webpack-plugin` Options
 
+[Implementation details](./packages/webpack-plugin/README.md)
+
 The `@prerenderer/webpack-plugin` requires [HtmlWebpackPlugin](https://github.com/jantimon/html-webpack-plugin) to be configured and serve your html as this plugin is hooked into it.
 
 None of the options are required, by default the renderer-puppeteer will be used and render only the entry file
@@ -271,6 +289,8 @@ None of the options are required, by default the renderer-puppeteer will be used
 ---
 
 ### `@prerenderer/rollup-plugin` Options
+
+[Implementation details](./packages/rollup-plugin/README.md)
 
 The `@prerenderer/rollup-plugin` and `@prerenderer/webpack-plugin` aims to have the same feature set and api for an easy migration
 
