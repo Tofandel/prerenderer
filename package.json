@@ -33,7 +33,7 @@
     "lint-staged": "^15.2.0"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=14",
     "npm": ">=9"
   },
   "license": "MIT",
