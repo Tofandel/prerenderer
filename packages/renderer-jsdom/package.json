@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-jsdom",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "A renderer for @prerenderer/prerenderer that uses JSDOM to prerender pages.",
   "license": "MIT",
   "exports": {
@@ -52,11 +52,11 @@
     "jsdom": ">= 11",
     "promise-limit": "^2.7.0",
     "schema-utils": "4.2.0",
-    "whatwg-fetch": "^3.6.20",
-    "ts-deepmerge": "^6.2.0"
+    "ts-deepmerge": "^6.2.0",
+    "whatwg-fetch": "^3.6.20"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "^1.2.3",
+    "@prerenderer/prerenderer": "^1.2.4",
     "jsdom": "^23.2.0"
   },
   "engines": {

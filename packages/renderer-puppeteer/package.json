@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/renderer-puppeteer",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A renderer for @prerenderer/prerenderer that uses puppeteer to prerender pages.",
   "license": "MIT",
   "exports": {
@@ -58,7 +58,7 @@
     "puppeteer": ">= 2"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "*",
+    "@prerenderer/prerenderer": "^1.2.4",
     "puppeteer": "^21.7.0"
   },
   "engines": {
