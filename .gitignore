@@ -135,3 +135,5 @@ $RECYCLE.BIN/
 
 packages/*/dist
 packages/*/types
+
+.nx

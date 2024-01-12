@@ -8,7 +8,7 @@ import { validate } from 'schema-utils'
 import deepMerge from 'ts-deepmerge'
 
 // Fetch polyfill for jsdom
-import { fetch, Headers, Request, Response } from 'whatwg-fetch'
+import * as fs from 'fs'
 
 const shim = function (window: DOMWindow) {
   /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/ban-ts-comment */
@@ -18,12 +18,10 @@ const shim = function (window: DOMWindow) {
   !window.localStorage && (window.localStorage = new Storage())
   // @ts-ignore
   !window.sessionStorage && (window.sessionStorage = new Storage())
-  global.XMLHttpRequest = window.XMLHttpRequest
-  window.fetch = fetch
-  window.Headers = Headers
-  window.Request = Request
-  window.Response = Response
   /* eslint-enable */
+
+  const fetchPkg = require.resolve('whatwg-fetch/dist/fetch.umd.js')
+  window.eval(fs.readFileSync(fetchPkg, 'utf-8'))
 }
 
 export default class JSDOMRenderer implements IRenderer {

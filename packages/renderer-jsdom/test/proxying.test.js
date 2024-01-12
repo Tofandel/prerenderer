@@ -23,7 +23,7 @@ test('uses the result of a fetch call', async () => {
 
 test('proxies a request to an alternative server', async () => {
   const app = express()
-  const proxyPort = 3041
+  const proxyPort = 3042
 
   app.get('*', (req, res) => {
     res.setHeader('Content-Type', 'text/html')
