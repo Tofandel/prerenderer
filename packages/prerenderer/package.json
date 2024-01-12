@@ -67,8 +67,7 @@
     "@types/stoppable": "^1.1.1",
     "chance": "^1.0.13",
     "http-proxy-middleware": "^2.0.6",
-    "jest": "^29.3.1",
-    "@prerenderer/renderer-puppeteer": "*"
+    "jest": "^29.3.1"
   },
   "engines": {
     "node": ">=8.0.0"
