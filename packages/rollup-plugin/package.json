@@ -5,9 +5,10 @@
   "license": "MIT",
   "exports": {
     "import": "./index.mjs",
-    "require": "./dist/cjs.js"
+    "require": "./dist/cjs.js",
+    "types": "./types/index.d.ts"
   },
-  "types": "types/index.d.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
@@ -46,7 +47,8 @@
   },
   "dependencies": {
     "@prerenderer/prerenderer": "^1.2.3",
-    "schema-utils": "^4.0.0"
+    "schema-utils": "^4.2.0",
+    "ts-deepmerge": "^6.2.0"
   },
   "optionalDependencies": {
     "@prerenderer/renderer-puppeteer": "^1.2.2"

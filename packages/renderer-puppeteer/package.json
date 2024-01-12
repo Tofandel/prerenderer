@@ -5,9 +5,10 @@
   "license": "MIT",
   "exports": {
     "import": "./index.mjs",
-    "require": "./dist/cjs.js"
+    "require": "./dist/cjs.js",
+    "types": "./types/index.d.ts"
   },
-  "types": "types/index.d.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
@@ -49,16 +50,16 @@
     "url": "https://github.com/Tofandel/prerenderer/issues"
   },
   "dependencies": {
-    "deepmerge": "^4.3.1",
     "promise-limit": "^2.7.0",
-    "schema-utils": "^4.0.0"
+    "schema-utils": "^4.2.0",
+    "ts-deepmerge": "^6.2.0"
   },
   "peerDependencies": {
     "puppeteer": ">= 2"
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "^1.2.3",
-    "puppeteer": "^19.7.5"
+    "puppeteer": "^21.7.0"
   },
   "engines": {
     "node": ">=8.0.0"

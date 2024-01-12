@@ -26,6 +26,7 @@ test('proxies a request to an alternative server', async () => {
   const proxyPort = 3040
 
   app.get('*', (req, res) => {
+    res.setHeader('Content-Type', 'text/html')
     res.send('<p>Proxied</p>')
   })
 

@@ -3,6 +3,10 @@ const Prerenderer = require('@prerenderer/prerenderer')
 const Renderer = require('@prerenderer/renderer-puppeteer')
 
 afterEach(() => {
+  jest.clearAllMocks()
+})
+
+afterAll(() => {
   jest.restoreAllMocks()
 })
 

@@ -5,9 +5,10 @@
   "license": "MIT",
   "exports": {
     "import": "./index.mjs",
-    "require": "./dist/cjs.js"
+    "require": "./dist/cjs.js",
+    "types": "./types/index.d.ts"
   },
-  "types": "types/index.d.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest ./test --silent",
@@ -56,7 +57,7 @@
     "portfinder": "^1.0.32",
     "schema-utils": "4.0.0",
     "stoppable": "^1.1.0",
-    "ts-deepmerge": "^6.0.2"
+    "ts-deepmerge": "^6.2.0"
   },
   "optionalDependencies": {
     "http-proxy-middleware": "^2.0.6"
