@@ -123,7 +123,7 @@ export default class WebpackPrerenderSPAPlugin {
       if (err instanceof Error) {
         compilation.errors.push(new WebpackError(err.message))
       } else if (typeof err === 'object' && err) {
-        compilation.errors.push(new WebpackError(err.toString()))
+        compilation.errors.push(new WebpackError(JSON.stringify(err)))
       }
     }
 

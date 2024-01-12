@@ -11,7 +11,7 @@ export default class Prerenderer {
   private readonly options: PrerendererFinalOptions
   private readonly server: Server
   private renderer: IRenderer
-  private hooks: Record<Stage | string, Array<HookCallback>> = {}
+  private hooks: Record<Stage, Array<HookCallback>> = {} as Record<Stage, Array<HookCallback>>
 
   constructor (options: PrerendererOptions) {
     validate(schema, options, {

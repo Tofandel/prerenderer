@@ -113,7 +113,7 @@ export default function RollupPrerenderPlugin (options: RollupPrerenderOptions =
           if (err instanceof Error) {
             this.error(err.message)
           } else if (typeof err === 'object' && err) {
-            this.error(err.toString())
+            this.error(JSON.stringify(err))
           }
         }
 
