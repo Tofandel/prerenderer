@@ -3,8 +3,6 @@ const webpack = require('webpack')
 const config = require('./webpack.config')
 const path = require('path')
 
-jest.setTimeout(15000)
-
 test('Basic vue', (resolve) => {
   webpack(config(path.resolve(__dirname, '../examples/vue3')), (err, stats) => {
     if (err) {
