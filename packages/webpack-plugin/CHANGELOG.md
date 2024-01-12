@@ -7,23 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### [5.3.7] - 2023-11-02
+## [5.3.9] - 2024-01-12
+- Fix typescript export issue in package.json
+- Upgrade deps
+- Add missing ts-deepmerge dependency
+
+## [5.3.7] - 2023-11-02
 - Fix: fallback only for the entrypoint
 - Fix: don't abort build if the entrypoint is not found but warn
 
-### [5.3.6] - 2023-06-20
+## [5.3.6] - 2023-06-20
 - Add warning if html-webpack-plugin is not configured properly
 
-### [5.3.5] - 2023-06-16
+## [5.3.5] - 2023-06-16
 - Fix fallback double rendering if multiple html-webpack-plugin
 
-### [5.3.3] - 2023-05-19
+## [5.3.3] - 2023-05-19
 - Fix handling of a custom webpack `publicPath` in the express server
 
-### [5.3.0] - 2023-05-19
+## [5.3.0] - 2023-05-19
 - Added `fallback` option to generate a non prerendered `index_fallback.html`
 
-### [5.2.0] - 2023-03-28
+## [5.2.0] - 2023-03-28
 - Move the postProcess option from the plugin to the `Prerenderer`
 
 ## [5.1.1] - 2023-03-27

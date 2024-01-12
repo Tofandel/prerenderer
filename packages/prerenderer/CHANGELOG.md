@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### [1.2.0] - 2023-03-28
+## [1.2.4] - 2024-01-12
+- Fix typescript export issue in package.json
+- Upgrade deps
+
+## [1.2.0] - 2023-03-28
 - Move the postProcess option from the plugins to the `Prerenderer`
 
 ## [1.1.1] - 2023-03-27

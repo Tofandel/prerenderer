@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2024-01-12
+- Fix typescript export issue in package.json
+- Upgrade deps
+- Add missing ts-deepmerge dependency and remove unused deepmerge dependency
+
 ## [1.2.0] - 2023-05-34
 - Switch to new puppeteer headless mode
 
