@@ -58,7 +58,7 @@
     "puppeteer": ">= 2"
   },
   "devDependencies": {
-    "@prerenderer/prerenderer": "^1.2.3",
+    "@prerenderer/prerenderer": "*",
     "puppeteer": "^21.7.0"
   },
   "engines": {
