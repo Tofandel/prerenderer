@@ -7,8 +7,6 @@ const __filename = fileURLToPath(import.meta.url)
 
 const __dirname = path.dirname(__filename)
 
-jest.setTimeout(15000)
-
 test('Basic vue', async () => {
   const config = (await import('./vite.config.mjs')).default
 
@@ -18,7 +16,7 @@ test('Basic vue', async () => {
   expect(index).toBeTruthy()
   expect(index.name).toBe('Prerendered route /')
   expect(index.source).toContain('provides you with all information you need to get started')
-})
+}, 15000)
 
 test('Routes and events', async () => {
   const config = (await import('./vite.config.mjs')).default
