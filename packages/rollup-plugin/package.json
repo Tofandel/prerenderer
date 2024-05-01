@@ -54,7 +54,7 @@
     "@prerenderer/renderer-puppeteer": "^1.2.2"
   },
   "peerDependencies": {
-    "rollup": "^3|^4"
+    "rollup": "^3||^4"
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "file:../prerenderer",
