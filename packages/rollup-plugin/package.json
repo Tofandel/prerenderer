@@ -1,6 +1,6 @@
 {
   "name": "@prerenderer/rollup-plugin",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Flexible, framework-agnostic static site generation for apps built with rollup or vite.",
   "license": "MIT",
   "exports": {
@@ -46,7 +46,7 @@
     "url": "https://github.com/Tofandel/prerenderer/issues"
   },
   "dependencies": {
-    "@prerenderer/prerenderer": "^1.2.4",
+    "@prerenderer/prerenderer": "^1.2.5",
     "schema-utils": "^4.2.0",
     "ts-deepmerge": "^6.2.0"
   },
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@prerenderer/prerenderer": "file:../prerenderer",
-    "@prerenderer/renderer-jsdom": "^1.1.8",
+    "@prerenderer/renderer-jsdom": "^1.1.9",
     "@prerenderer/renderer-puppeteer": "file:../renderer-puppeteer",
     "@vitejs/plugin-vue": "^4.1.0",
     "express": "^4.18.2",
