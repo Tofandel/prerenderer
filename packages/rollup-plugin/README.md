@@ -27,10 +27,10 @@ export default defineConfig({
     postProcess (renderedRoute) {
       // Replace all http with https urls and localhost to your site url
       renderedRoute.html = renderedRoute.html.replace(
-        /http:/i,
+        /http:/ig,
         'https:',
       ).replace(
-        /(https:\/\/)?(localhost|127\.0\.0\.1):\d*/i,
+        /(https:\/\/)?(localhost|127\.0\.0\.1):\d*/ig,
         (process.env.CI_ENVIRONMENT_URL || ''),
       );
     },
@@ -44,7 +44,7 @@ export default defineConfig({
 
 ```
 
-Don't forget to trigger the custom event you set in `renderAfterDocumentEvent` in your app when the page is ready to be renderer (Eg: onMounted for vue) 
+Don't forget to trigger the custom event you set in `renderAfterDocumentEvent` in your app when the page is ready to be renderer (Eg: onMounted for vue)
 
 ```js
 document.dispatchEvent(new Event('custom-render-trigger'))

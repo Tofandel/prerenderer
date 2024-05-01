@@ -102,10 +102,10 @@ const prerenderer = new Prerenderer({
   postProcess (renderedRoute) {
     // Replace all http with https urls and localhost to your site url
     renderedRoute.html = renderedRoute.html.replace(
-      /http:/i,
+      /http:/ig,
       'https:',
     ).replace(
-      /(https:\/\/)?(localhost|127\.0\.0\.1):\d*/i,
+      /(https:\/\/)?(localhost|127\.0\.0\.1):\d*/ig,
       (process.env.CI_ENVIRONMENT_URL || ''),
     );
   },
