@@ -169,17 +169,19 @@ All of the packages are strongly typed using typescript, if some documentation i
 
 ### Installation
 
-You need to install `puppeteer` manually, there is different methods of installation, in the documentation we only cover the simple package installation, which will also install the necessary browsers binary
-```bash
-npm install --save-dev puppeteer
-```
-
 Install your selected assortment of packages with your package manager
 
 Example for Rollup or vite and the Puppeteer renderer:
 ```bash
-npm install --save-dev @prerenderer/renderer-puppeteer @prerenderer/rollup-plugin
+npm install --save-dev @prerenderer/renderer-puppeteer puppeteer @prerenderer/rollup-plugin
 ```
+
+If your package manager does not install peer dependencies automatically, make sure to install `puppeteer` in your dependencies if you wish to use `@prerenderer/renderer-puppeteer`, there is different methods of installation, in the documentation we only cover the simple package installation, which will also install the necessary browsers binary
+
+```bash
+npm install --save-dev puppeteer
+```
+
 
 Then follow the installation instruction of your package of choice, that you can find in the README of that specific package
 

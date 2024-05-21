@@ -51,7 +51,7 @@
     "ts-deepmerge": "^6.2.0"
   },
   "optionalDependencies": {
-    "@prerenderer/renderer-puppeteer": "^1.2.2"
+    "@prerenderer/renderer-puppeteer": "^1.2.4"
   },
   "peerDependencies": {
     "rollup": "^3||^4"
@@ -78,5 +78,5 @@
       "**/?(*.)+(spec|test).?(m)[tj]s?(x)"
     ]
   },
-  "gitHead": "a3ca3a72a8fc9e53792dc3ba405bcd06ab4654ec"
+  "gitHead": "187c530b37c010541824a882ae48fad16ed2c14d"
 }

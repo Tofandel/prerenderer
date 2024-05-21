@@ -2,7 +2,7 @@ import { PrerendererOptions } from '@prerenderer/prerenderer'
 import { JSONSchemaType } from 'ajv'
 import { Schema } from 'schema-utils/declarations/validate'
 
-export interface RollupPrerenderOptions extends Omit<PrerendererOptions, 'staticDir' | 'renderer'> {
+export interface RollupPrerenderOptions extends Omit<PrerendererOptions, 'staticDir'> {
   entryPath?: string
   fallback?: boolean | string
   routes?: Array<string>
