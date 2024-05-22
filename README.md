@@ -28,6 +28,23 @@
 
 </div>
 
+### Installation
+
+Install your selected assortment of packages with your package manager
+
+Example for Rollup or vite and the Puppeteer renderer:
+```bash
+npm install --save-dev @prerenderer/rollup-plugin @prerenderer/renderer-puppeteer puppeteer
+```
+
+> [!IMPORTANT]
+> If your package manager does not install peer dependencies automatically, make sure to install `puppeteer` in your dependencies if you wish to use `@prerenderer/renderer-puppeteer`, there is different methods of installation but in the documentation we only cover the basic package installation, which will also install the necessary browsers binary
+>
+> `npm install --save-dev puppeteer`
+
+Then follow the installation instruction of your package of choice, that you can find in the README of that specific package
+
+
 ## About prerenderer
 
 The goal of this package is to provide a simple, framework-agnostic prerendering solution that is easily extensible and
@@ -166,21 +183,6 @@ that important, and you're willing to work around issues for more advanced cases
 ## Documentation
 
 All of the packages are strongly typed using typescript, if some documentation is missing or when in doubt, we recommend referring to the types which are self documenting
-
-### Installation
-
-Install your selected assortment of packages with your package manager
-
-Example for Rollup or vite and the Puppeteer renderer:
-```bash
-npm install --save-dev @prerenderer/rollup-plugin @prerenderer/renderer-puppeteer puppeteer
-```
-
-> [!IMPORTANT]
-> If your package manager does not install peer dependencies automatically, make sure to install `puppeteer` in your dependencies if you wish to use `@prerenderer/renderer-puppeteer`, there is different methods of installation, in the documentation we only cover the simple package installation, which will also install the necessary browsers binary
-> `npm install --save-dev puppeteer`
-
-Then follow the installation instruction of your package of choice, that you can find in the README of that specific package
 
 ### Prerenderer Options
 
