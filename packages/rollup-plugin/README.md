@@ -7,7 +7,10 @@ This plugin is for rollup (or vite), it's fairly recent and for now should be tr
 It was written based on the webpack-plugin, thus works similarly and has the same options
 
 ### Installation
-`npm i -D @prerenderer/rollup-plugin @prerenderer/renderer-puppeteer`
+> [!WARNING] 
+> Yarn 1 is [known to have issues resolving dependencies](https://github.com/storybookjs/storybook/issues/22431#issuecomment-16300860921), we recommend using npm or an up to date version of yarn.
+
+`npm i -D @prerenderer/rollup-plugin @prerenderer/renderer-puppeteer puppeteer`
 or
 `npm i -D @prerenderer/rollup-plugin @prerenderer/renderer-jsdom`
 
